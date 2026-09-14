@@ -1,0 +1,19 @@
+version: "3.8"
+
+# Local development database only. In production, use a free managed
+# Postgres (Supabase / Neon / Render) — see README "Free Hosting" section.
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: afya
+      POSTGRES_PASSWORD: afya
+      POSTGRES_DB: afya_nyumbani
+    ports:
+      - "5432:5432"
+    volumes:
+      - afya_pgdata:/var/lib/postgresql/data
+
+volumes:
+  afya_pgdata:

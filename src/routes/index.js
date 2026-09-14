@@ -1,0 +1,24 @@
+'use strict';
+
+const { Router } = require('express');
+const healthRoutes = require('./health.routes');
+const authRoutes = require('./auth.routes');
+const staffRoutes = require('./staff.routes');
+const adminRoutes = require('./admin.routes');
+const familyMemberRoutes = require('./familyMember.routes');
+const symptomCatalogRoutes = require('./symptomCatalog.routes');
+const bookingRoutes = require('./booking.routes');
+
+const router = Router();
+
+router.use('/', healthRoutes);
+router.use('/auth', authRoutes);
+router.use('/staff', staffRoutes);
+router.use('/admin', adminRoutes);
+router.use('/family-members', familyMemberRoutes);
+router.use('/symptom-catalogue', symptomCatalogRoutes);
+router.use('/bookings', bookingRoutes);
+
+// Phase 6+ will mount: /visits, ...
+
+module.exports = router;

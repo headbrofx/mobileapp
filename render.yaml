@@ -1,0 +1,35 @@
+# Render Blueprint — free-tier deployment for the Afya Nyumbani API.
+#
+# The database is NOT declared here on purpose: Render's own free Postgres
+# expires, so the API points at a free Neon Postgres instead (see
+# DEPLOYMENT.md). DATABASE_URL is set manually in the Render dashboard.
+services:
+  - type: web
+    name: afya-nyumbani-api
+    runtime: node
+    plan: free
+    # Closest Render region to Dar es Salaam.
+    region: frankfurt
+    buildCommand: npm ci && npm run db:migrate
+    startCommand: npm start
+    # Liveness route that does not touch the database, so a DB blip does
+    # not make Render restart a healthy process.
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Neon (like Supabase and Render Postgres) requires SSL.
+      - key: DB_SSL
+        value: "true"
+      # Set by hand in the dashboard — a Neon pooled connection string.
+      - key: DATABASE_URL
+        sync: false
+      # Render generates these once and keeps them stable across deploys.
+      # Rotating them logs every user out, which is the intended behaviour.
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      # Comma-separated origins for the client apps, once they exist.
+      - key: CORS_ORIGINS
+        sync: false
