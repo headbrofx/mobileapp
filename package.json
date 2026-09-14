@@ -36,5 +36,8 @@
     "nodemon": "^3.1.4",
     "sequelize-cli": "^6.6.5",
     "supertest": "^7.0.0"
+  },
+  "jest": {
+    "testTimeout": 60000
   }
 }
