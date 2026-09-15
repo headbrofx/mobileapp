@@ -36,13 +36,14 @@ If you are picking this project up fresh:
 
 ## Status (2026-09-15)
 
-Phases 0–9 complete. 102 Jest tests, all passing. 31 tables.
+Phases 0–10 complete. 121 Jest tests, all passing. 32 tables.
 
 Deployed and live:
 - **API:** https://afya-nyumbani-api.onrender.com (Render, free, Frankfurt)
 - **Database:** Neon, free, Frankfurt, PostgreSQL 17. A `test` branch
   carries the demo accounts and is what the suite runs against; the
-  default branch is production and has the catalogues only.
+  default branch is production and has the catalogues only (services,
+  symptoms, and the food catalogue).
 - **Repo:** `headbrofx/mobileapp`
 
 Two things about that deployment worth knowing before you touch it:
@@ -54,7 +55,7 @@ Two things about that deployment worth knowing before you touch it:
   `joeroberty01-blip` account, not `headbrofx`, so there is no webhook
   on this repo. A push does not deploy; the deploy has to be triggered.
 
-**Next up: Phase 10 — Nutrition.** Same rule as always: do not start it
+**Next up: Phase 11 — Fitness.** Same rule as always: do not start it
 without the owner confirming.
 
 ## A note on Phase 8's shape

@@ -8,8 +8,8 @@ security and integrations first; UI/UX comes once the engine is stable.
 Data Model) + Phase 2 (Authentication & Authorization) + Phase 3 (Client
 Health Engine) + Phase 4 (Symptoms Engine) + Phase 5 (Home Care Booking
 Engine) + Phase 6 (Staff/Nurse Clinical Workflow) + Phase 7 (Location &
-Tracking) + Phase 8 (Afya AI) + Phase 9 (Orbit — period tracking)
-complete.**
+Tracking) + Phase 8 (Afya AI) + Phase 9 (Orbit — period tracking) +
+Phase 10 (Nutrition) complete.**
 
 ## Stack (kept deliberately simple / free-tier friendly)
 
@@ -446,7 +446,7 @@ src/
   services/           auth, token, session, staff, audit, familyMember, healthProfile, vitals, timeline, insights, symptom, symptomRules, symptomTrends, symptomCatalog, booking, bookingStateMachine, staffMatch, visit, location
   validators/         auth, familyMember, healthProfile, vitals, symptom, booking, staff, visit, location (Zod schemas)
   utils/              apiResponse.js, appError.js, password.js, hash.js, otp.js, vitalsRanges.js, geo.js
-tests/                Jest + Supertest (102 tests)
+tests/                Jest + Supertest (121 tests)
 ```
 
 ## What's built in Phase 8 — Afya AI
@@ -568,4 +568,52 @@ default. A test asserts those columns stay null.
 All of it behind `loadOwnedFamilyMember`, so a client reaches only
 their own people. 16 tests.
 
-## Next: Phase 10 — Nutrition
+## What's built in Phase 10 — Nutrition
+
+`NutritionProfile`, `MealLog` and `WaterLog` have existed since Phase 1.
+What was missing was a way to log a meal without already knowing what a
+plate of ugali comes to, so Phase 10 adds a **food catalogue**: about
+forty foods people in Dar actually eat — ugali, wali, pilau, chapati,
+maharage, muhogo, dagaa, mchicha, mandazi, chai ya maziwa — each with a
+portion described the way it is served ("Kikombe 1", "Chapati 1") rather
+than in grams nobody measures. Searchable in Swahili or English.
+
+Two things this phase deliberately does **not** do.
+
+**It never calculates a calorie target.** The arithmetic is trivial, but
+the number that falls out is dietary advice, and it is wrong in exactly
+the cases where being wrong matters: pregnancy, breastfeeding,
+childhood, diabetes, recovery from illness, an eating disorder.
+`dailyCalorieTarget` stays null until a person or their nurse sets one
+on purpose.
+
+**It never passes judgement on what someone ate.** The daily summary
+reports what was logged, and the target if one exists. It does not say
+over, under, too much, or well done, and there is no verdict field for
+it to say them in. A test asserts that language stays out of the
+response. An app that scolds people about food harms some of the people
+using it.
+
+Honesty about the numbers is built into the response rather than buried
+in a footnote. Calorie figures are approximations for household
+portions, every response carrying one sets `caloriesAreApproximate` and
+a Swahili disclaimer, and `verifiedByProfessional` is false on every
+catalogue row until a nutritionist goes through them. A food the
+catalogue does not recognise is kept with whatever the user said and
+its calories stay null — never a guess — and the summary reports how
+many items its total does not cover, rather than presenting a partial
+figure as a whole one. A day with nothing countable returns null, not
+zero, because zero reads as having eaten nothing.
+
+| Endpoint | What |
+|---|---|
+| `GET /api/foods?q=` | Search the catalogue, Swahili or English |
+| `GET /api/family-members/:id/nutrition` | Profile (created on first read) |
+| `PUT /api/family-members/:id/nutrition` | Goal, targets, preferences, restrictions |
+| `GET /api/family-members/:id/nutrition/summary?date=` | The day, reported not judged |
+| `POST/GET/DELETE /api/family-members/:id/meals` | Meal log |
+| `POST/GET/DELETE /api/family-members/:id/water` | Water log |
+
+19 tests.
+
+## Next: Phase 11 — Fitness

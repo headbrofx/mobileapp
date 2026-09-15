@@ -10,6 +10,11 @@ const { updateHealthProfileSchema } = require('../validators/healthProfile.valid
 const { createVitalSchema, updateVitalSchema } = require('../validators/vitals.validator');
 const { createSymptomSchema, updateSymptomSchema } = require('../validators/symptom.validator');
 const { createCycleSchema, updateCycleSchema } = require('../validators/orbit.validator');
+const {
+  updateNutritionProfileSchema,
+  logMealSchema,
+  logWaterSchema,
+} = require('../validators/nutrition.validator');
 
 const familyMemberController = require('../controllers/familyMember.controller');
 const healthProfileController = require('../controllers/healthProfile.controller');
@@ -19,6 +24,7 @@ const insightsController = require('../controllers/insights.controller');
 const symptomController = require('../controllers/symptom.controller');
 const symptomTrendsController = require('../controllers/symptomTrends.controller');
 const orbitController = require('../controllers/orbit.controller');
+const nutritionController = require('../controllers/nutrition.controller');
 
 const router = Router();
 
@@ -110,5 +116,36 @@ router.patch(
   orbitController.update
 );
 router.delete('/:familyMemberId/cycles/:cycleId', authenticate, loadOwnedFamilyMember, orbitController.remove);
+
+// --- Nutrition (Phase 10) ---
+router.get('/:familyMemberId/nutrition', authenticate, loadOwnedFamilyMember, nutritionController.getProfile);
+router.put(
+  '/:familyMemberId/nutrition',
+  authenticate,
+  loadOwnedFamilyMember,
+  validate(updateNutritionProfileSchema),
+  nutritionController.updateProfile
+);
+router.get('/:familyMemberId/nutrition/summary', authenticate, loadOwnedFamilyMember, nutritionController.dailySummary);
+
+router.post(
+  '/:familyMemberId/meals',
+  authenticate,
+  loadOwnedFamilyMember,
+  validate(logMealSchema),
+  nutritionController.logMeal
+);
+router.get('/:familyMemberId/meals', authenticate, loadOwnedFamilyMember, nutritionController.listMeals);
+router.delete('/:familyMemberId/meals/:mealId', authenticate, loadOwnedFamilyMember, nutritionController.deleteMeal);
+
+router.post(
+  '/:familyMemberId/water',
+  authenticate,
+  loadOwnedFamilyMember,
+  validate(logWaterSchema),
+  nutritionController.logWater
+);
+router.get('/:familyMemberId/water', authenticate, loadOwnedFamilyMember, nutritionController.listWater);
+router.delete('/:familyMemberId/water/:waterId', authenticate, loadOwnedFamilyMember, nutritionController.deleteWater);
 
 module.exports = router;
