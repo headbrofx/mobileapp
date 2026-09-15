@@ -9,6 +9,7 @@ const { createFamilyMemberSchema, updateFamilyMemberSchema } = require('../valid
 const { updateHealthProfileSchema } = require('../validators/healthProfile.validator');
 const { createVitalSchema, updateVitalSchema } = require('../validators/vitals.validator');
 const { createSymptomSchema, updateSymptomSchema } = require('../validators/symptom.validator');
+const { createCycleSchema, updateCycleSchema } = require('../validators/orbit.validator');
 
 const familyMemberController = require('../controllers/familyMember.controller');
 const healthProfileController = require('../controllers/healthProfile.controller');
@@ -17,6 +18,7 @@ const timelineController = require('../controllers/timeline.controller');
 const insightsController = require('../controllers/insights.controller');
 const symptomController = require('../controllers/symptom.controller');
 const symptomTrendsController = require('../controllers/symptomTrends.controller');
+const orbitController = require('../controllers/orbit.controller');
 
 const router = Router();
 
@@ -86,5 +88,27 @@ router.patch(
   symptomController.update
 );
 router.delete('/:familyMemberId/symptoms/:symptomId', authenticate, loadOwnedFamilyMember, symptomController.remove);
+
+// --- Orbit: period tracking (Phase 9) ---
+// /cycles/insights before /cycles/:cycleId, so "insights" is not read
+// as an id.
+router.post(
+  '/:familyMemberId/cycles',
+  authenticate,
+  loadOwnedFamilyMember,
+  validate(createCycleSchema),
+  orbitController.create
+);
+router.get('/:familyMemberId/cycles', authenticate, loadOwnedFamilyMember, orbitController.list);
+router.get('/:familyMemberId/cycles/insights', authenticate, loadOwnedFamilyMember, orbitController.insights);
+router.get('/:familyMemberId/cycles/:cycleId', authenticate, loadOwnedFamilyMember, orbitController.getOne);
+router.patch(
+  '/:familyMemberId/cycles/:cycleId',
+  authenticate,
+  loadOwnedFamilyMember,
+  validate(updateCycleSchema),
+  orbitController.update
+);
+router.delete('/:familyMemberId/cycles/:cycleId', authenticate, loadOwnedFamilyMember, orbitController.remove);
 
 module.exports = router;

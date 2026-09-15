@@ -36,7 +36,7 @@ If you are picking this project up fresh:
 
 ## Status (2026-09-15)
 
-Phases 0–8 complete. 86 Jest tests, all passing. 31 tables.
+Phases 0–9 complete. 102 Jest tests, all passing. 31 tables.
 
 Deployed and live:
 - **API:** https://afya-nyumbani-api.onrender.com (Render, free, Frankfurt)
@@ -54,8 +54,8 @@ Two things about that deployment worth knowing before you touch it:
   `joeroberty01-blip` account, not `headbrofx`, so there is no webhook
   on this repo. A push does not deploy; the deploy has to be triggered.
 
-**Next up: Phase 9 — Women's Health.** Same rule as always: do not start
-it without the owner confirming.
+**Next up: Phase 10 — Nutrition.** Same rule as always: do not start it
+without the owner confirming.
 
 ## A note on Phase 8's shape
 

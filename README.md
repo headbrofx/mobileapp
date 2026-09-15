@@ -8,7 +8,8 @@ security and integrations first; UI/UX comes once the engine is stable.
 Data Model) + Phase 2 (Authentication & Authorization) + Phase 3 (Client
 Health Engine) + Phase 4 (Symptoms Engine) + Phase 5 (Home Care Booking
 Engine) + Phase 6 (Staff/Nurse Clinical Workflow) + Phase 7 (Location &
-Tracking) + Phase 8 (Afya AI) complete.**
+Tracking) + Phase 8 (Afya AI) + Phase 9 (Orbit — period tracking)
+complete.**
 
 ## Stack (kept deliberately simple / free-tier friendly)
 
@@ -445,7 +446,7 @@ src/
   services/           auth, token, session, staff, audit, familyMember, healthProfile, vitals, timeline, insights, symptom, symptomRules, symptomTrends, symptomCatalog, booking, bookingStateMachine, staffMatch, visit, location
   validators/         auth, familyMember, healthProfile, vitals, symptom, booking, staff, visit, location (Zod schemas)
   utils/              apiResponse.js, appError.js, password.js, hash.js, otp.js, vitalsRanges.js, geo.js
-tests/                Jest + Supertest (86 tests)
+tests/                Jest + Supertest (102 tests)
 ```
 
 ## What's built in Phase 8 — Afya AI
@@ -510,10 +511,61 @@ never to a User.
 
 17 tests cover it, including the conjugation cases and the sign-off gate.
 
-## Next: Phase 9 — Women's Health
+## What's built in Phase 9 — Orbit (period tracking)
 
-Phase 8 deliberately left generation out. If a language model is ever
-added, it belongs as a rephrasing layer over an already-vetted answer,
-disabled by default when no key is present — and note that free LLM
-tiers commonly reserve the right to train on what you send them, which
-is a patient-privacy question, not a budget one.
+**Orbit** is the period tracker. The `menstrual_cycles` table has been
+waiting since Phase 1, so Phase 9 is the engine and the endpoints, no
+new migration.
+
+A cycle entry is a start date, an optional end date, flow
+(LIGHT/MEDIUM/HEAVY), symptoms, mood and notes, attached to a
+FamilyMember. Start dates in the future are refused, an end before its
+start is refused, and two cycles cannot share a start date — nonsense
+in the log becomes nonsense in the average.
+
+**Everything Orbit returns is an estimate and says so.** The response
+carries `isEstimate: true` and a note in Swahili stating plainly that
+it is a projection from what was logged and not medical certainty. A
+cycle moves with illness, stress, travel and breastfeeding; arithmetic
+over past dates knows about none of that.
+
+Prediction is the mean gap between recent starts, over at most the last
+six intervals. Confidence rises with evidence and never reaches
+certain:
+
+| | |
+|---|---|
+| fewer than 2 cycles | no prediction at all, and it explains why |
+| 2 intervals, tightly clustered | `MEDIUM` |
+| 3+ intervals, tightly clustered | `HIGH` |
+| scattered history | `LOW`, plus a note offering a nurse to talk to |
+
+Note that *n* logged cycles give *n−1* intervals. Three logged cycles
+are two observations, and two observations do not earn HIGH however
+closely they agree — which is why the field is named
+`basedOnIntervals` rather than `basedOnCycles`.
+
+When the logged history is scattered, Orbit says the estimate is
+rougher and offers a nurse. It names no condition and diagnoses
+nothing.
+
+**No fertile window.** The columns exist on the table and are
+deliberately left empty. The moment an app shows a fertile window some
+users will treat it as birth control, and calendar prediction is not
+reliable enough to carry that — the person it fails is the one who
+bears the consequence. Adding it needs its own decision, not a quiet
+default. A test asserts those columns stay null.
+
+| Endpoint | What |
+|---|---|
+| `POST /api/family-members/:id/cycles` | Log a cycle |
+| `GET /api/family-members/:id/cycles` | List them, newest first |
+| `GET /api/family-members/:id/cycles/insights` | Averages, regularity, prediction |
+| `GET /api/family-members/:id/cycles/:cycleId` | One entry |
+| `PATCH /api/family-members/:id/cycles/:cycleId` | Edit |
+| `DELETE /api/family-members/:id/cycles/:cycleId` | Remove |
+
+All of it behind `loadOwnedFamilyMember`, so a client reaches only
+their own people. 16 tests.
+
+## Next: Phase 10 — Nutrition
