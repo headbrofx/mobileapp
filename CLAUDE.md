@@ -34,28 +34,50 @@ If you are picking this project up fresh:
    the full suite → a quick manual smoke test) before considering it
    done. Every phase so far has shipped with all tests green.
 
-## Status as of the last cloud session (2026-09-14)
+## Status (2026-09-15)
 
-Phases 0–7 complete (Foundation, Database & Core Data Model, Auth,
-Client Health Engine, Symptoms Engine, Home Care Booking Engine, Staff
-Clinical Workflow, Location & Tracking). 69 Jest tests, all passing.
-28 tables.
+Phases 0–8 complete. 86 Jest tests, all passing. 31 tables.
 
-**Next up: Phase 8 — Afya AI**, the AI safety/chat layer on top of the
-already-existing `AIConversation`/`AIMessage` tables and the structured
-data every prior phase has been feeding it (symptom catalogue +
-red-flag verdicts, vitals ranges, health insights, booking/visit
-history). This is the first phase where getting the safety boundary
-wrong (what the AI may say vs. must defer to a human) has real
-consequences — confirm scope with the owner before building it, don't
-just start.
+Deployed and live:
+- **API:** https://afya-nyumbani-api.onrender.com (Render, free, Frankfurt)
+- **Database:** Neon, free, Frankfurt, PostgreSQL 17. A `test` branch
+  carries the demo accounts and is what the suite runs against; the
+  default branch is production and has the catalogues only.
+- **Repo:** `headbrofx/mobileapp`
 
-After Phase 8, the owner's plan continues: Phase 9 (Women's Health),
-Phase 10 (Nutrition), Phase 11 (Fitness), Phase 12 (Medication & Smart
-Reminders), Phase 13 (Content Platform), Phase 14 (Payments & Billing),
-Phase 15 (Admin/Operations Backend), Phase 16 (Analytics), Phase 17
-(Testing & Security Audit), Phase 18 (API Documentation), and only then
-UI/UX.
+Two things about that deployment worth knowing before you touch it:
+
+- **Render sets `NODE_ENV=production`, so `npm ci` skips
+  devDependencies.** That is why `sequelize-cli` sits in `dependencies`
+  — the build runs migrations. Moving it back will break the deploy.
+- **Auto-deploy does not fire.** Render's GitHub App is connected to the
+  `joeroberty01-blip` account, not `headbrofx`, so there is no webhook
+  on this repo. A push does not deploy; the deploy has to be triggered.
+
+**Next up: Phase 9 — Women's Health.** Same rule as always: do not start
+it without the owner confirming.
+
+## A note on Phase 8's shape
+
+Phase 8 answers questions **without a language model, without embeddings
+and without any API key**. That was not only about cost. An answer is a
+signed-off knowledge entry returned word for word with its source, so
+there is nothing for a model to reword into something untrue. The
+red-flag engine (`src/services/aiRedFlags.service.js`) has no database,
+network or model dependency at all, on purpose: an emergency warning
+must not be able to fail because something else was unreachable.
+
+If generation is ever added, it belongs as a rephrasing layer over an
+already-vetted answer and must disable itself when no key is present.
+Note also that free LLM tiers commonly reserve the right to train on
+what is sent to them — for patient symptom descriptions that is a
+privacy question, not a budget one.
+
+The earlier Prisma-based system (the `joeroberty01-blip/Afyanyumbani`
+repo, its Render services, and the "Afya nyumbani mobile app" Neon
+project) is kept, not deleted. It solved this same problem in August
+with a RAG engine, and its schema is worth reading before extending
+this one.
 
 ## Stack decisions worth knowing
 

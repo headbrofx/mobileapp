@@ -8,7 +8,7 @@ security and integrations first; UI/UX comes once the engine is stable.
 Data Model) + Phase 2 (Authentication & Authorization) + Phase 3 (Client
 Health Engine) + Phase 4 (Symptoms Engine) + Phase 5 (Home Care Booking
 Engine) + Phase 6 (Staff/Nurse Clinical Workflow) + Phase 7 (Location &
-Tracking) complete.**
+Tracking) + Phase 8 (Afya AI) complete.**
 
 ## Stack (kept deliberately simple / free-tier friendly)
 
@@ -445,14 +445,75 @@ src/
   services/           auth, token, session, staff, audit, familyMember, healthProfile, vitals, timeline, insights, symptom, symptomRules, symptomTrends, symptomCatalog, booking, bookingStateMachine, staffMatch, visit, location
   validators/         auth, familyMember, healthProfile, vitals, symptom, booking, staff, visit, location (Zod schemas)
   utils/              apiResponse.js, appError.js, password.js, hash.js, otp.js, vitalsRanges.js, geo.js
-tests/                Jest + Supertest (69 tests)
+tests/                Jest + Supertest (86 tests)
 ```
 
-## Next: Phase 8 — Afya AI
+## What's built in Phase 8 — Afya AI
 
-The AI safety layer on top of `AIConversation`/`AIMessage` (Phase 1) and
-the structured data every phase since has been building specifically for
-this: symptom catalogue + red-flag verdicts (Phase 4), vitals ranges and
-health insights (Phase 3), booking/visit history (Phases 5–6). Scope
-(chat vs. structured triage, what it's allowed to say vs. must defer to
-a human) to be confirmed before starting.
+Afya AI answers questions, and it does it **without a language model,
+without embeddings, and without an API key**. That is a safety decision
+before it is a budget one: an answer here is a vetted knowledge entry
+returned word for word with its source, so there is nothing for a model
+to reword into something untrue.
+
+**The red-flag engine runs first, and depends on nothing.**
+`src/services/aiRedFlags.service.js` has no database call, no network
+call and no model behind it. A warning to go to hospital must not be
+able to fail because something else was slow or unreachable, so it
+cannot be. When a question trips a rule, retrieval never runs: the
+answer is "go now", and nothing else.
+
+Ten emergency categories, in Swahili and English: breathing difficulty,
+chest pain, loss of consciousness, seizures, heavy bleeding, poisoning
+and overdose, stroke signs, pregnancy emergencies, infant danger signs,
+and self-harm. Self-harm carries its own wording rather than a generic
+hospital instruction.
+
+Swahili conjugates the verb, so the patterns match on stems. A
+dictionary writes "kumeza sumu"; a parent types "mtoto amemeza sumu".
+Both fire, along with "nimemeza" and "alimeza". Matching is plain
+substring and deliberately errs towards flagging — a false alarm sends
+someone to a nurse who tells them they are fine, a missed emergency
+does not get a second chance.
+
+**Answers come only from signed-off material.** `knowledge_items` holds
+the knowledge base. `HEALTH_EDUCATION` entries are withheld from
+retrieval entirely until a named professional signs them off;
+`COMPANY_INFO` and `SERVICE_INFO` are business facts and carry no such
+gate. When nothing matches, Afya AI says so and points to a nurse — it
+never guesses.
+
+**Retrieval is Postgres' own full-text search**, using the `simple` text
+configuration rather than `english`, because English stemming mangles
+Swahili and Postgres ships no Swahili dictionary. No vector database, no
+embedding service, nothing to pay for.
+
+**Every interaction is kept and reviewable.** `ai_interactions` records
+the question, the answer, which knowledge entries it came from, and
+which red-flag categories fired. Red flags always go to the review
+queue and always write an audit log; a 5% sample of ordinary
+interactions goes too, so review is not only ever of the alarming cases.
+
+A question can name the FamilyMember it is about, and that member must
+belong to the person asking — health data belongs to a FamilyMember,
+never to a User.
+
+| Endpoint | Who | What |
+|---|---|---|
+| `POST /api/ai/ask` | any signed-in user | Ask a question |
+| `GET /api/ai/history` | any signed-in user | Own interactions only |
+| `GET /api/ai/knowledge` | any signed-in user | Retrievable entries (admins also see pending ones) |
+| `POST /api/ai/knowledge` | ADMIN | Add an entry |
+| `POST /api/ai/knowledge/:id/verify` | ADMIN | Professional sign-off |
+| `GET /api/ai/review` | ADMIN | Review queue, red flags first |
+| `POST /api/ai/review/:id` | ADMIN | Record a review verdict |
+
+17 tests cover it, including the conjugation cases and the sign-off gate.
+
+## Next: Phase 9 — Women's Health
+
+Phase 8 deliberately left generation out. If a language model is ever
+added, it belongs as a rephrasing layer over an already-vetted answer,
+disabled by default when no key is present — and note that free LLM
+tiers commonly reserve the right to train on what you send them, which
+is a patient-privacy question, not a budget one.
