@@ -130,6 +130,67 @@ Postgres is down. `/api/health/db` is the readiness check.
 
 ---
 
+## Deploying to Vercel instead
+
+The repo is set up for this as well: `api/index.js` is the serverless
+entry point and `vercel.json` sends every path to it. `src/app.js`
+already exports the app without listening, so no wrapper is needed.
+
+**In the Vercel dashboard:** Add New → Project → import
+`headbrofx/mobileapp`. Framework preset: Other. Leave the build command
+empty. Then set the environment variables before the first deploy:
+
+| Variable | Value |
+|---|---|
+| `DATABASE_URL` | the Neon **pooled** string — the one with `-pooler` |
+| `DB_SSL` | `true` |
+| `JWT_ACCESS_SECRET` | `openssl rand -hex 32` |
+| `JWT_REFRESH_SECRET` | a different one |
+| `NODE_ENV` | `production` |
+| `CORS_ORIGINS` | your app's origins, or leave unset for `*` |
+
+Reuse the same JWT secrets as Render only if you want tokens issued by
+one to work on the other. Different secrets mean the two deployments
+cannot read each other's tokens, which is usually what you want.
+
+### What changes on Vercel
+
+**Migrations do not run.** On Render the build runs
+`npm run db:migrate`. A Vercel function has no build step that should
+be touching the database, so run migrations yourself before deploying a
+schema change:
+
+```bash
+npm run db:migrate
+```
+
+**The rate limiter gets looser.** Its counters live in memory, so every
+serverless instance keeps its own. The brute-force guard on
+`/auth/login` still works within an instance but no longer across them.
+Tightening it properly needs a shared store such as Redis.
+
+**Connections matter more.** Every instance opens its own pool, which
+is why `DATABASE_URL` must be the pooled Neon string. Without it a
+burst of traffic exhausts the database's connection limit.
+`src/config/database.js` keeps `pool.min` at 0, so idle instances hold
+nothing open.
+
+**No sleeping.** Unlike Render's free tier there is no 15-minute
+shutdown, so the first request after a quiet spell is a cold start of a
+second or two rather than a minute. Neon still suspends on its own
+though, so the first database call after idle is slower.
+
+`trust proxy` is 1, which is right for Vercel as well as Render: both
+put exactly one proxy in front of the app.
+
+### Running both at once
+
+Nothing stops it — they are stateless and share the database. You get
+two URLs serving the same API. Worth deciding which one is the real one
+before a mobile app hardcodes the wrong address.
+
+---
+
 ## What to expect on the free tier
 
 - **The service sleeps** after ~15 minutes with no traffic. The next
