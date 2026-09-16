@@ -12,6 +12,23 @@ const routes = require('./routes');
 
 const app = express();
 
+// Render terminates TLS at its own proxy and forwards the real client
+// address in X-Forwarded-For. Without this, req.ip is the proxy's
+// address, which breaks two things quietly:
+//
+//   * the rate limiter buckets every user on the internet into one
+//     counter, so one noisy client exhausts the limit for everybody and
+//     the per-IP brute-force guard on /auth/login stops guarding
+//     anything;
+//   * every audit log records the proxy's address instead of the
+//     person's, which makes the IP column worthless exactly when it
+//     matters.
+//
+// 1, not true: trusting one hop means the address is the one Render
+// put there. Trusting all of them would let a caller set
+// X-Forwarded-For themselves and pick their own rate-limit bucket.
+app.set('trust proxy', 1);
+
 // Security baseline
 app.use(helmet());
 app.use(
