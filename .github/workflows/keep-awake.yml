@@ -1,0 +1,53 @@
+name: Keep the API awake
+
+# Render's free tier puts a service to sleep after about 15 minutes with
+# no traffic, and the next request then waits 30-60 seconds while it
+# wakes. For a patient opening the app that is a broken experience, so
+# this pings it during the hours people actually use it.
+#
+# It hits /api/health, which never touches the database, so the cost of
+# each ping is close to nothing.
+#
+# Deliberately NOT around the clock. A free Render account has a monthly
+# instance-hour allowance shared across every free service on it, and
+# this account runs others. Waking hours only leaves headroom for them.
+#
+# Two honest limits:
+#   * GitHub's scheduler is best-effort. Runs can be late by several
+#     minutes or skipped entirely when the platform is busy, so an
+#     occasional cold start will still happen.
+#   * GitHub disables scheduled workflows after 60 days with no commits
+#     to the repository. If the API starts sleeping again months from
+#     now, check that this workflow is still enabled before looking
+#     anywhere else.
+
+on:
+  schedule:
+    # Every 10 minutes, 03:00-19:00 UTC = 06:00-22:00 in Dar es Salaam.
+    # Tanzania keeps UTC+3 all year, so this needs no seasonal fixing.
+    - cron: '*/10 3-19 * * *'
+  # So it can be run by hand to check the API from outside.
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the health endpoint
+        run: |
+          # --max-time is generous because a sleeping instance takes
+          # close to a minute to answer its first request, and that
+          # answer is a success, not a timeout.
+          code=$(curl -s -o /tmp/body -w '%{http_code}' --max-time 90 \
+            https://afya-nyumbani-api.onrender.com/api/health)
+
+          echo "HTTP $code"
+          cat /tmp/body
+          echo
+
+          # Failing loudly makes this free uptime monitoring as well as a
+          # keep-awake: GitHub emails on a failed scheduled run.
+          if [ "$code" != "200" ]; then
+            echo "::error::The API did not return 200. It may be down."
+            exit 1
+          fi
