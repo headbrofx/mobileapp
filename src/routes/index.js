@@ -12,10 +12,12 @@ const aiRoutes = require('./ai.routes');
 const foodRoutes = require('./food.routes');
 const contentRoutes = require('./content.routes');
 const billingRoutes = require('./billing.routes');
+const docsRoutes = require('./docs.routes');
 
 const router = Router();
 
 router.use('/', healthRoutes);
+router.use('/', docsRoutes);
 router.use('/auth', authRoutes);
 router.use('/staff', staffRoutes);
 router.use('/admin', adminRoutes);

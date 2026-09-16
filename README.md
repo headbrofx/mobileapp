@@ -9,7 +9,10 @@ Data Model) + Phase 2 (Authentication & Authorization) + Phase 3 (Client
 Health Engine) + Phase 4 (Symptoms Engine) + Phase 5 (Home Care Booking
 Engine) + Phase 6 (Staff/Nurse Clinical Workflow) + Phase 7 (Location &
 Tracking) + Phase 8 (Afya AI) + Phase 9 (Orbit — period tracking) +
-Phase 10 (Nutrition) complete.**
+Phase 10 (Nutrition) + Phase 11 (Fitness) + Phase 12 (Medications) +
+Phase 13 (Content) + Phase 14 (Billing) + Phase 15 (Operations) +
+Phase 16 (Analytics) + Phase 17 (Security audit) + Phase 18 (API docs)
+— all 18 phases complete.**
 
 ## Stack (kept deliberately simple / free-tier friendly)
 
@@ -446,7 +449,7 @@ src/
   services/           auth, token, session, staff, audit, familyMember, healthProfile, vitals, timeline, insights, symptom, symptomRules, symptomTrends, symptomCatalog, booking, bookingStateMachine, staffMatch, visit, location
   validators/         auth, familyMember, healthProfile, vitals, symptom, booking, staff, visit, location (Zod schemas)
   utils/              apiResponse.js, appError.js, password.js, hash.js, otp.js, vitalsRanges.js, geo.js
-tests/                Jest + Supertest (121 tests)
+tests/                Jest + Supertest (218 tests)
 ```
 
 ## What's built in Phase 8 — Afya AI
@@ -616,4 +619,81 @@ zero, because zero reads as having eaten nothing.
 
 19 tests.
 
-## Next: Phase 11 — Fitness
+## Phases 11–18
+
+**Phase 11 — Fitness.** Workouts, daily steps and weekly totals.
+Calories burned are never estimated: the formula needs body weight and
+a MET value and returns a wide guess wearing a number's clothes, so the
+field stays null unless the user fills it. Totals are reported against
+no target, because published activity guidelines are written for
+healthy adults and many people here are elderly or recovering. A REHAB
+goal says outright that the plan belongs to the nurse. Daily activity
+is one row per date, upserted, since a pedometer reports a running
+total.
+
+**Phase 12 — Medications.** A prescription recorded exactly as written
+— the dosage is free text nothing parses — and the dose schedule
+generated from it. This records and reminds; it never changes a dose,
+suggests stopping a medicine, or warns about interactions. Schedule
+times are wall-clock resolved against UTC+3, which Tanzania keeps all
+year. Doses are generated fourteen days ahead and never into the past.
+Adherence counts a dose once answered even if its slot is still hours
+off, is broken down per medicine, and returns null rather than 0% when
+nothing has come due. No SMS is sent — there is no gateway budget — so
+the API says what is due and flags `deliveredByServer: false`.
+
+**Phase 13 — Content.** Articles, podcasts and news. DRAFT is the gate:
+content is created as a draft whatever status the caller sends,
+publishing is its own endpoint, and the publisher is audited. A draft
+reads as 404 to a client so unpublished titles cannot be found by
+guessing slugs. A published piece keeps its slug when its title is
+corrected.
+
+**Phase 14 — Billing.** Invoices, payments and what is owed. There is
+no live payment gateway: M-Pesa and the rest need a merchant account
+the business does not have yet, so every payment carries
+`gatewayConfirmed: false` and is keyed by a named person. Amounts are
+whole shillings as integers, totals are computed server-side from the
+line items, invoice numbers come from a Postgres sequence, a payment
+larger than the balance is refused, and an invoice with payments
+against it cannot be cancelled.
+
+**Phase 15 — Operations.** One dashboard call: bookings today, work
+awaiting assignment, visits in flight, staff awaiting approval, money
+outstanding, and Afya AI's review queue. Accounts are suspended, never
+deleted. An admin cannot suspend or demote themselves. Also
+`npm run make-admin -- <phone>`, which solves the bootstrap problem: the
+role endpoint is admin-only, so a fresh database has no way to make its
+first admin through the API.
+
+**Phase 16 — Analytics.** Aggregates only, and health breakdowns below
+five are withheld — in one city with a few dozen families, "one case of
+X" is a person, not a statistic. Rates return null rather than 0% when
+nothing sits behind them.
+
+**Phase 17 — Security audit.** Found and fixed: `trust proxy` was
+unset, so behind Render's proxy `req.ip` was the proxy. The rate
+limiter was bucketing every user into one counter and every audit log
+recorded the wrong address. Set to `1`, not `true` — one hop means the
+address is the one Render put there. Regression tests cover password
+hashes never leaving the database, stack traces never leaking, forged
+tokens, admin surfaces, privilege escalation, SQL-shaped input and
+tsquery punctuation.
+
+**Phase 18 — API documentation.** `GET /api/docs` is a browsable
+reference and `GET /api/docs.json` is the OpenAPI document, both open
+without a token. The document is built by walking the live Express
+router rather than written by hand, so it cannot drift: a test fails
+if any route lacks a description, and another fails if a description
+names a route that no longer exists.
+
+## What is not built
+
+- **No live payment gateway.** Phase 14 keeps the books and is ready
+  for one; connecting M-Pesa, Tigo Pesa or Airtel Money needs merchant
+  accounts and commercial agreements.
+- **No SMS or push delivery.** Reminders are exposed for the client app
+  to schedule locally.
+- **No language model.** Afya AI answers from vetted text on purpose —
+  see the Phase 8 section.
+- **No UI.** That was always the plan: engine first.

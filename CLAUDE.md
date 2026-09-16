@@ -36,7 +36,8 @@ If you are picking this project up fresh:
 
 ## Status (2026-09-15)
 
-Phases 0–10 complete. 121 Jest tests, all passing. 32 tables.
+Phases 0–18 complete — the whole planned backend. 218 Jest tests, all
+passing. 37 tables.
 
 Deployed and live:
 - **API:** https://afya-nyumbani-api.onrender.com (Render, free, Frankfurt)
@@ -55,8 +56,15 @@ Two things about that deployment worth knowing before you touch it:
   `joeroberty01-blip` account, not `headbrofx`, so there is no webhook
   on this repo. A push does not deploy; the deploy has to be triggered.
 
-**Next up: Phase 11 — Fitness.** Same rule as always: do not start it
-without the owner confirming.
+**There is no Phase 19.** The backend is finished as planned. What
+remains is the UI, and the three things listed under "What is not
+built" in README.md — a payment gateway, SMS delivery, and a language
+model if one is ever wanted.
+
+Phases 11–18 were built in one sitting at the owner's explicit
+instruction ("complete tumalize app nzima"), overriding the one-phase-
+at-a-time rule below. That was his call to make about his own rule; the
+rule still stands for anything new.
 
 ## A note on Phase 8's shape
 
