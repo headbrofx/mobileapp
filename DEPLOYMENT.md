@@ -1,122 +1,150 @@
-# Deploying the Afya Nyumbani API (free tier)
+# Deploying the Afya Nyumbani API
 
-Target: **Render** (web service) + **Neon** (Postgres). Both free, both
-already assumed by `README.md`'s hosting section.
+This is already deployed. What follows is what it runs on, what is
+still outstanding, and how to do it again from nothing.
+
+| | |
+|---|---|
+| **API** | https://afya-nyumbani-api.onrender.com |
+| **Docs** | https://afya-nyumbani-api.onrender.com/api/docs |
+| **Host** | Render, free plan, Frankfurt — service `afya-nyumbani-api` |
+| **Database** | Neon, free plan, Frankfurt, PostgreSQL 17 |
+| **Repo** | `headbrofx/mobileapp`, branch `main` |
+
+Frankfurt on both sides on purpose: it is the closest Render region to
+Dar es Salaam, and putting the database beside the app rather than in
+Oregon is the difference between a 220ms round trip and a second.
 
 Not Vercel: this is a long-running Express server with a Sequelize
 connection pool. Vercel is serverless, so it would need a function
-wrapper, external connection pooling, and the in-memory rate limiter in
-`src/middleware/rateLimiter.js` would stop working correctly (each
-lambda would keep its own counter).
-
-Free-tier limits change often — check the current numbers when you sign
-up rather than trusting this file.
+wrapper, external pooling, and the in-memory rate limiter would stop
+working correctly — each lambda would keep its own counter.
 
 ---
 
-## ⚠️ Read this before you seed production
+## Still outstanding
+
+**1. The health check path is not set.** `render.yaml` declares
+`/api/health`, but the service was created through the API, which has
+no field for it. Without it Render will not notice a process that has
+hung. One click: Render dashboard → the service → Settings → Health
+Check Path → `/api/health`.
+
+**2. Auto-deploy does not fire.** Render's GitHub App is connected to
+the `joeroberty01-blip` account; the repo lives under `headbrofx`, so
+there is no webhook on it. A push does not deploy — the deploy has to
+be triggered. To fix: GitHub → Settings → Applications → Render →
+Configure → add `headbrofx/mobileapp`.
+
+**3. The knowledge base is empty.** Afya AI declines every ordinary
+question until it has something signed off to answer from. The
+red-flag engine needs no setup and works already.
+
+---
+
+## ⚠️ Never seed demo users into production
 
 `npm run db:seed` runs **all** seeders, and
 `src/seeders/20260914000001-demo-users.js` inserts three live accounts
-with the password `Password123!` — including an **ADMIN** account on
-phone `0700000003`. That password is written down in `README.md` and in
-the project brief. Seeding it into a public database hands admin access
-to anyone who reads either file.
+with the password `Password123!` — including an **ADMIN** on phone
+`0700000003`. That password is written down in `README.md`. Seeding it
+into a public database hands admin access to anyone who reads the repo.
 
-Production needs the catalogue seeders but **not** the demo users:
+Production needs the reference data but not the demo users:
 
 ```bash
 npx sequelize-cli db:seed --seed 20260914000002-demo-services.js
+```
+
+```bash
 npx sequelize-cli db:seed --seed 20260914000003-symptom-catalogue.js
 ```
 
-Use the full `npm run db:seed` only against a local or throwaway
-database.
+```bash
+npx sequelize-cli db:seed --seed 20260915000004-food-catalogue.js
+```
+
+The full `npm run db:seed` is for a local database or the Neon `test`
+branch only.
+
+## Making the first admin
+
+The role endpoint is admin-only, so a fresh database has no way to make
+its first admin through the API. Register normally, then:
+
+```bash
+npm run make-admin -- 07XXXXXXXX
+```
+
+It needs shell access and `DATABASE_URL`, which is a fair bar for the
+one account that can promote every other. It never creates an account
+and never sets a password.
 
 ---
 
-## Step 1 — Database (Neon)
+## Doing it again from nothing
 
-You have to do this part yourself; it needs an account.
+Free-tier limits change often — check the current numbers rather than
+trusting this file.
 
-1. Sign up at <https://neon.tech> and create a project (pick the region
-   closest to Dar es Salaam — usually Frankfurt or Singapore).
-2. Copy the **pooled** connection string, the one containing `-pooler`.
-   It looks like:
-   `postgresql://user:password@ep-xxx-pooler.eu-central-1.aws.neon.tech/dbname?sslmode=require`
-3. Keep it somewhere safe. It is a password — do not commit it, and do
-   not paste it into a public issue or chat.
+**1. Database.** Create a Neon project in Frankfurt. Copy the
+**pooled** connection string, the one with `-pooler` in it. Optionally
+create a second branch named `test`; that is what the suite runs
+against, so tests never touch production data.
 
-Optional but recommended: create a second Neon **branch** for local
-development, so running tests never touches production data.
-
-## Step 2 — Migrate and verify locally
+**2. Locally.**
 
 ```bash
 cp .env.example .env
 ```
 
-Then edit `.env`:
-
-```
-DATABASE_URL="<your Neon connection string>"
-DB_SSL=true
-JWT_ACCESS_SECRET="<run: openssl rand -hex 32>"
-JWT_REFRESH_SECRET="<run: openssl rand -hex 32 — a different one>"
-```
+Set `DATABASE_URL`, `DB_SSL=true`, and two different secrets from
+`openssl rand -hex 32`.
 
 ```bash
-npm install
-npm run db:migrate
-npm test          # expect 69 passing
-npm run dev       # http://localhost:4000/api/health
+npm install && npm run db:migrate && npm test
 ```
 
-If the tests pass against Neon, the deploy will work.
+**3. Render.** New → Blueprint, pick the repo. `render.yaml` declares
+the service; set `DATABASE_URL` by hand, and Render generates the JWT
+secrets itself. The build runs `npm ci && npm run db:migrate`, so
+migrations apply on every deploy.
 
-## Step 3 — Git and GitHub
+`sequelize-cli` sits in `dependencies`, not `devDependencies`, because
+Render sets `NODE_ENV=production` and `npm ci` then skips dev
+dependencies entirely. Moving it back breaks the build — that is how
+the first deploy failed.
 
-```bash
-git remote add origin https://github.com/<you>/afya-nyumbani-backend.git
-git push -u origin main
-```
-
-Make the repository **private**. The code contains no secrets, but it
-does document the seeded test credentials.
-
-## Step 4 — Render
-
-1. Sign up at <https://render.com> and connect your GitHub account.
-2. **New → Blueprint**, pick this repository. Render reads
-   `render.yaml` and creates the `afya-nyumbani-api` web service.
-3. Set the two env vars marked `sync: false` in the dashboard:
-   - `DATABASE_URL` — the Neon pooled string from Step 1
-   - `CORS_ORIGINS` — leave blank for now (defaults to `*`); set it to
-     your app's real origins once a frontend exists
-4. `JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET` are generated by Render
-   automatically. Changing them later logs every user out.
-5. Deploy. The build runs `npm ci && npm run db:migrate`, so migrations
-   are applied on every deploy.
-
-## Step 5 — Verify
+**4. Verify.**
 
 ```bash
 curl https://afya-nyumbani-api.onrender.com/api/health
+```
+
+```bash
 curl https://afya-nyumbani-api.onrender.com/api/health/db
 ```
 
-`/api/health` is a liveness check that does not touch the database.
-`/api/health/db` confirms Postgres is actually reachable.
+`/api/health` never touches the database, so it stays honest when
+Postgres is down. `/api/health/db` is the readiness check.
+
+---
 
 ## What to expect on the free tier
 
 - **The service sleeps** after ~15 minutes with no traffic. The next
-  request takes roughly 30–60 seconds while it wakes. Harmless during
+  request takes 30–60 seconds while it wakes. Harmless during
   development; not acceptable once real clients depend on it.
 - **Neon suspends an idle database** too. `src/config/database.js` is
-  configured for this: `pool.min: 0` so no dead connections are held,
-  plus a retry on connection-level errors only.
-- **Logs** are Winston JSON in production, readable in the Render
-  dashboard.
-- **Rate limiting** is per-instance and in memory. Fine for one free
-  instance; it needs a shared store (Redis) before scaling to several.
+  set up for this: `pool.min: 0` so no dead connections are held, plus
+  a retry limited to connection-level errors.
+- **The server survives a sleeping database.** `src/server.js` binds
+  the port before authenticating, so a cold boot against a waking
+  database does not put Render into a restart loop.
+- **Rate limiting is per-instance and in memory.** Fine for one free
+  instance; it needs a shared store before scaling to several.
+- **`trust proxy` is 1.** Render terminates TLS at its proxy, so
+  without this the rate limiter buckets every user together and audit
+  logs record the proxy's address rather than the person's. `1`, not
+  `true`: trusting every hop would let a caller set their own
+  `X-Forwarded-For` and pick their own bucket.

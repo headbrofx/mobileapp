@@ -175,6 +175,11 @@ async function listDoses(familyMemberId, { from = null, to = null, status = null
 
 // What the client app turns into local notifications.
 async function dueDoses(familyMemberId, { hours = 24 } = {}) {
+  // Sweep first. Without this, a patient who never opens the adherence
+  // screen leaves every unanswered dose sitting at PENDING for good,
+  // and "what is due" quietly starts including last Tuesday.
+  await closeOutOverdue(familyMemberId);
+
   return listDoses(familyMemberId, {
     from: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     to: new Date(Date.now() + hours * 60 * 60 * 1000).toISOString(),

@@ -108,10 +108,14 @@ async function getOne(id) {
   return withTotals(invoice);
 }
 
-async function list({ clientProfileId = null, status = null } = {}) {
+async function list({ clientProfileId = null, status = null, scope = null } = {}) {
   const where = {};
   if (clientProfileId) where.clientProfileId = clientProfileId;
   if (status) where.status = status;
+  // An extra clause from the caller, used to narrow a staff member to
+  // the invoices they raised or were assigned to. Merged rather than
+  // replacing, so it can only ever narrow the result.
+  if (scope) Object.assign(where, scope);
 
   const invoices = await Invoice.findAll({
     where,
