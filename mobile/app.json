@@ -25,7 +25,16 @@
     "plugins": [
       "expo-router",
       "expo-status-bar",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/wordmark.png",
+          "imageWidth": 260,
+          "resizeMode": "contain",
+          "backgroundColor": "#EFE8E0"
+        }
+      ]
     ],
     "scheme": "afyanyumbani",
     "extra": {
