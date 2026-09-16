@@ -140,6 +140,33 @@ export const auth = {
 
 export const familyMembers = {
   list: () => api.get('/api/family-members'),
+  // Health screens are about one person, and by default that person is
+  // the account holder — the SELF member the backend creates on
+  // registration. Falls back to the first one rather than failing, so a
+  // screen still works if SELF was renamed.
+  async self() {
+    const data = await api.get('/api/family-members');
+    const list = data?.familyMembers ?? [];
+    return list.find((member) => member.relationship === 'SELF') ?? list[0] ?? null;
+  },
+};
+
+export const cycles = {
+  list: (memberId) => api.get(`/api/family-members/${memberId}/cycles`),
+  insights: (memberId) => api.get(`/api/family-members/${memberId}/cycles/insights`),
+  log: (memberId, payload) => api.post(`/api/family-members/${memberId}/cycles`, payload),
+};
+
+export const medications = {
+  list: (memberId) => api.get(`/api/family-members/${memberId}/medications`),
+  due: (memberId) => api.get(`/api/family-members/${memberId}/medications/due?hours=48`),
+  adherence: (memberId) => api.get(`/api/family-members/${memberId}/medications/adherence`),
+  markDose: (memberId, doseId, status) =>
+    api.post(`/api/family-members/${memberId}/medications/doses/${doseId}`, { status }),
+};
+
+export const invoices = {
+  list: () => api.get('/api/invoices'),
 };
 
 export const bookings = {

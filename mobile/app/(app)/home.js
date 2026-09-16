@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { bookings as bookingsApi, familyMembers as familyApi } from '../lib/api';
-import { useSession } from '../lib/session';
-import { Button, Card, ErrorBox } from '../lib/ui';
-import { colors, spacing } from '../lib/theme';
+import { bookings as bookingsApi, familyMembers as familyApi } from '../../lib/api';
+import { useSession } from '../../lib/session';
+import { Button, Card, ErrorBox } from '../../lib/ui';
+import { colors, spacing } from '../../lib/theme';
 
 const STATUS_SW = {
   REQUESTED: 'Imeombwa',
@@ -21,7 +21,7 @@ const STATUS_SW = {
 
 export default function Home() {
   const router = useRouter();
-  const { user, signOut } = useSession();
+  const { user } = useSession();
 
   const [members, setMembers] = useState([]);
   const [visits, setVisits] = useState([]);
@@ -107,9 +107,6 @@ export default function Home() {
         ))
       )}
 
-      <View style={styles.signOut}>
-        <Button title="Toka" variant="ghost" onPress={signOut} />
-      </View>
     </ScrollView>
   );
 }
@@ -131,5 +128,4 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
   muted: { fontSize: 14, color: colors.muted, marginTop: 2 },
   status: { fontSize: 14, color: colors.primary, fontWeight: '600', marginTop: spacing.xs },
-  signOut: { marginTop: spacing.xl },
 });

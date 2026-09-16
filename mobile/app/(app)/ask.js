@@ -7,9 +7,9 @@ import {
   Text,
   View,
 } from 'react-native';
-import { afyaAi } from '../lib/api';
-import { Button, Card, ErrorBox, Field } from '../lib/ui';
-import { colors, radius, spacing } from '../lib/theme';
+import { afyaAi } from '../../lib/api';
+import { Button, Card, ErrorBox, Field } from '../../lib/ui';
+import { colors, radius, spacing } from '../../lib/theme';
 
 // Afya AI.
 //
