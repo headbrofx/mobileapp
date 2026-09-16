@@ -20,6 +20,11 @@ const {
   logWorkoutSchema,
   upsertActivitySchema,
 } = require('../validators/fitness.validator');
+const {
+  createMedicationSchema,
+  updateMedicationSchema,
+  markDoseSchema,
+} = require('../validators/medication.validator');
 
 const familyMemberController = require('../controllers/familyMember.controller');
 const healthProfileController = require('../controllers/healthProfile.controller');
@@ -31,6 +36,7 @@ const symptomTrendsController = require('../controllers/symptomTrends.controller
 const orbitController = require('../controllers/orbit.controller');
 const nutritionController = require('../controllers/nutrition.controller');
 const fitnessController = require('../controllers/fitness.controller');
+const medicationController = require('../controllers/medication.controller');
 
 const router = Router();
 
@@ -190,5 +196,45 @@ router.put(
   fitnessController.upsertActivity
 );
 router.get('/:familyMemberId/activity', authenticate, loadOwnedFamilyMember, fitnessController.listActivity);
+
+// --- Medications & reminders (Phase 12) ---
+// The specific paths come before /:medicationId so "doses", "due" and
+// "adherence" are not read as ids.
+router.post(
+  '/:familyMemberId/medications',
+  authenticate,
+  loadOwnedFamilyMember,
+  validate(createMedicationSchema),
+  medicationController.create
+);
+router.get('/:familyMemberId/medications', authenticate, loadOwnedFamilyMember, medicationController.list);
+router.get('/:familyMemberId/medications/doses', authenticate, loadOwnedFamilyMember, medicationController.listDoses);
+router.get('/:familyMemberId/medications/due', authenticate, loadOwnedFamilyMember, medicationController.dueDoses);
+router.get(
+  '/:familyMemberId/medications/adherence',
+  authenticate,
+  loadOwnedFamilyMember,
+  medicationController.adherence
+);
+router.post(
+  '/:familyMemberId/medications/doses/:doseId',
+  authenticate,
+  loadOwnedFamilyMember,
+  validate(markDoseSchema),
+  medicationController.markDose
+);
+router.get(
+  '/:familyMemberId/medications/:medicationId',
+  authenticate,
+  loadOwnedFamilyMember,
+  medicationController.getOne
+);
+router.patch(
+  '/:familyMemberId/medications/:medicationId',
+  authenticate,
+  loadOwnedFamilyMember,
+  validate(updateMedicationSchema),
+  medicationController.update
+);
 
 module.exports = router;
