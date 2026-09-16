@@ -132,14 +132,14 @@ const PAGE = `<!doctype html>
   body {
     margin: 0 auto; padding: 24px 20px 64px; max-width: 46rem;
     font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    color: #16211D; background: #F6F8F7;
+    color: #16211D; background: #F6F4F1;
   }
-  h1 { font-size: 1.7rem; margin: 0 0 4px; color: #0E7A5F; }
-  h2 { font-size: 1.1rem; margin: 32px 0 8px; color: #0E7A5F; }
+  h1 { font-size: 1.7rem; margin: 0 0 4px; color: #0D408F; }
+  h2 { font-size: 1.1rem; margin: 32px 0 8px; color: #0D408F; }
   .lead { margin: 0; font-weight: 600; }
   .meta { color: #657A71; font-size: 0.9rem; margin-top: 4px; }
   .notice {
-    background: #FFF6E5; border-left: 4px solid #C77700;
+    background: #FFF3EA; border-left: 4px solid #FD6000;
     padding: 12px 16px; margin: 24px 0; border-radius: 6px; font-size: 0.95rem;
   }
   ul { padding-left: 1.25rem; }
