@@ -11,6 +11,7 @@ const bookingRoutes = require('./booking.routes');
 const aiRoutes = require('./ai.routes');
 const foodRoutes = require('./food.routes');
 const contentRoutes = require('./content.routes');
+const billingRoutes = require('./billing.routes');
 
 const router = Router();
 
@@ -24,6 +25,7 @@ router.use('/bookings', bookingRoutes);
 router.use('/ai', aiRoutes);
 router.use('/foods', foodRoutes);
 router.use('/content', contentRoutes);
+router.use('/invoices', billingRoutes);
 
 // Phase 6+ will mount: /visits, ...
 
