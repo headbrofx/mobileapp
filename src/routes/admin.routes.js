@@ -2,10 +2,25 @@
 
 const { Router } = require('express');
 const { authenticate, requireRole } = require('../middleware/auth');
+const validate = require('../middleware/validate');
+const { setUserStatusSchema, setUserRoleSchema } = require('../validators/admin.validator');
 const controller = require('../controllers/admin.controller');
 
 const router = Router();
 
-router.get('/audit-logs', authenticate, requireRole('ADMIN'), controller.listAuditLogs);
+// Everything below is ADMIN only.
+router.use(authenticate, requireRole('ADMIN'));
+
+router.get('/dashboard', controller.dashboard);
+router.get('/audit-logs', controller.listAuditLogs);
+
+router.get('/users', controller.listUsers);
+router.patch('/users/:id/status', validate(setUserStatusSchema), controller.setUserStatus);
+// The most sensitive endpoint in the API. Audited, and an admin cannot
+// point it at themselves.
+router.patch('/users/:id/role', validate(setUserRoleSchema), controller.setUserRole);
+
+router.get('/staff', controller.listStaff);
+router.get('/bookings', controller.listBookings);
 
 module.exports = router;
