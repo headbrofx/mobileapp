@@ -9,6 +9,7 @@ const requestLogger = require('./middleware/requestLogger');
 const { apiLimiter } = require('./middleware/rateLimiter');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 const routes = require('./routes');
+const privacyRoutes = require('./routes/privacy.routes');
 
 const app = express();
 
@@ -48,6 +49,10 @@ app.use(requestLogger);
 
 // API routes
 app.use('/api', routes);
+
+// Served at the root rather than under /api: Google Play wants a plain
+// public URL for the privacy policy, not an API path.
+app.use('/', privacyRoutes);
 
 // The front door. Somebody who pastes the bare URL into a browser
 // should land somewhere that tells them where to go next, so this

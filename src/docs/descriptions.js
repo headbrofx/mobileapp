@@ -24,6 +24,13 @@ module.exports = {
     auth: false,
   },
 
+  'GET /privacy': {
+    tag: 'Service',
+    summary: 'Privacy policy',
+    description: 'Served from the API because Google Play requires a public policy URL for a health app.',
+    auth: false,
+  },
+
   // --- Auth ---
   'POST /api/auth/register': { tag: 'Auth', summary: 'Create a client account', auth: false },
   'POST /api/auth/login': { tag: 'Auth', summary: 'Sign in and receive tokens', auth: false },
