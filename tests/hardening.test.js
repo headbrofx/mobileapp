@@ -127,6 +127,49 @@ describe('Hardening — a nurse sees the bills of their own patients only', () =
   });
 });
 
+describe('Hardening — the service catalogue is reachable', () => {
+  it('lists the services a booking can be made against', async () => {
+    // A booking requires a serviceId, and until this endpoint existed
+    // there was no way for any client to find one — the seeded services
+    // were reachable only by reading the database. The gap only showed
+    // itself when something tried to be a client.
+    const res = await request(app).get('/api/services').set(auth(clientToken));
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.services.length).toBeGreaterThan(0);
+
+    const service = res.body.data.services[0];
+    expect(service.id).toMatch(/^[0-9a-f-]{36}$/);
+    expect(service.name).toBeTruthy();
+
+    // Withdrawn services stop appearing without deleting the bookings
+    // that reference them.
+    expect(res.body.data.services.every((item) => item.isActive === true)).toBe(true);
+  });
+
+  it('requires a token', async () => {
+    const res = await request(app).get('/api/services');
+    expect(res.status).toBe(401);
+  });
+
+  it('can actually be used to make a booking', async () => {
+    const catalogue = await request(app).get('/api/services').set(auth(clientToken));
+    const serviceId = catalogue.body.data.services[0].id;
+
+    const res = await request(app)
+      .post('/api/bookings')
+      .set(auth(clientToken))
+      .send({
+        familyMemberId,
+        serviceId,
+        locationAddress: 'Masaki, Dar es Salaam',
+        scheduledAt: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+      });
+
+    expect(res.status).toBe(201);
+  });
+});
+
 describe('Hardening — overdue doses are swept before what is due is reported', () => {
   it('marks a dose nobody answered as missed, without waiting for the adherence screen', async () => {
     const created = await request(app)

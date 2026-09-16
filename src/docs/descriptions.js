@@ -73,6 +73,13 @@ module.exports = {
   'PATCH /api/family-members/:familyMemberId/symptoms/:symptomId': { tag: 'Symptoms', summary: 'Correct a symptom' },
   'DELETE /api/family-members/:familyMemberId/symptoms/:symptomId': { tag: 'Symptoms', summary: 'Remove a symptom' },
 
+  // --- Services ---
+  'GET /api/services/': {
+    tag: 'Bookings',
+    summary: 'The service catalogue',
+    description: 'Where a booking’s serviceId comes from. Inactive services are not listed.',
+  },
+
   // --- Bookings ---
   'POST /api/bookings/': { tag: 'Bookings', summary: 'Request a home visit', roles: ['CLIENT'] },
   'GET /api/bookings/': { tag: 'Bookings', summary: 'List bookings, scoped to your role' },

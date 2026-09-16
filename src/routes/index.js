@@ -10,6 +10,7 @@ const symptomCatalogRoutes = require('./symptomCatalog.routes');
 const bookingRoutes = require('./booking.routes');
 const aiRoutes = require('./ai.routes');
 const foodRoutes = require('./food.routes');
+const serviceRoutes = require('./service.routes');
 const contentRoutes = require('./content.routes');
 const billingRoutes = require('./billing.routes');
 const docsRoutes = require('./docs.routes');
@@ -26,6 +27,7 @@ router.use('/symptom-catalogue', symptomCatalogRoutes);
 router.use('/bookings', bookingRoutes);
 router.use('/ai', aiRoutes);
 router.use('/foods', foodRoutes);
+router.use('/services', serviceRoutes);
 router.use('/content', contentRoutes);
 router.use('/invoices', billingRoutes);
 
