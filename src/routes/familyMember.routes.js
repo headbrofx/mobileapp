@@ -15,6 +15,11 @@ const {
   logMealSchema,
   logWaterSchema,
 } = require('../validators/nutrition.validator');
+const {
+  updateFitnessProfileSchema,
+  logWorkoutSchema,
+  upsertActivitySchema,
+} = require('../validators/fitness.validator');
 
 const familyMemberController = require('../controllers/familyMember.controller');
 const healthProfileController = require('../controllers/healthProfile.controller');
@@ -25,6 +30,7 @@ const symptomController = require('../controllers/symptom.controller');
 const symptomTrendsController = require('../controllers/symptomTrends.controller');
 const orbitController = require('../controllers/orbit.controller');
 const nutritionController = require('../controllers/nutrition.controller');
+const fitnessController = require('../controllers/fitness.controller');
 
 const router = Router();
 
@@ -147,5 +153,42 @@ router.post(
 );
 router.get('/:familyMemberId/water', authenticate, loadOwnedFamilyMember, nutritionController.listWater);
 router.delete('/:familyMemberId/water/:waterId', authenticate, loadOwnedFamilyMember, nutritionController.deleteWater);
+
+// --- Fitness (Phase 11) ---
+router.get('/:familyMemberId/fitness', authenticate, loadOwnedFamilyMember, fitnessController.getProfile);
+router.put(
+  '/:familyMemberId/fitness',
+  authenticate,
+  loadOwnedFamilyMember,
+  validate(updateFitnessProfileSchema),
+  fitnessController.updateProfile
+);
+router.get('/:familyMemberId/fitness/summary', authenticate, loadOwnedFamilyMember, fitnessController.summary);
+
+router.post(
+  '/:familyMemberId/workouts',
+  authenticate,
+  loadOwnedFamilyMember,
+  validate(logWorkoutSchema),
+  fitnessController.logWorkout
+);
+router.get('/:familyMemberId/workouts', authenticate, loadOwnedFamilyMember, fitnessController.listWorkouts);
+router.delete(
+  '/:familyMemberId/workouts/:workoutId',
+  authenticate,
+  loadOwnedFamilyMember,
+  fitnessController.deleteWorkout
+);
+
+// One row per day, so sending the same date twice corrects it rather
+// than adding to it.
+router.put(
+  '/:familyMemberId/activity',
+  authenticate,
+  loadOwnedFamilyMember,
+  validate(upsertActivitySchema),
+  fitnessController.upsertActivity
+);
+router.get('/:familyMemberId/activity', authenticate, loadOwnedFamilyMember, fitnessController.listActivity);
 
 module.exports = router;
