@@ -49,8 +49,17 @@ app.use(requestLogger);
 // API routes
 app.use('/api', routes);
 
+// The front door. Somebody who pastes the bare URL into a browser
+// should land somewhere that tells them where to go next, so this
+// points at the real reference rather than at a health check.
 app.get('/', (req, res) => {
-  res.json({ name: 'Afya Nyumbani API', status: 'ok', docs: '/api/health' });
+  res.json({
+    name: 'Afya Nyumbani API',
+    status: 'ok',
+    docs: '/api/docs',
+    openapi: '/api/docs.json',
+    health: '/api/health',
+  });
 });
 
 // 404 + centralized error handling (must be last)

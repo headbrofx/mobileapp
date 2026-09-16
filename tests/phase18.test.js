@@ -68,6 +68,24 @@ describe('Phase 18 — API documentation', () => {
     expect(roleGuarded.responses['403'].description).toMatch(/ADMIN/);
   });
 
+  it('points the front door at places that actually exist', async () => {
+    // The root advertised /api/health as its "docs" link from Phase 0
+    // until Phase 18 put real docs somewhere else, and nothing noticed
+    // because nothing checked. Every path it names now has to answer.
+    const root = await request(app).get('/');
+    expect(root.status).toBe(200);
+
+    const advertised = [root.body.docs, root.body.openapi, root.body.health];
+    expect(advertised.every(Boolean)).toBe(true);
+
+    for (const path of advertised) {
+      const res = await request(app).get(path);
+      expect([200, 401]).toContain(res.status);
+    }
+
+    expect(root.body.docs).toBe('/api/docs');
+  });
+
   it('documents the response envelope both ways round', async () => {
     const res = await request(app).get('/api/docs.json');
     const schemas = res.body.components.schemas;
