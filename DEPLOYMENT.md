@@ -15,10 +15,11 @@ Frankfurt on both sides on purpose: it is the closest Render region to
 Dar es Salaam, and putting the database beside the app rather than in
 Oregon is the difference between a 220ms round trip and a second.
 
-Not Vercel: this is a long-running Express server with a Sequelize
-connection pool. Vercel is serverless, so it would need a function
-wrapper, external pooling, and the in-memory rate limiter would stop
-working correctly — each lambda would keep its own counter.
+Render was chosen because this is a long-running Express server with a
+Sequelize connection pool, which suits an always-on process better than
+a serverless one. The repo also deploys to **Vercel** — see that
+section below for what changes there, and it does change things worth
+knowing.
 
 ---
 
