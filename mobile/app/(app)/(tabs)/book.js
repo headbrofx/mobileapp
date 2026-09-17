@@ -8,63 +8,81 @@ import {
   Text,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { bookings, familyMembers, services as servicesApi } from '../../../lib/api';
-import { Button, Card, ErrorBox, Field } from '../../../lib/ui';
-import { colors, radius, spacing } from '../../../lib/theme';
+import { Card, ErrorBox, Field } from '../../../lib/ui';
+import { colors, radius, shadow, spacing, tileColors } from '../../../lib/theme';
 
-// Requesting a home visit.
+// Requesting a home visit, as the design lays it out: four steps with a
+// stepper across the top — service, details, location, confirm.
 //
-// The API wants a serviceId, a familyMemberId and an ISO timestamp. A
-// person has none of those, so this screen's whole job is turning
-// "nurse, for my mother, tomorrow morning" into them.
+// One step at a time is not decoration. The API wants a serviceId, a
+// familyMemberId, an address and an ISO timestamp; a person has a
+// nurse, a mother, a neighbourhood and "tomorrow morning". Asking one
+// thing per screen is what turns the second into the first without
+// presenting a wall of fields.
+
+const STEPS = ['Huduma', 'Maelezo', 'Mahali', 'Thibitisha'];
+
+const ICONS = {
+  'Home Nursing': 'medkit-outline',
+  'Elderly Care': 'people-outline',
+  Physiotherapy: 'fitness-outline',
+  'Wound Care': 'bandage-outline',
+  'Postnatal Care': 'heart-outline',
+  'Health Education': 'school-outline',
+  'Follow-up Visit': 'repeat-outline',
+  'Medication Administration': 'medical-outline',
+};
+const iconFor = (name) => ICONS[name] ?? 'ellipse-outline';
 
 const WHEN_OPTIONS = [
   { label: 'Kesho asubuhi', hoursAhead: 24, hour: 9 },
   { label: 'Kesho jioni', hoursAhead: 24, hour: 16 },
   { label: 'Keshokutwa asubuhi', hoursAhead: 48, hour: 9 },
+  { label: 'Keshokutwa jioni', hoursAhead: 48, hour: 16 },
 ];
 
 function toScheduledAt({ hoursAhead, hour }) {
   const date = new Date(Date.now() + hoursAhead * 60 * 60 * 1000);
-  // Times are chosen in the user's own clock, which is what they mean
-  // by "tomorrow morning". The API stores the instant.
+  // Chosen in the user's own clock, because that is what "tomorrow
+  // morning" means to them. The API stores the instant.
   date.setHours(hour, 0, 0, 0);
-  return date.toISOString();
+  return date;
 }
+
+const tzs = (amount) => `TZS ${Number(amount).toLocaleString('en-US')}`;
 
 export default function Book() {
   const router = useRouter();
 
-  const [members, setMembers] = useState([]);
+  const [step, setStep] = useState(0);
   const [catalogue, setCatalogue] = useState([]);
+  const [members, setMembers] = useState([]);
+
+  const [service, setService] = useState(null);
   const [memberId, setMemberId] = useState(null);
-  const [serviceId, setServiceId] = useState(null);
   const [when, setWhen] = useState(WHEN_OPTIONS[0]);
   const [address, setAddress] = useState('');
   const [notes, setNotes] = useState('');
 
-  const [error, setError] = useState(null);
-  const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
   const [done, setDone] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
-        const [memberData, serviceData] = await Promise.all([
-          familyMembers.list(),
+        const [serviceData, memberData] = await Promise.all([
           servicesApi.list(),
+          familyMembers.list(),
         ]);
+        setCatalogue(serviceData?.services ?? []);
         const list = memberData?.familyMembers ?? [];
-        const cat = serviceData?.services ?? [];
         setMembers(list);
-        setCatalogue(cat);
-        // Most requests are for the account holder and the commonest
-        // service, so pre-select both rather than making every booking
-        // start with two taps.
         if (list.length) setMemberId(list[0].id);
-        if (cat.length) setServiceId(cat[0].id);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -79,36 +97,43 @@ export default function Book() {
     try {
       await bookings.create({
         familyMemberId: memberId,
-        serviceId,
+        serviceId: service.id,
         locationAddress: address.trim(),
-        scheduledAt: toScheduledAt(when),
+        scheduledAt: toScheduledAt(when).toISOString(),
         ...(notes.trim() ? { notes: notes.trim() } : {}),
       });
       setDone(true);
     } catch (err) {
       setError(err.message);
+      // Back to the step most likely at fault, rather than stranding
+      // them on a confirmation screen that will not confirm.
+      setStep(2);
     } finally {
       setBusy(false);
     }
   }
 
-  if (done) {
-    return (
-      <View style={styles.doneWrap}>
-        <Text style={styles.doneTitle}>Ombi limepokelewa</Text>
-        <Text style={styles.doneBody}>
-          Tutakupangia muuguzi na utaona hali ya ombi lako kwenye ukurasa wa mwanzo.
-        </Text>
-        <Button title="Rudi mwanzo" onPress={() => router.replace('/home')} />
-      </View>
-    );
-  }
+  const member = members.find((m) => m.id === memberId);
+
+  const canContinue = [
+    Boolean(service),
+    Boolean(memberId && when),
+    address.trim().length >= 3,
+    true,
+  ][step];
+
+  if (done) return <Done router={router} />;
 
   return (
     <KeyboardAvoidingView
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      <View style={styles.header}>
+        <Text style={styles.title}>Omba ziara ya nyumbani</Text>
+        <Stepper step={step} />
+      </View>
+
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <ErrorBox error={error} />
 
@@ -118,100 +143,338 @@ export default function Book() {
           </Card>
         ) : (
           <>
-            <Text style={styles.heading}>Huduma</Text>
-            {catalogue.map((service) => (
-              <Choice
-                key={service.id}
-                selected={service.id === serviceId}
-                onPress={() => setServiceId(service.id)}
-                title={service.name}
-                subtitle={
-                  service.basePriceTzs
-                    ? `Kuanzia TZS ${service.basePriceTzs.toLocaleString('en-US')}`
-                    : service.description
-                }
-              />
-            ))}
+            {step === 0 ? (
+              <>
+                <Text style={styles.stepTitle}>Chagua huduma</Text>
+                <Text style={styles.stepHint}>Ni huduma gani unayohitaji?</Text>
+                {catalogue.map((item, index) => (
+                  <ServiceRow
+                    key={item.id}
+                    service={item}
+                    index={index}
+                    selected={service?.id === item.id}
+                    onPress={() => setService(item)}
+                  />
+                ))}
+              </>
+            ) : null}
 
-            <Text style={styles.heading}>Ni kwa ajili ya nani</Text>
-            {members.map((member) => (
-              <Choice
-                key={member.id}
-                selected={member.id === memberId}
-                onPress={() => setMemberId(member.id)}
-                title={member.fullName ?? member.name}
-                subtitle={member.relationship === 'SELF' ? 'Wewe mwenyewe' : member.relationship}
-              />
-            ))}
+            {step === 1 ? (
+              <>
+                <Text style={styles.stepTitle}>Ni kwa ajili ya nani</Text>
+                <Text style={styles.stepHint}>Na muda gani unakufaa</Text>
 
-            <Text style={styles.heading}>Lini</Text>
-            {WHEN_OPTIONS.map((option) => (
-              <Choice
-                key={option.label}
-                selected={option.label === when.label}
-                onPress={() => setWhen(option)}
-                title={option.label}
-              />
-            ))}
+                {members.map((m) => (
+                  <Choice
+                    key={m.id}
+                    title={m.relationship === 'SELF' ? `${m.name} (wewe)` : m.name}
+                    subtitle={m.relationship === 'SELF' ? null : m.relationship}
+                    selected={m.id === memberId}
+                    onPress={() => setMemberId(m.id)}
+                  />
+                ))}
 
-            <View style={styles.spacer} />
+                <Pressable onPress={() => router.push('/family')} style={styles.addLink}>
+                  <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
+                  <Text style={styles.addLinkText}>Ongeza mtu mwingine wa familia</Text>
+                </Pressable>
 
-            <Field
-              label="Mahali"
-              placeholder="mfano: Masaki, karibu na shule ya msingi"
-              value={address}
-              onChangeText={setAddress}
-            />
-            <Field
-              label="Maelezo (hiari)"
-              placeholder="Chochote muuguzi anapaswa kujua kabla hajafika"
-              value={notes}
-              onChangeText={setNotes}
-              multiline
-              numberOfLines={3}
-              style={styles.textarea}
-            />
+                <Text style={styles.label}>Lini</Text>
+                {WHEN_OPTIONS.map((option) => (
+                  <Choice
+                    key={option.label}
+                    title={option.label}
+                    subtitle={toScheduledAt(option).toLocaleString('sw-TZ')}
+                    selected={option.label === when.label}
+                    onPress={() => setWhen(option)}
+                  />
+                ))}
+              </>
+            ) : null}
 
-            <Button
-              title="Tuma ombi"
-              onPress={submit}
-              loading={busy}
-              disabled={!memberId || !serviceId || address.trim().length < 3}
-            />
+            {step === 2 ? (
+              <>
+                <Text style={styles.stepTitle}>Muuguzi aje wapi</Text>
+                <Text style={styles.stepHint}>Andika mahali pa kufikika kwa urahisi</Text>
+
+                <Field
+                  label="Mahali"
+                  placeholder="mfano: Kariakoo, karibu na soko"
+                  value={address}
+                  onChangeText={setAddress}
+                />
+                <Field
+                  label="Maelezo (hiari)"
+                  placeholder="Chochote muuguzi anapaswa kujua kabla hajafika"
+                  value={notes}
+                  onChangeText={setNotes}
+                  multiline
+                  numberOfLines={3}
+                  style={styles.textarea}
+                />
+              </>
+            ) : null}
+
+            {step === 3 ? (
+              <>
+                <Text style={styles.stepTitle}>Thibitisha ombi lako</Text>
+                <Text style={styles.stepHint}>Angalia kila kitu kabla ya kutuma</Text>
+
+                <Card style={styles.summary}>
+                  <View style={styles.summaryHead}>
+                    <View style={[styles.rowIcon, { backgroundColor: tileColors[0].bg }]}>
+                      <Ionicons name={iconFor(service?.name)} size={20} color="#FFFFFF" />
+                    </View>
+                    <View style={styles.rowText}>
+                      <Text style={styles.summaryTitle}>{service?.name}</Text>
+                      {service?.basePriceTzs ? (
+                        <Text style={styles.muted}>Kuanzia {tzs(service.basePriceTzs)}</Text>
+                      ) : null}
+                    </View>
+                  </View>
+
+                  <Line icon="person-outline" label="Mgonjwa" value={member?.name} />
+                  <Line
+                    icon="calendar-outline"
+                    label="Tarehe na muda"
+                    value={toScheduledAt(when).toLocaleString('sw-TZ')}
+                  />
+                  <Line icon="location-outline" label="Mahali" value={address.trim()} />
+                  {notes.trim() ? (
+                    <Line icon="document-text-outline" label="Maelezo" value={notes.trim()} />
+                  ) : null}
+                </Card>
+
+                {/* The design puts the assigned nurse here, with a
+                    photo and a rating. Nobody has been assigned at this
+                    point — the office does that once the request
+                    arrives — so this says what happens next instead of
+                    showing a nurse who has not agreed to come. */}
+                <Card style={styles.pending}>
+                  <Ionicons name="time-outline" size={20} color={colors.primary} />
+                  <Text style={styles.pendingText}>
+                    Muuguzi atapangiwa baada ya kutuma ombi. Utaona jina lake na hali ya ziara
+                    kwenye "Ziara".
+                  </Text>
+                </Card>
+              </>
+            ) : null}
           </>
         )}
       </ScrollView>
+
+      <View style={styles.footer}>
+        {step > 0 ? (
+          <Pressable
+            onPress={() => setStep(step - 1)}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.back, pressed && styles.pressed]}
+          >
+            <Ionicons name="arrow-back" size={18} color={colors.primary} />
+            <Text style={styles.backText}>Rudi</Text>
+          </Pressable>
+        ) : null}
+
+        <Pressable
+          onPress={() => (step === 3 ? submit() : setStep(step + 1))}
+          disabled={!canContinue || busy}
+          accessibilityRole="button"
+          style={({ pressed }) => [
+            styles.next,
+            (!canContinue || busy) && styles.nextDisabled,
+            pressed && canContinue && styles.pressed,
+          ]}
+        >
+          <Text style={styles.nextText}>
+            {busy ? 'Inatuma…' : step === 3 ? 'Thibitisha ombi' : 'Endelea'}
+          </Text>
+          {!busy ? <Ionicons name="arrow-forward" size={18} color={colors.onPrimary} /> : null}
+        </Pressable>
+      </View>
     </KeyboardAvoidingView>
   );
 }
 
-function Choice({ selected, onPress, title, subtitle }) {
+function Stepper({ step }) {
+  return (
+    <View style={styles.stepper}>
+      {STEPS.map((label, index) => {
+        const done = index < step;
+        const current = index === step;
+        return (
+          <View key={label} style={styles.stepItem}>
+            <View style={styles.stepTop}>
+              <View
+                style={[styles.stepLine, index === 0 && styles.invisible, done && styles.stepLineDone]}
+              />
+              <View style={[styles.stepDot, (done || current) && styles.stepDotActive]}>
+                {done ? (
+                  <Ionicons name="checkmark" size={12} color={colors.onPrimary} />
+                ) : (
+                  <Text style={[styles.stepNum, current && styles.stepNumActive]}>{index + 1}</Text>
+                )}
+              </View>
+              <View
+                style={[
+                  styles.stepLine,
+                  index === STEPS.length - 1 && styles.invisible,
+                  done && styles.stepLineDone,
+                ]}
+              />
+            </View>
+            <Text style={[styles.stepLabel, (done || current) && styles.stepLabelActive]}>
+              {label}
+            </Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+function ServiceRow({ service, index, selected, onPress }) {
+  const tile = tileColors[index % tileColors.length];
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="radio"
       accessibilityState={{ selected }}
-      style={[styles.choice, selected && styles.choiceSelected]}
+      style={({ pressed }) => [
+        styles.serviceRow,
+        selected && styles.serviceRowSelected,
+        pressed && styles.pressed,
+      ]}
     >
-      <Text style={[styles.choiceTitle, selected && styles.choiceTitleSelected]}>{title}</Text>
-      {subtitle ? <Text style={styles.muted}>{subtitle}</Text> : null}
+      <View style={[styles.rowIcon, { backgroundColor: selected ? tile.bg : tile.tint }]}>
+        <Ionicons name={iconFor(service.name)} size={20} color={selected ? '#FFFFFF' : tile.bg} />
+      </View>
+      <View style={styles.rowText}>
+        <Text style={styles.serviceName}>{service.name}</Text>
+        <Text style={styles.muted} numberOfLines={2}>
+          {service.basePriceTzs ? `Kuanzia ${tzs(service.basePriceTzs)}` : service.description}
+          {service.durationMinutes ? ` · dakika ${service.durationMinutes}` : ''}
+        </Text>
+      </View>
+      <Ionicons
+        name={selected ? 'checkmark-circle' : 'ellipse-outline'}
+        size={22}
+        color={selected ? colors.primary : colors.border}
+      />
     </Pressable>
   );
 }
 
+function Choice({ title, subtitle, selected, onPress }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="radio"
+      accessibilityState={{ selected }}
+      style={({ pressed }) => [
+        styles.choice,
+        selected && styles.choiceSelected,
+        pressed && styles.pressed,
+      ]}
+    >
+      <View style={styles.rowText}>
+        <Text style={[styles.choiceTitle, selected && styles.choiceTitleSelected]}>{title}</Text>
+        {subtitle ? <Text style={styles.muted}>{subtitle}</Text> : null}
+      </View>
+      <Ionicons
+        name={selected ? 'checkmark-circle' : 'ellipse-outline'}
+        size={22}
+        color={selected ? colors.primary : colors.border}
+      />
+    </Pressable>
+  );
+}
+
+function Line({ icon, label, value }) {
+  return (
+    <View style={styles.line}>
+      <Ionicons name={icon} size={17} color={colors.muted} />
+      <View style={styles.rowText}>
+        <Text style={styles.lineLabel}>{label}</Text>
+        <Text style={styles.lineValue}>{value}</Text>
+      </View>
+    </View>
+  );
+}
+
+function Done({ router }) {
+  return (
+    <View style={styles.doneWrap}>
+      <View style={styles.doneIcon}>
+        <Ionicons name="checkmark" size={38} color={colors.onPrimary} />
+      </View>
+      <Text style={styles.doneTitle}>Ombi limepokelewa</Text>
+      <Text style={styles.doneBody}>
+        Tutakupangia muuguzi na utaona hali ya ombi lako ikibadilika kwenye "Ziara".
+      </Text>
+      <Pressable
+        onPress={() => router.replace('/appointments')}
+        accessibilityRole="button"
+        style={({ pressed }) => [styles.next, styles.doneButton, pressed && styles.pressed]}
+      >
+        <Text style={styles.nextText}>Nenda kwenye ziara zangu</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
+  flex: { flex: 1, backgroundColor: colors.bg },
+  pressed: { opacity: 0.8 },
+  invisible: { opacity: 0 },
+
+  header: {
+    backgroundColor: colors.surface,
+    paddingTop: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  title: { fontSize: 18, fontWeight: '700', color: colors.text, textAlign: 'center' },
+
+  stepper: { flexDirection: 'row', marginTop: spacing.md },
+  stepItem: { flex: 1, alignItems: 'center' },
+  stepTop: { flexDirection: 'row', alignItems: 'center', width: '100%' },
+  stepLine: { flex: 1, height: 2, backgroundColor: colors.border },
+  stepLineDone: { backgroundColor: colors.primary },
+  stepDot: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: colors.bg,
+    borderWidth: 2,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepDotActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  stepNum: { fontSize: 12, fontWeight: '700', color: colors.subtle },
+  stepNumActive: { color: colors.onPrimary },
+  stepLabel: { fontSize: 11, color: colors.subtle, marginTop: 4 },
+  stepLabelActive: { color: colors.primary, fontWeight: '600' },
+
   content: { padding: spacing.md, paddingBottom: spacing.xl },
-  heading: {
-    fontSize: 13,
+  stepTitle: { fontSize: 17, fontWeight: '700', color: colors.text },
+  stepHint: { fontSize: 14, color: colors.muted, marginBottom: spacing.md },
+  label: {
+    fontSize: 14,
     fontWeight: '700',
-    color: colors.muted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
+    color: colors.text,
     marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
-  choice: {
+  muted: { fontSize: 13, color: colors.muted, marginTop: 2 },
+  textarea: { minHeight: 84, textAlignVertical: 'top' },
+
+  serviceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
@@ -219,14 +482,133 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginBottom: spacing.sm,
   },
-  choiceSelected: { borderColor: colors.primary, borderWidth: 2 },
-  choiceTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
-  choiceTitleSelected: { color: colors.primary },
-  muted: { fontSize: 14, color: colors.muted, marginTop: 2 },
-  textarea: { minHeight: 80, textAlignVertical: 'top' },
-  spacer: { height: spacing.md },
+  serviceRowSelected: {
+    borderColor: colors.primary,
+    borderWidth: 2,
+    backgroundColor: colors.primaryLight,
+  },
+  serviceName: { fontSize: 15, fontWeight: '600', color: colors.text },
 
-  doneWrap: { flex: 1, padding: spacing.lg, justifyContent: 'center' },
-  doneTitle: { fontSize: 22, fontWeight: '700', color: colors.primary, marginBottom: spacing.sm },
-  doneBody: { fontSize: 15, color: colors.muted, lineHeight: 22, marginBottom: spacing.lg },
+  rowIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowText: { flex: 1 },
+
+  choice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  choiceSelected: {
+    borderColor: colors.primary,
+    borderWidth: 2,
+    backgroundColor: colors.primaryLight,
+  },
+  choiceTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
+  choiceTitleSelected: { color: colors.primary },
+
+  addLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.sm,
+  },
+  addLinkText: { color: colors.primary, fontWeight: '600', fontSize: 14 },
+
+  summary: { ...shadow.card },
+  summaryHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    marginBottom: spacing.sm,
+  },
+  summaryTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
+
+  line: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+  },
+  lineLabel: { fontSize: 12, color: colors.muted },
+  lineValue: { fontSize: 14, color: colors.text, fontWeight: '500', marginTop: 1 },
+
+  pending: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    alignItems: 'flex-start',
+    backgroundColor: colors.primaryLight,
+    borderColor: colors.primaryLight,
+  },
+  pendingText: { flex: 1, fontSize: 13, color: colors.text, lineHeight: 19 },
+
+  footer: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    padding: spacing.md,
+    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  back: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  backText: { color: colors.primary, fontWeight: '600' },
+  next: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+  },
+  nextDisabled: { opacity: 0.45 },
+  nextText: { color: colors.onPrimary, fontSize: 15, fontWeight: '700' },
+
+  doneWrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.lg,
+    backgroundColor: colors.bg,
+  },
+  doneIcon: {
+    width: 78,
+    height: 78,
+    borderRadius: 39,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
+  doneTitle: { fontSize: 21, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
+  doneBody: {
+    fontSize: 15,
+    color: colors.muted,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: spacing.lg,
+  },
+  doneButton: { flex: 0, alignSelf: 'stretch' },
 });
