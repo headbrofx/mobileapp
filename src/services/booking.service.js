@@ -6,12 +6,28 @@ const AppError = require('../utils/appError');
 const { logAudit } = require('./audit.service');
 const { assertTransition } = require('./bookingStateMachine.service');
 const { suggestStaffForBooking } = require('./staffMatch.service');
+const { notify } = require('./notification.service');
 const { DETAIL_INCLUDE } = require('../middleware/bookingAccess');
 
 async function findDetailed(id) {
   const booking = await Booking.findByPk(id, { include: DETAIL_INCLUDE });
   if (!booking) throw AppError.notFound('Booking not found');
   return booking;
+}
+
+// Tell the client when somebody else moves their booking along. The
+// transitions a client performs themselves are left alone: nobody needs
+// a notification about the thing they just did.
+async function notifyClient(booking, title, message) {
+  const clientProfile = await ClientProfile.findByPk(booking.clientProfileId);
+  if (!clientProfile) return;
+  await notify({
+    userId: clientProfile.userId,
+    type: 'BOOKING',
+    title,
+    message,
+    data: { bookingId: booking.id },
+  });
 }
 
 // familyMemberId comes from the request body (not the URL), so ownership
@@ -120,6 +136,8 @@ async function assign(id, staffId, actorUser, req) {
   booking.status = 'ASSIGNED';
   await booking.save();
 
+  await notifyClient(booking, 'Muuguzi amepangiwa', 'Ombi lako la ziara limepangiwa muuguzi.');
+
   await logAudit({
     userId: actorUser.id,
     action: 'BOOKING_ASSIGNED',
@@ -140,6 +158,7 @@ async function accept(id, actorUser, req) {
   booking.status = 'ACCEPTED';
   await booking.save();
 
+  await notifyClient(booking, 'Muuguzi amekubali', 'Muuguzi amekubali kuja kwenye ziara yako.');
   await logAudit({ userId: actorUser.id, action: 'BOOKING_ACCEPTED', entityType: 'Booking', entityId: booking.id, req });
   return findDetailed(booking.id);
 }
@@ -173,6 +192,7 @@ async function onTheWay(id, actorUser, req) {
   booking.status = 'ON_THE_WAY';
   await booking.save();
 
+  await notifyClient(booking, 'Muuguzi yupo njiani', 'Muuguzi wako ameanza safari kuja kwako.');
   await logAudit({ userId: actorUser.id, action: 'BOOKING_ON_THE_WAY', entityType: 'Booking', entityId: booking.id, req });
   return findDetailed(booking.id);
 }
@@ -185,6 +205,7 @@ async function arrive(id, actorUser, req) {
   booking.status = 'ARRIVED';
   await booking.save();
 
+  await notifyClient(booking, 'Muuguzi amefika', 'Muuguzi wako amefika mahali ulipoandika.');
   await logAudit({ userId: actorUser.id, action: 'BOOKING_ARRIVED', entityType: 'Booking', entityId: booking.id, req });
   return findDetailed(booking.id);
 }
@@ -209,6 +230,7 @@ async function complete(id, actorUser, req) {
   booking.status = 'COMPLETED';
   await booking.save();
 
+  await notifyClient(booking, 'Ziara imekamilika', 'Ziara yako imekamilika. Asante kwa kutumia Afya Nyumbani.');
   await logAudit({ userId: actorUser.id, action: 'BOOKING_COMPLETED', entityType: 'Booking', entityId: booking.id, req });
   return findDetailed(booking.id);
   // Note: the clinical Visit record (check-in/out, vitals, notes) is

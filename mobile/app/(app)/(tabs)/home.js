@@ -10,7 +10,11 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { bookings as bookingsApi, services as servicesApi } from '../../../lib/api';
+import {
+  bookings as bookingsApi,
+  notifications as notificationsApi,
+  services as servicesApi,
+} from '../../../lib/api';
 import { useSession } from '../../../lib/session';
 import { Card, ErrorBox } from '../../../lib/ui';
 import { colors, radius, shadow, spacing, tileColors } from '../../../lib/theme';
@@ -58,18 +62,21 @@ export default function Home() {
 
   const [services, setServices] = useState([]);
   const [visits, setVisits] = useState([]);
+  const [unread, setUnread] = useState(0);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
     try {
-      const [serviceData, bookingData] = await Promise.all([
+      const [serviceData, bookingData, notificationData] = await Promise.all([
         servicesApi.list(),
         bookingsApi.list(),
+        notificationsApi.list(),
       ]);
       setServices(serviceData?.services ?? []);
       setVisits(bookingData?.bookings ?? []);
+      setUnread(notificationData?.unread ?? 0);
     } catch (err) {
       setError(err.message);
     }
@@ -99,12 +106,27 @@ export default function Home() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <View style={styles.hero}>
-        <Image
-          source={require('../../../assets/wordmark.png')}
-          style={styles.wordmark}
-          resizeMode="contain"
-          accessibilityLabel="Afya Nyumbani"
-        />
+        <View style={styles.heroTop}>
+          <Image
+            source={require('../../../assets/wordmark.png')}
+            style={styles.wordmark}
+            resizeMode="contain"
+            accessibilityLabel="Afya Nyumbani"
+          />
+          <Pressable
+            onPress={() => router.push('/notifications')}
+            accessibilityRole="button"
+            accessibilityLabel={unread > 0 ? `Taarifa ${unread} mpya` : 'Taarifa'}
+            style={({ pressed }) => [styles.bell, pressed && styles.tilePressed]}
+          >
+            <Ionicons name="notifications-outline" size={22} color={colors.onPrimary} />
+            {unread > 0 ? (
+              <View style={styles.bellBadge}>
+                <Text style={styles.bellCount}>{unread > 9 ? '9+' : unread}</Text>
+              </View>
+            ) : null}
+          </Pressable>
+        </View>
         <Text style={styles.greeting}>Habari, {user?.name?.split(' ')[0] ?? 'karibu'}</Text>
         <Text style={styles.tagline}>Huduma bora ya afya, nyumbani kwako.</Text>
 
@@ -222,7 +244,22 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: radius.xl,
     borderBottomRightRadius: radius.xl,
   },
+  heroTop: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
   wordmark: { width: 150, height: 61, marginBottom: spacing.sm },
+  bell: { padding: spacing.xs },
+  bellBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    minWidth: 17,
+    height: 17,
+    borderRadius: 9,
+    paddingHorizontal: 4,
+    backgroundColor: colors.brandOrange,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bellCount: { color: '#FFFFFF', fontSize: 10, fontWeight: '800' },
   greeting: { color: colors.onPrimary, fontSize: 22, fontWeight: '700' },
   tagline: { color: colors.onPrimary, fontSize: 14, opacity: 0.9, marginTop: 2 },
 

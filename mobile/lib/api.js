@@ -173,6 +173,12 @@ export const medications = {
     api.post(`/api/family-members/${memberId}/medications/doses/${doseId}`, { status }),
 };
 
+export const notifications = {
+  list: () => api.get('/api/notifications'),
+  markRead: (id) => api.post(`/api/notifications/${id}/read`),
+  markAllRead: () => api.post('/api/notifications/read-all'),
+};
+
 export const invoices = {
   list: () => api.get('/api/invoices'),
 };

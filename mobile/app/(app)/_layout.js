@@ -51,6 +51,7 @@ export default function AppLayout() {
       {/* The four main destinations carry their own tab bar. */}
       <Drawer.Screen name="(tabs)" options={{ drawerLabel: 'Mwanzo', title: 'Afya Nyumbani', headerShown: false }} />
       <Drawer.Screen name="ask" options={{ drawerLabel: 'Afya AI', title: 'Afya AI' }} />
+      <Drawer.Screen name="notifications" options={{ drawerLabel: 'Taarifa', title: 'Taarifa' }} />
       <Drawer.Screen name="symptoms" options={{ drawerLabel: 'Ripoti dalili', title: 'Ripoti dalili' }} />
       <Drawer.Screen name="family" options={{ drawerLabel: 'Familia yangu', title: 'Familia yangu' }} />
       <Drawer.Screen name="cycles" options={{ drawerLabel: 'Mzunguko wangu', title: 'Mzunguko wangu' }} />

@@ -80,6 +80,15 @@ module.exports = {
   'PATCH /api/family-members/:familyMemberId/symptoms/:symptomId': { tag: 'Symptoms', summary: 'Correct a symptom' },
   'DELETE /api/family-members/:familyMemberId/symptoms/:symptomId': { tag: 'Symptoms', summary: 'Remove a symptom' },
 
+  // --- Notifications ---
+  'GET /api/notifications/': {
+    tag: 'Notifications',
+    summary: 'Your notifications, with an unread count',
+    description: 'Scoped to the signed-in user. Nothing is pushed — the app reads these when it opens.',
+  },
+  'POST /api/notifications/:id/read': { tag: 'Notifications', summary: 'Mark one as read' },
+  'POST /api/notifications/read-all': { tag: 'Notifications', summary: 'Mark everything as read' },
+
   // --- Services ---
   'GET /api/services/': {
     tag: 'Bookings',
