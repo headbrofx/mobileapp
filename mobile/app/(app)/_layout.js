@@ -51,6 +51,8 @@ export default function AppLayout() {
       <Drawer.Screen name="home" options={{ drawerLabel: 'Mwanzo', title: 'Afya Nyumbani' }} />
       <Drawer.Screen name="book" options={{ drawerLabel: 'Omba muuguzi', title: 'Omba muuguzi' }} />
       <Drawer.Screen name="ask" options={{ drawerLabel: 'Afya AI', title: 'Afya AI' }} />
+      <Drawer.Screen name="symptoms" options={{ drawerLabel: 'Ripoti dalili', title: 'Ripoti dalili' }} />
+      <Drawer.Screen name="family" options={{ drawerLabel: 'Familia yangu', title: 'Familia yangu' }} />
       <Drawer.Screen name="cycles" options={{ drawerLabel: 'Mzunguko wangu', title: 'Mzunguko wangu' }} />
       <Drawer.Screen name="medications" options={{ drawerLabel: 'Dawa zangu', title: 'Dawa zangu' }} />
       <Drawer.Screen name="invoices" options={{ drawerLabel: 'Ankara', title: 'Ankara' }} />

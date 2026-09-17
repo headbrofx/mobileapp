@@ -5,11 +5,17 @@ session in this repo. Read it first, before touching any code.
 
 ## What this is
 
-Backend API for **Afya Nyumbani**, a home-care platform in Dar es
-Salaam, Tanzania, owned by Joseph R Yusuph ("Headbro"). No UI yet, on
-purpose — this is a backend-first build: architecture, database,
-business logic, security and integrations before any mobile/web
-frontend.
+Backend API and mobile app for **Afya Nyumbani**, a home-care platform
+in Dar es Salaam, Tanzania, owned by Joseph R Yusuph ("Headbro"). Built
+backend-first on purpose: architecture, database, business logic and
+security before any screen.
+
+The backend is finished and deployed. **`mobile/` now holds an Expo
+app** against it — SDK 57 with Expo Router, a drawer over a route group
+so the signed-in half has navigation and the login screen does not,
+tokens in SecureStore, and Swahili throughout. Read `mobile/AGENTS.md`
+before touching it: SDK 57 moves faster than most training data, and
+the versioned docs are the source of truth there, not memory.
 
 Read `README.md` for the full stack, API surface, local dev setup, and
 per-phase feature breakdown. This file is about *how to work on it*,

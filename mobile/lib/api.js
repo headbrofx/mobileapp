@@ -140,6 +140,8 @@ export const auth = {
 
 export const familyMembers = {
   list: () => api.get('/api/family-members'),
+  create: (payload) => api.post('/api/family-members', payload),
+  update: (id, payload) => api.patch(`/api/family-members/${id}`, payload),
   // Health screens are about one person, and by default that person is
   // the account holder — the SELF member the backend creates on
   // registration. Falls back to the first one rather than failing, so a
@@ -149,6 +151,12 @@ export const familyMembers = {
     const list = data?.familyMembers ?? [];
     return list.find((member) => member.relationship === 'SELF') ?? list[0] ?? null;
   },
+};
+
+export const symptoms = {
+  catalogue: () => api.get('/api/symptom-catalogue'),
+  list: (memberId) => api.get(`/api/family-members/${memberId}/symptoms`),
+  report: (memberId, payload) => api.post(`/api/family-members/${memberId}/symptoms`, payload),
 };
 
 export const cycles = {

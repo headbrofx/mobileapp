@@ -1,8 +1,10 @@
 # Afya Nyumbani — Backend API
 
 Backend engine for the Afya Nyumbani home-care platform (Dar es Salaam,
-Tanzania). No UI yet, on purpose — architecture, database, business logic,
-security and integrations first; UI/UX comes once the engine is stable.
+Tanzania). Built backend-first on purpose — architecture, database, business
+logic and security before any screen. The engine is now stable and the
+mobile app lives in [`mobile/`](mobile), an Expo app that talks to the
+deployed API.
 
 **Status: Phase 0 (Foundation & Architecture) + Phase 1 (Database & Core
 Data Model) + Phase 2 (Authentication & Authorization) + Phase 3 (Client
@@ -449,7 +451,8 @@ src/
   services/           auth, token, session, staff, audit, familyMember, healthProfile, vitals, timeline, insights, symptom, symptomRules, symptomTrends, symptomCatalog, booking, bookingStateMachine, staffMatch, visit, location
   validators/         auth, familyMember, healthProfile, vitals, symptom, booking, staff, visit, location (Zod schemas)
   utils/              apiResponse.js, appError.js, password.js, hash.js, otp.js, vitalsRanges.js, geo.js
-tests/                Jest + Supertest (218 tests)
+tests/                Jest + Supertest (241 tests)
+mobile/               Expo app — screens in app/, API client in lib/
 ```
 
 ## What's built in Phase 8 — Afya AI
@@ -696,4 +699,8 @@ names a route that no longer exists.
   to schedule locally.
 - **No language model.** Afya AI answers from vetted text on purpose —
   see the Phase 8 section.
-- **No UI.** That was always the plan: engine first.
+- **No iOS build.** The Expo app is configured for both, but only
+  Android has been bundled and there is no Apple developer account.
+- **Not on Play Store.** The app runs today through Expo Go. Listing it
+  needs a Google Play developer account, which costs money the business
+  has not spent yet.
