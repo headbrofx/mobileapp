@@ -48,8 +48,8 @@ export default function AppLayout() {
         drawerLabelStyle: { fontSize: 15 },
       }}
     >
-      <Drawer.Screen name="home" options={{ drawerLabel: 'Mwanzo', title: 'Afya Nyumbani' }} />
-      <Drawer.Screen name="book" options={{ drawerLabel: 'Omba muuguzi', title: 'Omba muuguzi' }} />
+      {/* The four main destinations carry their own tab bar. */}
+      <Drawer.Screen name="(tabs)" options={{ drawerLabel: 'Mwanzo', title: 'Afya Nyumbani', headerShown: false }} />
       <Drawer.Screen name="ask" options={{ drawerLabel: 'Afya AI', title: 'Afya AI' }} />
       <Drawer.Screen name="symptoms" options={{ drawerLabel: 'Ripoti dalili', title: 'Ripoti dalili' }} />
       <Drawer.Screen name="family" options={{ drawerLabel: 'Familia yangu', title: 'Familia yangu' }} />

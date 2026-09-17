@@ -9,9 +9,9 @@ import {
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { bookings, familyMembers, services as servicesApi } from '../../lib/api';
-import { Button, Card, ErrorBox, Field } from '../../lib/ui';
-import { colors, radius, spacing } from '../../lib/theme';
+import { bookings, familyMembers, services as servicesApi } from '../../../lib/api';
+import { Button, Card, ErrorBox, Field } from '../../../lib/ui';
+import { colors, radius, spacing } from '../../../lib/theme';
 
 // Requesting a home visit.
 //
