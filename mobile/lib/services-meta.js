@@ -37,6 +37,29 @@ function hash(text = '') {
   return total;
 }
 
+// Photographs, where there is one.
+//
+// require() paths have to be static — the bundler resolves them at
+// build time, so a path built from a variable resolves to nothing. A
+// map it is.
+//
+// A service with no photograph yet returns null and the screen falls
+// back to its colour and icon, which is also what happens when the
+// catalogue gains a service before anybody has photographed it.
+const IMAGES = {
+  'Home Nursing': require('../assets/services/home-nursing.jpg'),
+  'Elderly Care': require('../assets/services/elderly-care.jpg'),
+  'Wound Care': require('../assets/services/wound-care.jpg'),
+  'Postnatal Care': require('../assets/services/postnatal-care.jpg'),
+  'Health Education': require('../assets/services/health-education.jpg'),
+  'Follow-up Visit': require('../assets/services/follow-up-visit.jpg'),
+  'Medication Administration': require('../assets/services/medication-administration.jpg'),
+};
+
+export function serviceImage(name) {
+  return IMAGES[name] ?? null;
+}
+
 export function serviceMeta(name) {
   const known = META[name];
   if (known) return known;

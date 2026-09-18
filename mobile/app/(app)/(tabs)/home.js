@@ -19,7 +19,7 @@ import {
 import { useSession } from '../../../lib/session';
 import { ErrorBox, MenuButton } from '../../../lib/ui';
 import { colors, font, radius, shadow, spacing } from '../../../lib/theme';
-import { serviceColour, serviceIcon } from '../../../lib/services-meta';
+import { serviceColour, serviceIcon, serviceImage } from '../../../lib/services-meta';
 
 // The home screen, matched to the supplied design element for element:
 // gradient hero with logo, tagline and bell; the full-width booking
@@ -171,6 +171,16 @@ export default function Home() {
               style={({ pressed }) => [styles.tileWrap, pressed && styles.pressed]}
             >
               <View style={[styles.tile, { backgroundColor: serviceColour(service.name) }]}>
+                {serviceImage(service.name) ? (
+                  <Image
+                    source={serviceImage(service.name)}
+                    style={styles.tilePhoto}
+                    resizeMode="cover"
+                  />
+                ) : null}
+                {/* A wash over the photograph, so the name stays
+                    readable whatever the picture underneath is doing. */}
+                <View style={styles.tileScrim} />
                 <View style={styles.tileIcon}>
                   <Ionicons name={serviceIcon(service.name)} size={19} color="#FFFFFF" />
                 </View>
@@ -188,11 +198,19 @@ export default function Home() {
             accessibilityRole="button"
             style={({ pressed }) => [styles.featured, pressed && styles.pressed]}
           >
-            {/* The design has a photograph here. Until there is one, the
-                service's own tile colour fills the same shape. */}
-            <View style={[styles.featuredImage, { backgroundColor: featuredColour }]}>
-              <Ionicons name={serviceIcon(featured.name)} size={30} color="#FFFFFF" />
-            </View>
+            {serviceImage(featured.name) ? (
+              <Image
+                source={serviceImage(featured.name)}
+                style={styles.featuredImage}
+                resizeMode="cover"
+              />
+            ) : (
+              <View
+                style={[styles.featuredImage, styles.featuredFallback, { backgroundColor: featuredColour }]}
+              >
+                <Ionicons name={serviceIcon(featured.name)} size={30} color="#FFFFFF" />
+              </View>
+            )}
 
             <View style={styles.featuredText}>
               <Text style={styles.featuredLabel}>Huduma maalum</Text>
@@ -368,9 +386,14 @@ const styles = StyleSheet.create({
   tile: {
     borderRadius: radius.lg,
     padding: spacing.sm,
-    minHeight: 96,
+    minHeight: 112,
     justifyContent: 'space-between',
+    // The photograph is positioned absolutely inside, so it has to be
+    // clipped to the rounded corner rather than spilling past it.
+    overflow: 'hidden',
   },
+  tilePhoto: { ...StyleSheet.absoluteFillObject, width: undefined, height: undefined },
+  tileScrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(8,32,25,0.42)' },
   tileIcon: {
     width: 32,
     height: 32,
@@ -397,9 +420,8 @@ const styles = StyleSheet.create({
     width: 74,
     height: 74,
     borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
+  featuredFallback: { alignItems: 'center', justifyContent: 'center' },
   featuredText: { flex: 1 },
   featuredLabel: { fontSize: 11, color: colors.primary, fontFamily: font.bold },
   featuredTitle: { fontSize: 16, fontFamily: font.extrabold, color: colors.text, marginTop: 1 },

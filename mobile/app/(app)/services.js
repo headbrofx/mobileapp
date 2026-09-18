@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { services as servicesApi } from '../../lib/api';
 import { Card, ErrorBox } from '../../lib/ui';
 import { colors, font, radius, shadow, spacing } from '../../lib/theme';
-import { serviceColour, serviceIcon } from '../../lib/services-meta';
+import { serviceColour, serviceIcon, serviceImage } from '../../lib/services-meta';
 
 // The design's "Select a Service" screen: the whole catalogue, one row
 // each, readable before anything is chosen.
 //
-// The design puts a photograph on every row. There is none for any
-// service, so each row carries its colour block and icon at the same
-// size and radius — a real photograph replaces it without the row
-// changing shape.
+// The design puts a photograph on every row, and now most of them have
+// one. A service still waiting for its picture keeps the colour block
+// and icon at exactly the same size and radius, so a row looks
+// deliberate either way rather than broken.
 
 
 const tzs = (amount) => `TZS ${Number(amount).toLocaleString('en-US')}`;
@@ -53,9 +53,13 @@ export default function Services() {
             accessibilityRole="button"
             style={({ pressed }) => [styles.row, pressed && styles.pressed]}
           >
-            <View style={[styles.thumb, { backgroundColor: serviceColour(service.name) }]}>
-              <Ionicons name={serviceIcon(service.name)} size={26} color="#FFFFFF" />
-            </View>
+            {serviceImage(service.name) ? (
+              <Image source={serviceImage(service.name)} style={styles.thumb} resizeMode="cover" />
+            ) : (
+              <View style={[styles.thumb, styles.thumbFallback, { backgroundColor: serviceColour(service.name) }]}>
+                <Ionicons name={serviceIcon(service.name)} size={26} color="#FFFFFF" />
+              </View>
+            )}
 
             <View style={styles.rowText}>
               <Text style={styles.name}>{service.name}</Text>
@@ -123,12 +127,11 @@ const styles = StyleSheet.create({
     ...shadow.card,
   },
   thumb: {
-    width: 62,
-    height: 62,
+    width: 74,
+    height: 74,
     borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
+  thumbFallback: { alignItems: 'center', justifyContent: 'center' },
   rowText: { flex: 1 },
   name: { fontSize: 15, fontFamily: font.bold, color: colors.text },
   muted: { fontSize: 13, color: colors.muted, marginTop: 2, lineHeight: 18 },
