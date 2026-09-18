@@ -43,12 +43,13 @@ function hash(text = '') {
 // build time, so a path built from a variable resolves to nothing. A
 // map it is.
 //
-// A service with no photograph yet returns null and the screen falls
-// back to its colour and icon, which is also what happens when the
-// catalogue gains a service before anybody has photographed it.
+// All eight services have one. A service the catalogue gains later
+// returns null and the screen falls back to its colour and icon, which
+// is why that path stays.
 const IMAGES = {
   'Home Nursing': require('../assets/services/home-nursing.jpg'),
   'Elderly Care': require('../assets/services/elderly-care.jpg'),
+  Physiotherapy: require('../assets/services/physiotherapy.jpg'),
   'Wound Care': require('../assets/services/wound-care.jpg'),
   'Postnatal Care': require('../assets/services/postnatal-care.jpg'),
   'Health Education': require('../assets/services/health-education.jpg'),
