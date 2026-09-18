@@ -22,8 +22,12 @@ export default function RootLayout() {
             }}
           >
             <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="login" options={{ title: 'Ingia' }} />
-            <Stack.Screen name="register" options={{ title: 'Jisajili' }} />
+            {/* The sign-in screens carry their own brand header and
+                back arrow, so a second green bar above them would be one
+                header too many. */}
+            <Stack.Screen name="login" options={{ headerShown: false }} />
+            <Stack.Screen name="register" options={{ headerShown: false }} />
+            <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
             {/* The signed-in half owns its own header, from the drawer. */}
             <Stack.Screen name="(app)" options={{ headerShown: false }} />
           </Stack>

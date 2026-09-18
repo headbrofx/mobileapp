@@ -24,9 +24,18 @@ export function setSessionLostHandler(handler) {
   onSessionLost = handler;
 }
 
-export async function saveTokens({ accessToken, refreshToken }) {
+// `remember` decides whether the refresh token is kept at all. Without
+// it the session lasts as long as the short-lived access token and then
+// ends — which is what somebody unticking "remember me" on a shared
+// phone is actually asking for. Ticking it is the default, and the
+// refresh token is what lets the app reopen without a login.
+export async function saveTokens({ accessToken, refreshToken }, { remember = true } = {}) {
   await setItem(ACCESS_KEY, accessToken);
-  await setItem(REFRESH_KEY, refreshToken);
+  if (remember && refreshToken) {
+    await setItem(REFRESH_KEY, refreshToken);
+  } else {
+    await deleteItem(REFRESH_KEY);
+  }
 }
 
 export async function clearTokens() {
@@ -136,6 +145,23 @@ export const auth = {
     send('/api/auth/login', { method: 'POST', body: { identifier, password }, auth: false }),
   me: () => api.get('/api/auth/me'),
   logout: () => api.post('/api/auth/logout'),
+  // The endpoint is real and records the request, but nothing delivers
+  // the token yet — there is no SMS or email gateway, so it reaches the
+  // server log and no further. The screen says so rather than implying
+  // a message is on its way.
+  forgotPassword: (identifier) =>
+    send('/api/auth/password/forgot', { method: 'POST', body: { identifier }, auth: false }),
+};
+
+export const clientProfile = {
+  get: () => api.get('/api/client-profile'),
+  update: (payload) => api.patch('/api/client-profile', payload),
+};
+
+export const healthProfile = {
+  get: (memberId) => api.get(`/api/family-members/${memberId}/health-profile`),
+  update: (memberId, payload) =>
+    api.patch(`/api/family-members/${memberId}/health-profile`, payload),
 };
 
 export const familyMembers = {

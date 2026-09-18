@@ -96,6 +96,22 @@ module.exports = {
     description: 'Where a booking’s serviceId comes from. Inactive services are not listed.',
   },
 
+  // --- Client profile ---
+  'GET /api/client-profile/': {
+    tag: 'Bookings',
+    summary: 'Your own address and emergency contact',
+    description:
+      'Always the caller’s own profile — there is no id in the path, so there is none to swap for somebody else’s.',
+    roles: ['CLIENT'],
+  },
+  'PATCH /api/client-profile/': {
+    tag: 'Bookings',
+    summary: 'Save your address and emergency contact',
+    description:
+      'Fields left out are left alone. Recorded in the audit trail: this says where a nurse will be sent and who gets called in a crisis.',
+    roles: ['CLIENT'],
+  },
+
   // --- Bookings ---
   'POST /api/bookings/': { tag: 'Bookings', summary: 'Request a home visit', roles: ['CLIENT'] },
   'GET /api/bookings/': { tag: 'Bookings', summary: 'List bookings, scoped to your role' },

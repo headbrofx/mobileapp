@@ -49,9 +49,9 @@ export function SessionProvider({ children }) {
     };
   }, []);
 
-  const signIn = useCallback(async (identifier, password) => {
+  const signIn = useCallback(async (identifier, password, { remember = true } = {}) => {
     const data = await auth.login(identifier, password);
-    await saveTokens(data.tokens);
+    await saveTokens(data.tokens, { remember });
     setUser(data.user);
   }, []);
 
