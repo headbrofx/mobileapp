@@ -7,6 +7,7 @@ const { authLimiter } = require('../middleware/rateLimiter');
 const {
   registerSchema,
   loginSchema,
+  googleSignInSchema,
   refreshSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
@@ -20,6 +21,12 @@ const router = Router();
 // --- Sign up / sign in ---
 router.post('/register', authLimiter, validate(registerSchema), controller.register);
 router.post('/login', authLimiter, validate(loginSchema), controller.login);
+router.post(
+  '/google',
+  authLimiter,
+  validate(googleSignInSchema),
+  controller.googleSignIn
+);
 router.post('/refresh', authLimiter, validate(refreshSchema), controller.refresh);
 router.get('/me', authenticate, controller.me);
 

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -13,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSession } from '../lib/session';
+import { GoogleButton } from '../lib/google';
 import { ErrorBox } from '../lib/ui';
 import {
   BrandFooter,
@@ -20,7 +20,6 @@ import {
   CheckBox,
   GradientButton,
   IconField,
-  SocialRow,
 } from '../lib/auth-ui';
 import { colors, spacing } from '../lib/theme';
 
@@ -33,13 +32,18 @@ import { colors, spacing } from '../lib/theme';
 // rather than showing as a rectangle. Changing it again is one file,
 // assets/hero.png, and no code.
 //
-// Google and Facebook are drawn because the design has them. They
-// cannot sign anybody in yet: the API has no OAuth, no provider, no
-// callback. Pressing one says so rather than failing quietly.
+// Google sign-in is real. The app asks Google for an ID token and
+// hands it to the API, which verifies the signature and the audience
+// before believing it.
+//
+// A Google account the API has not seen comes back 409 PHONE_REQUIRED
+// rather than being created, because a home-visit service cannot hold a
+// client it has no number for and Google supplies none. That is the
+// second panel below: same token, plus the number.
 
 export default function Login() {
   const router = useRouter();
-  const { signIn } = useSession();
+  const { signIn, signInWithGoogle } = useSession();
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -47,11 +51,46 @@ export default function Login() {
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
 
+  // Set once Google has verified somebody the API has never seen: their
+  // token, waiting for a phone number before an account can exist.
+  const [pendingGoogle, setPendingGoogle] = useState(null);
+  const [googlePhone, setGooglePhone] = useState('');
+
   async function submit() {
     setError(null);
     setBusy(true);
     try {
       await signIn(identifier.trim(), password, { remember });
+      router.replace('/home');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Called with a token Google has already issued. A new account comes
+  // back 409 PHONE_REQUIRED instead of being created, and that is not a
+  // failure — it is the second half of signing up.
+  async function withGoogleToken(idToken) {
+    setError(null);
+    try {
+      await signInWithGoogle(idToken);
+      router.replace('/home');
+    } catch (err) {
+      if (err.code === 'PHONE_REQUIRED') {
+        setPendingGoogle({ idToken, email: err.errors?.email, name: err.errors?.name });
+        return;
+      }
+      setError(err.message);
+    }
+  }
+
+  async function finishGoogle() {
+    setError(null);
+    setBusy(true);
+    try {
+      await signInWithGoogle(pendingGoogle.idToken, googlePhone.replace(/\s/g, ''));
       router.replace('/home');
     } catch (err) {
       setError(err.message);
@@ -131,14 +170,41 @@ export default function Login() {
             disabled={!identifier || !password}
           />
 
-          <SocialRow
-            onUnavailable={(provider) =>
-              Alert.alert(
-                `${provider} bado`,
-                `Kuingia kwa ${provider} hakujawashwa bado. Tumia namba yako ya simu.`
-              )
-            }
-          />
+          {pendingGoogle ? (
+            <View style={styles.pending}>
+              <Text style={styles.pendingTitle}>Karibu, {pendingGoogle.name}</Text>
+              <Text style={styles.pendingText}>
+                Tunahitaji namba yako ya simu ili muuguzi ajue pa kukufuata.
+              </Text>
+
+              <IconField
+                label="Namba ya simu"
+                icon="call-outline"
+                placeholder="0712 345 678"
+                value={googlePhone}
+                onChangeText={setGooglePhone}
+                keyboardType="phone-pad"
+                autoComplete="tel"
+              />
+
+              <GradientButton
+                title="Maliza kujisajili"
+                onPress={finishGoogle}
+                loading={busy}
+                disabled={googlePhone.trim().length < 10}
+              />
+
+              <Pressable
+                onPress={() => setPendingGoogle(null)}
+                accessibilityRole="button"
+                style={styles.cancelGoogle}
+              >
+                <Text style={styles.muted}>Ghairi</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <GoogleButton onToken={withGoogleToken} onError={setError} />
+          )}
 
           <View style={styles.registerRow}>
             <Text style={styles.muted}>Huna akaunti? </Text>
@@ -209,4 +275,14 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   muted: { color: colors.muted, fontSize: 13 },
+
+  pending: {
+    marginTop: spacing.lg,
+    padding: spacing.md,
+    borderRadius: 14,
+    backgroundColor: colors.primaryLight,
+  },
+  pendingTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
+  pendingText: { fontSize: 13, color: colors.muted, marginTop: 2, marginBottom: spacing.md, lineHeight: 18 },
+  cancelGoogle: { alignItems: 'center', paddingTop: spacing.sm },
 });

@@ -68,15 +68,11 @@ export function BrandHeader({ onBack }) {
   );
 }
 
-// The "or continue with" divider and the two provider buttons the
-// design draws under the sign-in form.
+// The "or continue with" divider and the Google button.
 //
-// The API has no OAuth — no provider configured, no callback, nothing —
-// so neither of these can sign anybody in yet. The owner asked for the
-// design exactly, so they are drawn exactly, and pressing one says
-// plainly that it is not switched on rather than failing silently or
-// pretending to work.
-export function SocialRow({ onUnavailable }) {
+// Facebook was here because the design had it. It is gone at the
+// owner's request — one provider that works beats two that are drawn.
+export function SocialRow({ onPress, busy }) {
   return (
     <View>
       <View style={styles.dividerRow}>
@@ -85,22 +81,21 @@ export function SocialRow({ onUnavailable }) {
         <View style={styles.dividerLine} />
       </View>
 
-      <View style={styles.socialRow}>
-        {[
-          { key: 'Google', icon: 'logo-google', colour: '#DB4437' },
-          { key: 'Facebook', icon: 'logo-facebook', colour: '#1877F2' },
-        ].map((provider) => (
-          <Pressable
-            key={provider.key}
-            onPress={() => onUnavailable(provider.key)}
-            accessibilityRole="button"
-            style={({ pressed }) => [styles.social, pressed && styles.pressed]}
-          >
-            <Ionicons name={provider.icon} size={19} color={provider.colour} />
-            <Text style={styles.socialText}>{provider.key}</Text>
-          </Pressable>
-        ))}
-      </View>
+      <Pressable
+        onPress={onPress}
+        disabled={busy}
+        accessibilityRole="button"
+        style={({ pressed }) => [styles.social, pressed && styles.pressed, busy && styles.disabled]}
+      >
+        {busy ? (
+          <ActivityIndicator color={colors.muted} />
+        ) : (
+          <>
+            <Ionicons name="logo-google" size={19} color="#DB4437" />
+            <Text style={styles.socialText}>Endelea na Google</Text>
+          </>
+        )}
+      </Pressable>
     </View>
   );
 }
@@ -310,9 +305,7 @@ const styles = StyleSheet.create({
   dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
   dividerText: { fontSize: 12, color: colors.muted },
 
-  socialRow: { flexDirection: 'row', gap: spacing.sm },
   social: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

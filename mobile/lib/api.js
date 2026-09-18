@@ -151,6 +151,14 @@ export const auth = {
   // a message is on its way.
   forgotPassword: (identifier) =>
     send('/api/auth/password/forgot', { method: 'POST', body: { identifier }, auth: false }),
+  // phone is only sent on the second call, after the API has answered
+  // 409 PHONE_REQUIRED for a Google account it has never seen.
+  google: (idToken, phone) =>
+    send('/api/auth/google', {
+      method: 'POST',
+      body: phone ? { idToken, phone } : { idToken },
+      auth: false,
+    }),
 };
 
 export const clientProfile = {

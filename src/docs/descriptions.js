@@ -34,6 +34,13 @@ module.exports = {
   // --- Auth ---
   'POST /api/auth/register': { tag: 'Auth', summary: 'Create a client account', auth: false },
   'POST /api/auth/login': { tag: 'Auth', summary: 'Sign in and receive tokens', auth: false },
+  'POST /api/auth/google': {
+    tag: 'Auth',
+    summary: 'Sign in with a Google ID token',
+    description:
+      'Send { idToken }. A known Google account, or one whose verified email already has an account here, signs in straight away. A new one comes back 409 PHONE_REQUIRED with the email and name — call again with { idToken, phone } to finish. The number is required because it is how a nurse is sent to the right house.',
+    auth: false,
+  },
   'POST /api/auth/refresh': {
     tag: 'Auth',
     summary: 'Exchange a refresh token for a new pair',

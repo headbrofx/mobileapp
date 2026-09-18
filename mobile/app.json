@@ -36,11 +36,17 @@
           "resizeMode": "contain",
           "backgroundColor": "#EFE8E0"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "scheme": "afyanyumbani",
     "extra": {
-      "apiUrl": "https://afya-nyumbani-api.onrender.com"
+      "apiUrl": "https://afya-nyumbani-api.onrender.com",
+      "googleClientIds": {
+        "web": "",
+        "android": "",
+        "ios": ""
+      }
     }
   }
 }

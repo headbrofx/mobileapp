@@ -55,6 +55,12 @@ export function SessionProvider({ children }) {
     setUser(data.user);
   }, []);
 
+  const signInWithGoogle = useCallback(async (idToken, phone) => {
+    const data = await auth.google(idToken, phone);
+    await saveTokens(data.tokens);
+    setUser(data.user);
+  }, []);
+
   const register = useCallback(async (payload) => {
     const data = await auth.register(payload);
     await saveTokens(data.tokens);
@@ -73,8 +79,8 @@ export function SessionProvider({ children }) {
   }, [signOutLocally]);
 
   const value = useMemo(
-    () => ({ user, loading, signIn, register, signOut }),
-    [user, loading, signIn, register, signOut]
+    () => ({ user, loading, signIn, signInWithGoogle, register, signOut }),
+    [user, loading, signIn, signInWithGoogle, register, signOut]
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

@@ -36,6 +36,16 @@ module.exports = {
     max: parseInt(process.env.RATE_LIMIT_MAX, 10) || 100,
   },
 
+  // Every OAuth client id the app ships with — web, Android and iOS
+  // each get their own from Google, and a token minted for any of them
+  // is valid for this backend. Verification checks the token's audience
+  // against this list, which is the step that stops somebody presenting
+  // a Google token issued to an entirely different app.
+  googleClientIds: (process.env.GOOGLE_CLIENT_IDS || '')
+    .split(',')
+    .map((id) => id.trim())
+    .filter(Boolean),
+
   corsOrigins: (process.env.CORS_ORIGINS || '*')
     .split(',')
     .map((origin) => origin.trim())

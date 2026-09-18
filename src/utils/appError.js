@@ -30,8 +30,12 @@ class AppError extends Error {
     return new AppError(message, 404, 'NOT_FOUND');
   }
 
-  static conflict(message = 'Conflict') {
-    return new AppError(message, 409, 'CONFLICT');
+  // Takes an optional code and payload, because some conflicts are a
+  // step in a flow rather than a dead end — Google sign-in returns one
+  // saying which detail is still missing, and the app needs to tell
+  // that apart from an ordinary clash.
+  static conflict(message = 'Conflict', code = 'CONFLICT', errors = null) {
+    return new AppError(message, 409, code, errors);
   }
 }
 

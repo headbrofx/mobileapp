@@ -12,6 +12,15 @@ async function register(req, res, next) {
   }
 }
 
+async function googleSignIn(req, res, next) {
+  try {
+    const data = await authService.googleSignIn(req.body, req);
+    return success(res, { message: 'Signed in with Google', data });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function login(req, res, next) {
   try {
     const result = await authService.login(req.body, req);
@@ -116,6 +125,7 @@ async function me(req, res, next) {
 module.exports = {
   register,
   login,
+  googleSignIn,
   refresh,
   logout,
   logoutAll,

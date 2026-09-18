@@ -21,6 +21,14 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+const googleSignInSchema = z.object({
+  idToken: z.string().min(20, 'idToken is required'),
+  // Only sent on the second call, once the app has been told a number
+  // is still needed. Same rule as registration, so Google cannot be a
+  // way in past the phone format.
+  phone: z.string().regex(phoneRegex, 'Enter a valid Tanzanian phone number').optional(),
+});
+
 const refreshSchema = z.object({
   refreshToken: z.string().min(10, 'refreshToken is required'),
 });
@@ -46,6 +54,7 @@ const verifyConfirmSchema = z.object({
 module.exports = {
   registerSchema,
   loginSchema,
+  googleSignInSchema,
   refreshSchema,
   forgotPasswordSchema,
   resetPasswordSchema,

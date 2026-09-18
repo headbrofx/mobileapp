@@ -21,7 +21,9 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     toSafeJSON() {
-      const { passwordHash, ...safe } = this.toJSON();
+      // googleSub goes out with the hash. It is an account identifier
+      // at Google, and nothing on the client has any use for it.
+      const { passwordHash, googleSub, ...safe } = this.toJSON();
       return safe;
     }
   }
@@ -47,10 +49,21 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         unique: true,
       },
+      // Null for an account that signs in with Google and never chose
+      // a password. The login path checks for that rather than
+      // comparing a password against nothing.
       passwordHash: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         field: 'password_hash',
+      },
+      // Google's subject id, which survives the person changing their
+      // email address. Matching on email alone would lose them.
+      googleSub: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true,
+        field: 'google_sub',
       },
       role: {
         type: DataTypes.ENUM('CLIENT', 'STAFF', 'ADMIN'),

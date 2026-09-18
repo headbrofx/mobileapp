@@ -5,6 +5,7 @@ const { User, Staff, ClientProfile, FamilyMember, PasswordResetToken, Verificati
 const { hashPassword, comparePassword } = require('../utils/password');
 const { sha256, randomToken } = require('../utils/hash');
 const { generateOtp } = require('../utils/otp');
+const googleService = require('./google.service');
 const tokenService = require('./token.service');
 const sessionService = require('./session.service');
 const { logAudit } = require('./audit.service');
@@ -95,6 +96,90 @@ async function register({ name, phone, email, password, role, specialty }, req) 
   };
 }
 
+// Sign in with Google.
+//
+// Three cases, in the order they are tried:
+//
+//   1. We have seen this Google account before — match on the subject
+//      id, not the email, because the subject survives the person
+//      changing their address and the email does not.
+//   2. An account already exists with the same verified email. Link it,
+//      so somebody who registered by phone and later presses the Google
+//      button lands in their own account rather than a second one.
+//   3. Nobody. Then we need a phone number before an account can exist,
+//      and the caller is told that rather than getting a half-account.
+//
+// Case 3 is why this is not one tap for new users. The phone number is
+// how the office rings a client and how a nurse finds the house, so a
+// home-visit service cannot hold accounts without one. Google supplies
+// an email and a name and no number.
+async function googleSignIn({ idToken, phone }, req) {
+  const profile = await googleService.verifyIdToken(idToken);
+
+  const linked = await User.findOne({ where: { googleSub: profile.sub } });
+  if (linked) {
+    if (linked.status === 'SUSPENDED') throw AppError.forbidden('Account suspended');
+    const tokens = await issueTokenPair(linked, req);
+    await logAudit({ userId: linked.id, action: 'LOGIN_SUCCESS', req, metadata: { via: 'google' } });
+    return { user: linked.toSafeJSON(), tokens };
+  }
+
+  const byEmail = await User.findOne({ where: { email: profile.email } });
+  if (byEmail) {
+    if (byEmail.status === 'SUSPENDED') throw AppError.forbidden('Account suspended');
+    byEmail.googleSub = profile.sub;
+    await byEmail.save();
+    const tokens = await issueTokenPair(byEmail, req);
+    await logAudit({
+      userId: byEmail.id,
+      action: 'GOOGLE_LINKED',
+      req,
+      metadata: { email: profile.email },
+    });
+    return { user: byEmail.toSafeJSON(), tokens };
+  }
+
+  if (!phone) {
+    throw AppError.conflict(
+      'A phone number is needed to finish creating this account',
+      'PHONE_REQUIRED',
+      { email: profile.email, name: profile.name }
+    );
+  }
+
+  const phoneTaken = await User.findOne({ where: { phone } });
+  if (phoneTaken) {
+    throw AppError.conflict('An account with this phone number already exists');
+  }
+
+  // No password: this account has no way in except Google, and storing
+  // a random hash would make it look like it had one.
+  const user = await User.create({
+    name: profile.name,
+    phone,
+    email: profile.email,
+    passwordHash: null,
+    googleSub: profile.sub,
+    role: 'CLIENT',
+    status: 'PENDING_VERIFICATION',
+  });
+
+  // The same two rows register() creates, so a Google account is not a
+  // second-class one missing its own health record.
+  const clientProfile = await ClientProfile.create({ userId: user.id });
+  await FamilyMember.create({
+    clientProfileId: clientProfile.id,
+    name: user.name,
+    relationship: 'SELF',
+    isPrimaryAccountHolder: true,
+  });
+
+  const tokens = await issueTokenPair(user, req);
+  await logAudit({ userId: user.id, action: 'REGISTER', req, metadata: { via: 'google' } });
+
+  return { user: user.toSafeJSON(), tokens };
+}
+
 async function login({ identifier, password }, req) {
   const user = await User.findOne({
     where: { [Op.or]: [{ phone: identifier }, { email: identifier }] },
@@ -102,6 +187,13 @@ async function login({ identifier, password }, req) {
   if (!user) {
     await logAudit({ action: 'LOGIN_FAILED', req, metadata: { identifier, reason: 'not_found' } });
     throw AppError.unauthorized('Invalid credentials');
+  }
+
+  // An account created through Google has no password. Comparing
+  // against null would throw, and inventing one would let anybody in.
+  if (!user.passwordHash) {
+    await logAudit({ userId: user.id, action: 'LOGIN_FAILED', req, metadata: { reason: 'google_only' } });
+    throw AppError.badRequest('This account signs in with Google');
   }
 
   const valid = await comparePassword(password, user.passwordHash);
@@ -299,6 +391,7 @@ async function confirmVerification(req, { channel, code }) {
 module.exports = {
   register,
   login,
+  googleSignIn,
   refresh,
   logout,
   logoutAll,
