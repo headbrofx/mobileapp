@@ -3,8 +3,9 @@ import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } 
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { bookings as bookingsApi } from '../../../lib/api';
-import { Card, ErrorBox } from '../../../lib/ui';
+import { Card, ErrorBox, ScreenHeader } from '../../../lib/ui';
 import { colors, radius, shadow, spacing } from '../../../lib/theme';
+import { serviceColour, serviceIcon } from '../../../lib/services-meta';
 
 // "My Care" from the design: what is coming, who is coming, how far
 // along it is, and what has already happened.
@@ -142,8 +143,7 @@ export default function Appointments() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <Text style={styles.title}>Ziara zangu</Text>
-      <Text style={styles.subtitle}>Huduma zako na safari ya matibabu</Text>
+      <ScreenHeader title="Ziara zangu" subtitle="Huduma zako na safari ya matibabu" />
 
       <ErrorBox error={error} />
 
@@ -226,8 +226,8 @@ function FeaturedVisit({ visit, busy, onSupport, onCancel }) {
       </View>
 
       <DetailRow
-        icon="medkit"
-        tint="#3B82F6"
+        icon={serviceIcon(visit.service?.name)}
+        tint={serviceColour(visit.service?.name)}
         title={visit.service?.name ?? 'Huduma ya nyumbani'}
         sub={`${dateSw(visit.scheduledAt)} · saa ${timeSw(visit.scheduledAt)}`}
       />
@@ -317,7 +317,7 @@ function CompactVisit({ visit, past }) {
       <View style={styles.row}>
         <View style={[styles.icon, past && styles.iconMuted]}>
           <Ionicons
-            name={past ? (done ? 'checkmark' : 'close') : 'medkit'}
+            name={past ? (done ? 'checkmark' : 'close') : serviceIcon(visit.service?.name)}
             size={18}
             color={past && !done ? colors.muted : colors.primary}
           />

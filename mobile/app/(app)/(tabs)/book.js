@@ -11,8 +11,9 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { bookings, familyMembers, services as servicesApi } from '../../../lib/api';
-import { Card, ErrorBox, Field } from '../../../lib/ui';
-import { colors, radius, shadow, spacing, tileColors } from '../../../lib/theme';
+import { Card, ErrorBox, Field, MenuButton } from '../../../lib/ui';
+import { colors, radius, shadow, spacing } from '../../../lib/theme';
+import { serviceColour, serviceIcon, serviceTint } from '../../../lib/services-meta';
 
 // Requesting a home visit, as the design lays it out: four steps with a
 // stepper across the top — service, details, location, confirm.
@@ -25,17 +26,6 @@ import { colors, radius, shadow, spacing, tileColors } from '../../../lib/theme'
 
 const STEPS = ['Huduma', 'Maelezo', 'Mahali', 'Thibitisha'];
 
-const ICONS = {
-  'Home Nursing': 'medkit-outline',
-  'Elderly Care': 'people-outline',
-  Physiotherapy: 'fitness-outline',
-  'Wound Care': 'bandage-outline',
-  'Postnatal Care': 'heart-outline',
-  'Health Education': 'school-outline',
-  'Follow-up Visit': 'repeat-outline',
-  'Medication Administration': 'medical-outline',
-};
-const iconFor = (name) => ICONS[name] ?? 'ellipse-outline';
 
 const WHEN_OPTIONS = [
   { label: 'Kesho asubuhi', hoursAhead: 24, hour: 9 },
@@ -130,7 +120,10 @@ export default function Book() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Omba ziara ya nyumbani</Text>
+        <View style={styles.headerTop}>
+          <MenuButton />
+          <Text style={styles.title}>Omba ziara ya nyumbani</Text>
+        </View>
         <Stepper step={step} />
       </View>
 
@@ -147,11 +140,10 @@ export default function Book() {
               <>
                 <Text style={styles.stepTitle}>Chagua huduma</Text>
                 <Text style={styles.stepHint}>Ni huduma gani unayohitaji?</Text>
-                {catalogue.map((item, index) => (
+                {catalogue.map((item) => (
                   <ServiceRow
                     key={item.id}
                     service={item}
-                    index={index}
                     selected={service?.id === item.id}
                     onPress={() => setService(item)}
                   />
@@ -222,8 +214,8 @@ export default function Book() {
 
                 <Card style={styles.summary}>
                   <View style={styles.summaryHead}>
-                    <View style={[styles.rowIcon, { backgroundColor: tileColors[0].bg }]}>
-                      <Ionicons name={iconFor(service?.name)} size={20} color="#FFFFFF" />
+                    <View style={[styles.rowIcon, { backgroundColor: serviceColour(service?.name) }]}>
+                      <Ionicons name={serviceIcon(service?.name)} size={20} color="#FFFFFF" />
                     </View>
                     <View style={styles.rowText}>
                       <Text style={styles.summaryTitle}>{service?.name}</Text>
@@ -332,8 +324,8 @@ function Stepper({ step }) {
   );
 }
 
-function ServiceRow({ service, index, selected, onPress }) {
-  const tile = tileColors[index % tileColors.length];
+function ServiceRow({ service, selected, onPress }) {
+  const colour = serviceColour(service.name);
   return (
     <Pressable
       onPress={onPress}
@@ -345,8 +337,8 @@ function ServiceRow({ service, index, selected, onPress }) {
         pressed && styles.pressed,
       ]}
     >
-      <View style={[styles.rowIcon, { backgroundColor: selected ? tile.bg : tile.tint }]}>
-        <Ionicons name={iconFor(service.name)} size={20} color={selected ? '#FFFFFF' : tile.bg} />
+      <View style={[styles.rowIcon, { backgroundColor: selected ? colour : serviceTint(service.name) }]}>
+        <Ionicons name={serviceIcon(service.name)} size={20} color={selected ? '#FFFFFF' : colour} />
       </View>
       <View style={styles.rowText}>
         <Text style={styles.serviceName}>{service.name}</Text>
@@ -427,6 +419,7 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.8 },
   invisible: { opacity: 0 },
 
+  headerTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   header: {
     backgroundColor: colors.surface,
     paddingTop: spacing.md,

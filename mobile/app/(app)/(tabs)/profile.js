@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSession } from '../../../lib/session';
 import { BASE_URL } from '../../../lib/api';
-import { Card } from '../../../lib/ui';
+import { Card, MenuButton } from '../../../lib/ui';
 import { colors, radius, spacing } from '../../../lib/theme';
 
 // The fourth tab. Everything about the account, plus a way into the
@@ -14,7 +14,7 @@ import { colors, radius, spacing } from '../../../lib/theme';
 const LINKS = [
   { icon: 'people-outline', label: 'Familia yangu', href: '/family', hint: 'Wale unaowahudumia' },
   { icon: 'pulse-outline', label: 'Ripoti dalili', href: '/symptoms', hint: 'Andika unavyojisikia' },
-  { icon: 'calendar-number-outline', label: 'Mzunguko wangu', href: '/cycles', hint: 'Hedhi na makadirio' },
+  { icon: 'calendar-number-outline', label: 'Orbit', href: '/cycles', hint: 'Hedhi, kalenda na makadirio' },
   { icon: 'medical-outline', label: 'Dawa zangu', href: '/medications', hint: 'Dozi na ratiba' },
   { icon: 'receipt-outline', label: 'Ankara', href: '/invoices', hint: 'Deni na malipo' },
   { icon: 'chatbubble-ellipses-outline', label: 'Afya AI', href: '/ask', hint: 'Uliza swali' },
@@ -33,6 +33,10 @@ export default function Profile() {
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
+      <View style={styles.menuRow}>
+        <MenuButton />
+      </View>
+
       <View style={styles.header}>
         <View style={styles.avatar}>
           <Text style={styles.initials}>{initials}</Text>
@@ -97,6 +101,7 @@ export default function Profile() {
 const styles = StyleSheet.create({
   content: { padding: spacing.md, paddingBottom: spacing.xl },
 
+  menuRow: { flexDirection: 'row' },
   header: { alignItems: 'center', paddingVertical: spacing.lg },
   avatar: {
     width: 76,

@@ -6,6 +6,8 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useSidebar } from './sidebar';
 import { colors, radius, spacing } from './theme';
 
 // Small shared pieces, so five screens do not each style a button
@@ -67,6 +69,52 @@ export function Card({ children, style }) {
   return <View style={[styles.card, style]}>{children}</View>;
 }
 
+// Opens the sidebar.
+//
+// The tab screens are drawn with headerShown: false so they can have
+// the design's own headers, which left the menu with no button anywhere
+// and everything in it — Afya AI, symptoms, family, medicines, invoices
+// — effectively invisible.
+//
+// Two earlier attempts went through react-navigation's Drawer, one
+// hand-rolled and one using the library's own DrawerToggleButton.
+// Neither opened anything on web, and nor did the drawer's own header
+// toggle: the panel stayed parked off-screen and no error was thrown.
+// The sidebar is now this app's own Modal, so pressing this is a state
+// change it controls rather than an action dispatched into a navigator
+// that quietly drops it.
+
+export function MenuButton({ tint = colors.text }) {
+  const { openSidebar } = useSidebar();
+
+  return (
+    <Pressable
+      onPress={openSidebar}
+      accessibilityRole="button"
+      accessibilityLabel="Fungua menyu"
+      hitSlop={10}
+      style={({ pressed }) => [styles.menuButton, pressed && styles.menuPressed]}
+    >
+      <Ionicons name="menu" size={24} color={tint} />
+    </Pressable>
+  );
+}
+
+// The top row for a tab screen that has no header of its own: the menu
+// button, the screen's name, and whatever the screen wants on the right.
+export function ScreenHeader({ title, subtitle, right }) {
+  return (
+    <View style={styles.screenHeader}>
+      <MenuButton />
+      <View style={styles.screenHeaderText}>
+        <Text style={styles.screenTitle}>{title}</Text>
+        {subtitle ? <Text style={styles.screenSubtitle}>{subtitle}</Text> : null}
+      </View>
+      {right}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   fieldWrap: { marginBottom: spacing.md },
   label: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
@@ -105,6 +153,19 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   errorText: { color: colors.danger, fontSize: 14 },
+
+  screenHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  screenHeaderText: { flex: 1 },
+  screenTitle: { fontSize: 22, fontWeight: '800', color: colors.text },
+  screenSubtitle: { fontSize: 13, color: colors.muted, marginTop: 1 },
+
+  menuButton: { padding: 4, borderRadius: radius.sm },
+  menuPressed: { opacity: 0.6 },
 
   card: {
     backgroundColor: colors.surface,

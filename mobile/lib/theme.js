@@ -43,16 +43,9 @@ export const colors = {
   successBg: '#E6F2EE',
 };
 
-// One colour per service, so a tile is recognisable before it is read.
-// Mirrors the six-tile grid in the design.
-export const tileColors = [
-  { bg: '#3B82F6', tint: '#EAF2FE' },
-  { bg: '#0E9B77', tint: '#E6F5F1' },
-  { bg: '#F59E0B', tint: '#FEF4E6' },
-  { bg: '#8B5CF6', tint: '#F1EBFE' },
-  { bg: '#0EA5E9', tint: '#E6F5FD' },
-  { bg: '#EC4899', tint: '#FDEBF4' },
-];
+// Service colours used to live here as a list indexed by position,
+// which is how the same service ended up a different colour on each
+// screen. They now live in services-meta.js, keyed by name.
 
 export const spacing = { xs: 6, sm: 10, md: 16, lg: 24, xl: 32 };
 

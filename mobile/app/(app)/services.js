@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { services as servicesApi } from '../../lib/api';
 import { Card, ErrorBox } from '../../lib/ui';
 import { colors, radius, shadow, spacing } from '../../lib/theme';
+import { serviceColour, serviceIcon } from '../../lib/services-meta';
 
 // The design's "Select a Service" screen: the whole catalogue, one row
 // each, readable before anything is chosen.
@@ -14,19 +15,6 @@ import { colors, radius, shadow, spacing } from '../../lib/theme';
 // size and radius — a real photograph replaces it without the row
 // changing shape.
 
-const ICONS = {
-  'Home Nursing': 'medkit',
-  'Elderly Care': 'people',
-  Physiotherapy: 'fitness',
-  'Wound Care': 'bandage',
-  'Postnatal Care': 'heart',
-  'Health Education': 'school',
-  'Follow-up Visit': 'repeat',
-  'Medication Administration': 'medical',
-};
-const iconFor = (name) => ICONS[name] ?? 'ellipse';
-
-const TILES = ['#3B82F6', '#0E9B77', '#F59E0B', '#8B5CF6', '#0EA5E9', '#EC4899'];
 
 const tzs = (amount) => `TZS ${Number(amount).toLocaleString('en-US')}`;
 
@@ -65,8 +53,8 @@ export default function Services() {
             accessibilityRole="button"
             style={({ pressed }) => [styles.row, pressed && styles.pressed]}
           >
-            <View style={[styles.thumb, { backgroundColor: TILES[index % TILES.length] }]}>
-              <Ionicons name={iconFor(service.name)} size={26} color="#FFFFFF" />
+            <View style={[styles.thumb, { backgroundColor: serviceColour(service.name) }]}>
+              <Ionicons name={serviceIcon(service.name)} size={26} color="#FFFFFF" />
             </View>
 
             <View style={styles.rowText}>

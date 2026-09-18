@@ -17,8 +17,9 @@ import {
   services as servicesApi,
 } from '../../../lib/api';
 import { useSession } from '../../../lib/session';
-import { ErrorBox } from '../../../lib/ui';
+import { ErrorBox, MenuButton } from '../../../lib/ui';
 import { colors, radius, shadow, spacing } from '../../../lib/theme';
+import { serviceColour, serviceIcon } from '../../../lib/services-meta';
 
 // The home screen, matched to the supplied design element for element:
 // gradient hero with logo, tagline and bell; the full-width booking
@@ -44,20 +45,6 @@ const STATUS_SW = {
   RESCHEDULED: 'Imehairishwa',
 };
 
-const ICONS = {
-  'Home Nursing': 'medkit',
-  'Elderly Care': 'people',
-  Physiotherapy: 'fitness',
-  'Wound Care': 'bandage',
-  'Postnatal Care': 'heart',
-  'Health Education': 'school',
-  'Follow-up Visit': 'repeat',
-  'Medication Administration': 'medical',
-};
-const iconFor = (name) => ICONS[name] ?? 'ellipse';
-
-// The six tile colours, in the order the design lays them out.
-const TILES = ['#3B82F6', '#0E9B77', '#F59E0B', '#8B5CF6', '#0EA5E9', '#EC4899'];
 
 export default function Home() {
   const router = useRouter();
@@ -106,7 +93,7 @@ export default function Home() {
   // outlive the service it points at.
   const featured =
     services.find((service) => service.name === 'Elderly Care') ?? services[0] ?? null;
-  const featuredColour = featured ? TILES[services.indexOf(featured) % TILES.length] : colors.primary;
+  const featuredColour = featured ? serviceColour(featured.name) : colors.primary;
 
   return (
     <ScrollView
@@ -121,6 +108,7 @@ export default function Home() {
         style={styles.hero}
       >
         <View style={styles.heroTop}>
+          <MenuButton tint={colors.onPrimary} />
           <View style={styles.brand}>
             <Image
               source={require('../../../assets/wordmark.png')}
@@ -182,9 +170,9 @@ export default function Home() {
               accessibilityRole="button"
               style={({ pressed }) => [styles.tileWrap, pressed && styles.pressed]}
             >
-              <View style={[styles.tile, { backgroundColor: TILES[index % TILES.length] }]}>
+              <View style={[styles.tile, { backgroundColor: serviceColour(service.name) }]}>
                 <View style={styles.tileIcon}>
-                  <Ionicons name={iconFor(service.name)} size={19} color="#FFFFFF" />
+                  <Ionicons name={serviceIcon(service.name)} size={19} color="#FFFFFF" />
                 </View>
                 <Text style={styles.tileText} numberOfLines={3}>
                   {service.name}
@@ -203,7 +191,7 @@ export default function Home() {
             {/* The design has a photograph here. Until there is one, the
                 service's own tile colour fills the same shape. */}
             <View style={[styles.featuredImage, { backgroundColor: featuredColour }]}>
-              <Ionicons name={iconFor(featured.name)} size={30} color="#FFFFFF" />
+              <Ionicons name={serviceIcon(featured.name)} size={30} color="#FFFFFF" />
             </View>
 
             <View style={styles.featuredText}>
@@ -321,10 +309,10 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: radius.xl,
     borderBottomRightRadius: radius.xl,
   },
-  heroTop: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
+  heroTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
   brand: { flex: 1 },
-  wordmark: { width: 132, height: 54 },
-  brandTag: { color: colors.onPrimary, fontSize: 11, opacity: 0.85, marginTop: -4 },
+  wordmark: { width: 118, height: 48 },
+  brandTag: { color: colors.onPrimary, fontSize: 11, opacity: 0.85, marginTop: 0 },
   bell: { padding: spacing.xs },
   bellBadge: {
     position: 'absolute',
