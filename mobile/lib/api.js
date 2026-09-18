@@ -186,6 +186,9 @@ export const invoices = {
 export const bookings = {
   list: () => api.get('/api/bookings'),
   create: (payload) => api.post('/api/bookings', payload),
+  // The backend requires a reason and records who cancelled, so this is
+  // never a silent disappearance.
+  cancel: (id, reason) => api.patch(`/api/bookings/${id}/cancel`, { reason }),
 };
 
 export const services = {

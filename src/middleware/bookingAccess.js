@@ -1,12 +1,21 @@
 'use strict';
 
-const { Booking, ClientProfile, Staff, FamilyMember, Service } = require('../models');
+const { Booking, ClientProfile, Staff, FamilyMember, Service, User } = require('../models');
 const AppError = require('../utils/appError');
 
 const DETAIL_INCLUDE = [
   { model: FamilyMember, as: 'patient' },
   { model: Service, as: 'service' },
-  { model: Staff, as: 'staff' },
+  {
+    model: Staff,
+    as: 'staff',
+    // The client is entitled to know who is coming to their house, so
+    // the nurse's name travels with the booking. Name only — a client
+    // has no business with a staff member's phone number or email, and
+    // a nested include is exactly the place that leaks them by
+    // accident.
+    include: [{ model: User, as: 'user', attributes: ['id', 'name'] }],
+  },
 ];
 
 // Loads the Booking named by req.params.bookingId. Access checks are kept

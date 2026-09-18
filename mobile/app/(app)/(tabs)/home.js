@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   bookings as bookingsApi,
@@ -16,21 +17,24 @@ import {
   services as servicesApi,
 } from '../../../lib/api';
 import { useSession } from '../../../lib/session';
-import { Card, ErrorBox } from '../../../lib/ui';
-import { colors, radius, shadow, spacing, tileColors } from '../../../lib/theme';
+import { ErrorBox } from '../../../lib/ui';
+import { colors, radius, shadow, spacing } from '../../../lib/theme';
 
-// The home screen, built to the design the owner supplied.
+// The home screen, matched to the supplied design element for element:
+// gradient hero with logo, tagline and bell; the full-width booking
+// button; six filled service cards; a featured service; the next
+// appointment with its status pill; and the two shortcut cards.
 //
-// That design leads with a photograph of a nurse sitting with a
-// patient. There is none to use, so the hero is the brand green with
-// the wordmark on it: the layout is identical and a real photograph
-// drops straight in when there is one. A stock photo of somebody else's
-// nurses on a Tanzanian home-care app would be worse than no photo.
+// The one thing that cannot be copied is the photography. The design
+// puts a photo behind the hero and another on the featured card. There
+// are none, so those places hold a gradient and the service's own
+// colour — the layout, sizes and radii are the design's, so real
+// photographs drop in without moving anything.
 
 const STATUS_SW = {
   REQUESTED: 'Imeombwa',
   ASSIGNED: 'Amepangiwa',
-  ACCEPTED: 'Amekubali',
+  ACCEPTED: 'Amethibitishwa',
   ON_THE_WAY: 'Yupo njiani',
   ARRIVED: 'Amefika',
   IN_PROGRESS: 'Inaendelea',
@@ -40,21 +44,20 @@ const STATUS_SW = {
   RESCHEDULED: 'Imehairishwa',
 };
 
-// The catalogue comes from the server, so icons are matched by name
-// rather than stored beside it. An unrecognised service still gets a
-// sensible one instead of a blank tile.
 const ICONS = {
-  'Home Nursing': 'medkit-outline',
-  'Elderly Care': 'people-outline',
-  Physiotherapy: 'fitness-outline',
-  'Wound Care': 'bandage-outline',
-  'Postnatal Care': 'heart-outline',
-  'Health Education': 'school-outline',
-  'Follow-up Visit': 'repeat-outline',
-  'Medication Administration': 'medical-outline',
+  'Home Nursing': 'medkit',
+  'Elderly Care': 'people',
+  Physiotherapy: 'fitness',
+  'Wound Care': 'bandage',
+  'Postnatal Care': 'heart',
+  'Health Education': 'school',
+  'Follow-up Visit': 'repeat',
+  'Medication Administration': 'medical',
 };
+const iconFor = (name) => ICONS[name] ?? 'ellipse';
 
-const iconFor = (name) => ICONS[name] ?? 'ellipse-outline';
+// The six tile colours, in the order the design lays them out.
+const TILES = ['#3B82F6', '#0E9B77', '#F59E0B', '#8B5CF6', '#0EA5E9', '#EC4899'];
 
 export default function Home() {
   const router = useRouter();
@@ -94,30 +97,45 @@ export default function Home() {
     setRefreshing(false);
   }
 
-  // The next visit that has not finished — the one somebody opens the
-  // app to check on.
   const upcoming = visits.find(
     (visit) => !['COMPLETED', 'CANCELLED', 'REJECTED'].includes(visit.status)
   );
 
+  // The design's featured slot. Elderly Care if it is on the books,
+  // otherwise whatever is — rather than a hardcoded name that could
+  // outlive the service it points at.
+  const featured =
+    services.find((service) => service.name === 'Elderly Care') ?? services[0] ?? null;
+  const featuredColour = featured ? TILES[services.indexOf(featured) % TILES.length] : colors.primary;
+
   return (
     <ScrollView
       contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <View style={styles.hero}>
+      <LinearGradient
+        colors={['#0E7A5F', '#0A5C47']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.hero}
+      >
         <View style={styles.heroTop}>
-          <Image
-            source={require('../../../assets/wordmark.png')}
-            style={styles.wordmark}
-            resizeMode="contain"
-            accessibilityLabel="Afya Nyumbani"
-          />
+          <View style={styles.brand}>
+            <Image
+              source={require('../../../assets/wordmark.png')}
+              style={styles.wordmark}
+              resizeMode="contain"
+              accessibilityLabel="Afya Nyumbani"
+            />
+            <Text style={styles.brandTag}>Huduma ya afya mlangoni kwako</Text>
+          </View>
+
           <Pressable
             onPress={() => router.push('/notifications')}
             accessibilityRole="button"
             accessibilityLabel={unread > 0 ? `Taarifa ${unread} mpya` : 'Taarifa'}
-            style={({ pressed }) => [styles.bell, pressed && styles.tilePressed]}
+            style={({ pressed }) => [styles.bell, pressed && styles.pressed]}
           >
             <Ionicons name="notifications-outline" size={22} color={colors.onPrimary} />
             {unread > 0 ? (
@@ -127,91 +145,132 @@ export default function Home() {
             ) : null}
           </Pressable>
         </View>
-        <Text style={styles.greeting}>Habari, {user?.name?.split(' ')[0] ?? 'karibu'}</Text>
-        <Text style={styles.tagline}>Huduma bora ya afya, nyumbani kwako.</Text>
 
+        <Text style={styles.greeting}>Habari, {user?.name?.split(' ')[0] ?? 'Karibu'}!</Text>
+        <Text style={styles.tagline}>Huduma bora ya afya, ukiwa nyumbani kwako.</Text>
+      </LinearGradient>
+
+      <View style={styles.body}>
         <Pressable
           onPress={() => router.push('/book')}
           accessibilityRole="button"
-          style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
+          style={({ pressed }) => [styles.ctaWrap, pressed && styles.pressed]}
         >
-          <Ionicons name="calendar" size={20} color={colors.onPrimary} />
-          <Text style={styles.ctaText}>Omba muuguzi aje nyumbani</Text>
-          <Ionicons name="arrow-forward" size={18} color={colors.onPrimary} />
+          <LinearGradient
+            colors={['#0E7A5F', '#0A5C47']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.cta}
+          >
+            <View style={styles.ctaIcon}>
+              <Ionicons name="calendar" size={19} color={colors.onPrimary} />
+            </View>
+            <Text style={styles.ctaText}>Omba ziara ya nyumbani</Text>
+            <Ionicons name="arrow-forward" size={20} color={colors.onPrimary} />
+          </LinearGradient>
         </Pressable>
-      </View>
 
-      <View style={styles.body}>
         <ErrorBox error={error} />
 
-        <View style={styles.sectionRow}>
-          <Text style={styles.section}>Huduma zetu</Text>
-          <Pressable onPress={() => router.push('/book')}>
-            <Text style={styles.link}>Zote</Text>
-          </Pressable>
-        </View>
+        <SectionHeader title="Huduma zetu" onPress={() => router.push('/services')} />
 
         <View style={styles.grid}>
-          {services.slice(0, 6).map((service, index) => {
-            const tile = tileColors[index % tileColors.length];
-            return (
-              <Pressable
-                key={service.id}
-                onPress={() => router.push('/book')}
-                accessibilityRole="button"
-                style={({ pressed }) => [styles.tile, pressed && styles.tilePressed]}
-              >
-                <View style={[styles.tileIcon, { backgroundColor: tile.bg }]}>
-                  <Ionicons name={iconFor(service.name)} size={20} color="#FFFFFF" />
+          {services.slice(0, 6).map((service, index) => (
+            <Pressable
+              key={service.id}
+              onPress={() => router.push('/book')}
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.tileWrap, pressed && styles.pressed]}
+            >
+              <View style={[styles.tile, { backgroundColor: TILES[index % TILES.length] }]}>
+                <View style={styles.tileIcon}>
+                  <Ionicons name={iconFor(service.name)} size={19} color="#FFFFFF" />
                 </View>
-                <Text style={styles.tileText} numberOfLines={2}>
+                <Text style={styles.tileText} numberOfLines={3}>
                   {service.name}
                 </Text>
-              </Pressable>
-            );
-          })}
+              </View>
+            </Pressable>
+          ))}
         </View>
 
-        <Text style={styles.section}>Ziara inayofuata</Text>
+        {featured ? (
+          <Pressable
+            onPress={() => router.push('/book')}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.featured, pressed && styles.pressed]}
+          >
+            {/* The design has a photograph here. Until there is one, the
+                service's own tile colour fills the same shape. */}
+            <View style={[styles.featuredImage, { backgroundColor: featuredColour }]}>
+              <Ionicons name={iconFor(featured.name)} size={30} color="#FFFFFF" />
+            </View>
+
+            <View style={styles.featuredText}>
+              <Text style={styles.featuredLabel}>Huduma maalum</Text>
+              <Text style={styles.featuredTitle}>{featured.name}</Text>
+              <Text style={styles.featuredBody} numberOfLines={2}>
+                {featured.description ??
+                  (featured.basePriceTzs
+                    ? `Kuanzia TZS ${Number(featured.basePriceTzs).toLocaleString('en-US')}`
+                    : 'Huduma ya karibu, nyumbani kwako.')}
+              </Text>
+            </View>
+
+            <View style={styles.featuredArrow}>
+              <Ionicons name="arrow-forward" size={18} color={colors.onPrimary} />
+            </View>
+          </Pressable>
+        ) : null}
+
+        <SectionHeader title="Ziara inayofuata" onPress={() => router.push('/appointments')} />
+
         {upcoming ? (
-          <Pressable onPress={() => router.push('/appointments')}>
-            <Card style={styles.upcoming}>
-              <View style={styles.upcomingIcon}>
-                <Ionicons name="medkit" size={20} color={colors.primary} />
-              </View>
-              <View style={styles.upcomingText}>
-                <Text style={styles.upcomingTitle} numberOfLines={1}>
-                  {upcoming.locationAddress}
-                </Text>
-                <Text style={styles.muted}>
-                  {new Date(upcoming.scheduledAt).toLocaleString('sw-TZ')}
-                </Text>
-              </View>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>
-                  {STATUS_SW[upcoming.status] ?? upcoming.status}
-                </Text>
-              </View>
-            </Card>
+          <Pressable
+            onPress={() => router.push('/appointments')}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.appointment, pressed && styles.pressed]}
+          >
+            <View style={styles.appointmentIcon}>
+              <Ionicons name="medkit" size={20} color="#3B82F6" />
+            </View>
+            <View style={styles.appointmentText}>
+              <Text style={styles.appointmentTitle} numberOfLines={1}>
+                {upcoming.locationAddress}
+              </Text>
+              <Text style={styles.appointmentWhen}>
+                {new Date(upcoming.scheduledAt).toLocaleString('sw-TZ')}
+              </Text>
+            </View>
+            <View style={styles.pill}>
+              <Text style={styles.pillText}>{STATUS_SW[upcoming.status] ?? upcoming.status}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={17} color={colors.subtle} />
           </Pressable>
         ) : (
-          <Card>
-            <Text style={styles.muted}>Huna ziara inayokuja. Omba muuguzi hapo juu.</Text>
-          </Card>
+          <View style={styles.empty}>
+            <Text style={styles.emptyText}>
+              Huna ziara inayokuja. Omba muuguzi kwa kitufe hapo juu.
+            </Text>
+          </View>
         )}
 
-        <View style={styles.quickRow}>
-          <QuickAction
-            icon="chatbubble-ellipses-outline"
-            title="Afya AI"
-            subtitle="Uliza swali"
-            onPress={() => router.push('/ask')}
+        <View style={styles.shortcutRow}>
+          <Shortcut
+            icon="calendar-outline"
+            tint="#EAF2FE"
+            colour="#3B82F6"
+            title="Ziara zangu"
+            subtitle="Ona ziara zote"
+            onPress={() => router.push('/appointments')}
           />
-          <QuickAction
-            icon="pulse-outline"
-            title="Ripoti dalili"
-            subtitle="Andika unavyojisikia"
-            onPress={() => router.push('/symptoms')}
+          <Shortcut
+            icon="headset-outline"
+            tint="#E6F2EE"
+            colour={colors.primary}
+            title="Msaada"
+            subtitle="Una swali? Uliza"
+            onPress={() => router.push('/ask')}
           />
         </View>
       </View>
@@ -219,33 +278,53 @@ export default function Home() {
   );
 }
 
-function QuickAction({ icon, title, subtitle, onPress }) {
+function SectionHeader({ title, onPress }) {
+  return (
+    <View style={styles.sectionRow}>
+      <Text style={styles.section}>{title}</Text>
+      <Pressable onPress={onPress} accessibilityRole="button" style={styles.viewAll}>
+        <Text style={styles.viewAllText}>Zote</Text>
+        <Ionicons name="arrow-forward" size={13} color={colors.primary} />
+      </Pressable>
+    </View>
+  );
+}
+
+function Shortcut({ icon, tint, colour, title, subtitle, onPress }) {
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      style={({ pressed }) => [styles.quick, pressed && styles.tilePressed]}
+      style={({ pressed }) => [styles.shortcut, pressed && styles.pressed]}
     >
-      <Ionicons name={icon} size={20} color={colors.primary} />
-      <Text style={styles.quickTitle}>{title}</Text>
-      <Text style={styles.quickSubtitle}>{subtitle}</Text>
+      <View style={[styles.shortcutIcon, { backgroundColor: tint }]}>
+        <Ionicons name={icon} size={18} color={colour} />
+      </View>
+      <View style={styles.shortcutText}>
+        <Text style={styles.shortcutTitle}>{title}</Text>
+        <Text style={styles.shortcutSubtitle} numberOfLines={1}>
+          {subtitle}
+        </Text>
+      </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { paddingBottom: spacing.xl },
+  content: { paddingBottom: spacing.xl, backgroundColor: colors.bg },
+  pressed: { opacity: 0.8 },
 
   hero: {
-    backgroundColor: colors.primary,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.lg,
-    paddingBottom: spacing.lg,
+    paddingBottom: spacing.xl + spacing.md,
     borderBottomLeftRadius: radius.xl,
     borderBottomRightRadius: radius.xl,
   },
   heroTop: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
-  wordmark: { width: 150, height: 61, marginBottom: spacing.sm },
+  brand: { flex: 1 },
+  wordmark: { width: 132, height: 54 },
+  brandTag: { color: colors.onPrimary, fontSize: 11, opacity: 0.85, marginTop: -4 },
   bell: { padding: spacing.xs },
   bellBadge: {
     position: 'absolute',
@@ -260,75 +339,151 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   bellCount: { color: '#FFFFFF', fontSize: 10, fontWeight: '800' },
-  greeting: { color: colors.onPrimary, fontSize: 22, fontWeight: '700' },
-  tagline: { color: colors.onPrimary, fontSize: 14, opacity: 0.9, marginTop: 2 },
 
+  greeting: { color: colors.onPrimary, fontSize: 23, fontWeight: '800', marginTop: spacing.md },
+  tagline: { color: colors.onPrimary, fontSize: 13, opacity: 0.9, marginTop: 4, lineHeight: 18 },
+
+  body: { paddingHorizontal: spacing.md, marginTop: -spacing.lg - spacing.xs },
+
+  ctaWrap: { borderRadius: radius.lg, ...shadow.card, marginBottom: spacing.md },
   cta: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: colors.primaryDark,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
-    marginTop: spacing.md,
   },
-  ctaPressed: { opacity: 0.85 },
-  ctaText: { color: colors.onPrimary, fontSize: 15, fontWeight: '700', flex: 1 },
+  ctaIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.sm,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ctaText: { flex: 1, color: colors.onPrimary, fontSize: 16, fontWeight: '700' },
 
-  body: { padding: spacing.md },
-  sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  section: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
+  sectionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
-  link: { color: colors.primary, fontWeight: '600', marginTop: spacing.md },
+  section: { fontSize: 18, fontWeight: '800', color: colors.text },
+  viewAll: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  viewAllText: { color: colors.primary, fontWeight: '600', fontSize: 13 },
 
-  grid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -spacing.xs },
-  tile: { width: '33.333%', paddingHorizontal: spacing.xs, marginBottom: spacing.sm },
-  tilePressed: { opacity: 0.7 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -spacing.xs / 2 },
+  tileWrap: { width: '33.333%', paddingHorizontal: spacing.xs / 2, marginBottom: spacing.sm },
+  tile: {
+    borderRadius: radius.lg,
+    padding: spacing.sm,
+    minHeight: 96,
+    justifyContent: 'space-between',
+  },
   tileIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.sm,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tileText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700', lineHeight: 15 },
+
+  featured: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.sm,
+    marginTop: spacing.xs,
+    ...shadow.card,
+  },
+  featuredImage: {
+    width: 74,
+    height: 74,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  featuredText: { flex: 1 },
+  featuredLabel: { fontSize: 11, color: colors.primary, fontWeight: '700' },
+  featuredTitle: { fontSize: 16, fontWeight: '800', color: colors.text, marginTop: 1 },
+  featuredBody: { fontSize: 12, color: colors.muted, marginTop: 2, lineHeight: 17 },
+  featuredArrow: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  appointment: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.sm + 2,
+    ...shadow.card,
+  },
+  appointmentIcon: {
     width: 42,
     height: 42,
     borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.xs,
-  },
-  tileText: { fontSize: 12, color: colors.text, fontWeight: '600', lineHeight: 16 },
-
-  upcoming: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, ...shadow.card },
-  upcomingIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
-    backgroundColor: colors.primaryLight,
+    backgroundColor: '#EAF2FE',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  upcomingText: { flex: 1 },
-  upcomingTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
-  muted: { fontSize: 13, color: colors.muted, marginTop: 2 },
-  badge: {
+  appointmentText: { flex: 1 },
+  appointmentTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
+  appointmentWhen: { fontSize: 12, color: colors.muted, marginTop: 1 },
+  pill: {
     backgroundColor: colors.successBg,
     borderRadius: radius.pill,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
   },
-  badgeText: { color: colors.primary, fontSize: 11, fontWeight: '700' },
+  pillText: { color: colors.primary, fontSize: 11, fontWeight: '700' },
 
-  quickRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
-  quick: {
-    flex: 1,
+  empty: {
     backgroundColor: colors.surface,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border,
     padding: spacing.md,
   },
-  quickTitle: { fontSize: 14, fontWeight: '700', color: colors.text, marginTop: spacing.xs },
-  quickSubtitle: { fontSize: 12, color: colors.muted, marginTop: 1 },
+  emptyText: { fontSize: 13, color: colors.muted, lineHeight: 19 },
+
+  shortcutRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
+  shortcut: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.sm + 2,
+  },
+  shortcutIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  shortcutText: { flex: 1 },
+  shortcutTitle: { fontSize: 13, fontWeight: '700', color: colors.text },
+  shortcutSubtitle: { fontSize: 11, color: colors.muted, marginTop: 1 },
 });
