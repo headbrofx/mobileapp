@@ -26,13 +26,12 @@ import { colors, spacing } from '../lib/theme';
 
 // The sign-in screen from the design.
 //
-// The picture band is a real Image pointed at assets/hero.png, running
-// to both edges with the design's curved bottom. That file is a branded
-// panel rather than a photograph, because there is no photograph of
-// this business's own staff and a stock picture of somebody else's
-// nurse has no place on the screen every client opens. Replacing that
-// one file with a real photograph is the whole job — the frame, the
-// height and the curve are already right, and no code changes.
+// The picture band runs to both edges with the design's curved bottom.
+// It held a branded panel while there was nothing to put in it; the
+// owner has now supplied the image, cropped to the band's 2:1 and
+// composited onto the page background so its cut-out edges dissolve
+// rather than showing as a rectangle. Changing it again is one file,
+// assets/hero.png, and no code.
 //
 // Google and Facebook are drawn because the design has them. They
 // cannot sign anybody in yet: the API has no OAuth, no provider, no
