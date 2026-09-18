@@ -219,8 +219,13 @@ export default function Book() {
                     </View>
                     <View style={styles.rowText}>
                       <Text style={styles.summaryTitle}>{service?.name}</Text>
+                      {service?.description ? (
+                        <Text style={styles.muted} numberOfLines={2}>
+                          {service.description}
+                        </Text>
+                      ) : null}
                       {service?.basePriceTzs ? (
-                        <Text style={styles.muted}>Kuanzia {tzs(service.basePriceTzs)}</Text>
+                        <Text style={styles.summaryPrice}>Kuanzia {tzs(service.basePriceTzs)}</Text>
                       ) : null}
                     </View>
                   </View>
@@ -229,7 +234,14 @@ export default function Book() {
                   <Line
                     icon="calendar-outline"
                     label="Tarehe na muda"
-                    value={toScheduledAt(when).toLocaleString('sw-TZ')}
+                    value={`${toScheduledAt(when).toLocaleDateString('sw-TZ', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })} · saa ${toScheduledAt(when).toLocaleTimeString('sw-TZ', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}`}
                   />
                   <Line icon="location-outline" label="Mahali" value={address.trim()} />
                   {notes.trim() ? (
@@ -249,6 +261,25 @@ export default function Book() {
                     kwenye "Ziara".
                   </Text>
                 </Card>
+
+                <View style={styles.statusCard}>
+                  <View style={styles.statusIcon}>
+                    <Ionicons name="checkmark" size={15} color={colors.onPrimary} />
+                  </View>
+                  <View style={styles.rowText}>
+                    <Text style={styles.statusLabel}>Hali ya ombi</Text>
+                    <Text style={styles.statusValue}>Tayari kutumwa</Text>
+                  </View>
+                </View>
+
+                <Pressable
+                  onPress={() => setStep(0)}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
+                >
+                  <Ionicons name="create-outline" size={17} color={colors.primary} />
+                  <Text style={styles.editText}>Badilisha maelezo</Text>
+                </Pressable>
               </>
             ) : null}
           </>
@@ -499,6 +530,41 @@ const styles = StyleSheet.create({
   },
   rowPrice: { ...type.tiny, fontFamily: font.bold, color: colors.primary, marginTop: 3 },
   rowText: { flex: 1 },
+  summaryPrice: { ...type.tiny, fontFamily: font.bold, color: colors.primary, marginTop: 3 },
+
+  statusCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.successBg,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.primaryLight,
+    padding: spacing.sm + 2,
+    marginBottom: spacing.sm,
+  },
+  statusIcon: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statusLabel: { ...type.tiny, color: colors.muted },
+  statusValue: { ...type.label, color: colors.primary },
+
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    paddingVertical: spacing.sm + 3,
+  },
+  editText: { ...type.label, color: colors.primary },
 
   choice: {
     flexDirection: 'row',
