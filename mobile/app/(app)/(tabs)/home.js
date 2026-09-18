@@ -299,7 +299,7 @@ function Shortcut({ icon, tint, colour, title, subtitle, onPress }) {
 }
 
 const styles = StyleSheet.create({
-  content: { paddingBottom: spacing.xl, backgroundColor: colors.bg },
+  content: { flexGrow: 1, paddingBottom: spacing.xl, backgroundColor: colors.bg },
   pressed: { opacity: 0.8 },
 
   hero: {

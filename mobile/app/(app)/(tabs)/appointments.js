@@ -395,7 +395,7 @@ function Timeline({ visit }) {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.md, paddingBottom: spacing.xl },
+  content: { flexGrow: 1, padding: spacing.md, paddingBottom: spacing.xl },
   pressed: { opacity: 0.75 },
   disabled: { opacity: 0.5 },
 

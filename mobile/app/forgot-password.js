@@ -103,7 +103,7 @@ export default function ForgotPassword() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: spacing.lg, paddingTop: spacing.xl, paddingBottom: spacing.lg },
+  content: { flexGrow: 1, padding: spacing.lg, paddingTop: spacing.xl, paddingBottom: spacing.lg },
   pressed: { opacity: 0.75 },
 
   title: { fontSize: 24, fontFamily: font.extrabold, color: colors.text, marginTop: spacing.lg },

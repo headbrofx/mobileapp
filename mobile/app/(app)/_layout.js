@@ -35,6 +35,7 @@ export default function AppLayout() {
         <Stack.Screen name="symptoms" options={{ title: 'Ripoti dalili' }} />
         <Stack.Screen name="family" options={{ title: 'Familia yangu' }} />
         <Stack.Screen name="cycles" options={{ title: 'Orbit' }} />
+        <Stack.Screen name="article" options={{ title: 'Soma' }} />
         <Stack.Screen name="medications" options={{ title: 'Dawa zangu' }} />
         <Stack.Screen name="invoices" options={{ title: 'Ankara' }} />
       </Stack>

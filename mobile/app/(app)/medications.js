@@ -150,7 +150,7 @@ export default function Medications() {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.md, paddingBottom: spacing.xl },
+  content: { flexGrow: 1, padding: spacing.md, paddingBottom: spacing.xl },
   heading: {
     fontSize: 13,
     fontFamily: font.bold,

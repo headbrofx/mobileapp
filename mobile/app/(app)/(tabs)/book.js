@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   stepLabel: { fontSize: 11, color: colors.subtle, marginTop: 4 },
   stepLabelActive: { color: colors.primary, fontFamily: font.semibold },
 
-  content: { padding: spacing.md, paddingBottom: spacing.xl },
+  content: { flexGrow: 1, padding: spacing.md, paddingBottom: spacing.xl },
   stepTitle: { fontSize: 17, fontFamily: font.bold, color: colors.text },
   stepHint: { fontSize: 14, color: colors.muted, marginBottom: spacing.md },
   label: {

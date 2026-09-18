@@ -112,7 +112,7 @@ function Answer({ answer }) {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  content: { padding: spacing.md, paddingBottom: spacing.xl },
+  content: { flexGrow: 1, padding: spacing.md, paddingBottom: spacing.xl },
   intro: { fontSize: 14, color: colors.muted, marginBottom: spacing.lg, lineHeight: 20 },
   textarea: { minHeight: 90, textAlignVertical: 'top' },
 

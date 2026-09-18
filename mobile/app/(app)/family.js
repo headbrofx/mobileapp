@@ -213,7 +213,7 @@ function Chip({ label, selected, onPress }) {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  content: { padding: spacing.md, paddingBottom: spacing.xl },
+  content: { flexGrow: 1, padding: spacing.md, paddingBottom: spacing.xl },
   cardTitle: { fontSize: 16, fontFamily: font.semibold, color: colors.text },
   muted: { fontSize: 14, color: colors.muted, marginTop: 2 },
 

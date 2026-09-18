@@ -230,6 +230,13 @@ export const services = {
   list: () => api.get('/api/services'),
 };
 
+export const content = {
+  // Only ever returns PUBLISHED items for a client — drafts are the
+  // backend's gate for material nobody qualified has read yet.
+  list: (tag) => api.get(`/api/content${tag ? `?tag=${encodeURIComponent(tag)}` : ''}`),
+  get: (slug) => api.get(`/api/content/${slug}`),
+};
+
 export const afyaAi = {
   ask: (question, familyMemberId) =>
     api.post('/api/ai/ask', familyMemberId ? { question, familyMemberId } : { question }),

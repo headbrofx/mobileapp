@@ -281,7 +281,7 @@ function Chip({ label, selected, onPress }) {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  content: { padding: spacing.md, paddingBottom: spacing.xl },
+  content: { flexGrow: 1, padding: spacing.md, paddingBottom: spacing.xl },
   label: { fontSize: 14, fontFamily: font.semibold, color: colors.text, marginBottom: spacing.xs },
   textarea: { minHeight: 80, textAlignVertical: 'top' },
 

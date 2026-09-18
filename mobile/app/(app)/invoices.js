@@ -81,7 +81,7 @@ export default function Invoices() {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.md, paddingBottom: spacing.xl },
+  content: { flexGrow: 1, padding: spacing.md, paddingBottom: spacing.xl },
   number: { fontSize: 14, color: colors.muted, letterSpacing: 0.4 },
   amount: { fontSize: 20, fontFamily: font.bold, color: colors.text, marginVertical: 2 },
   muted: { fontSize: 14, color: colors.muted, marginTop: 2 },

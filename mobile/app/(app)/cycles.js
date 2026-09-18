@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useFocusEffect } from 'expo-router';
-import { cycles as cyclesApi, familyMembers } from '../../lib/api';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { content as contentApi, cycles as cyclesApi, familyMembers } from '../../lib/api';
 import { Card, ErrorBox } from '../../lib/ui';
 import { colors, font, radius, shadow, spacing } from '../../lib/theme';
 
@@ -78,7 +78,9 @@ const parse = (dateOnly) => {
 const todayIso = () => iso(Date.now());
 
 export default function Cycles() {
+  const router = useRouter();
   const [memberId, setMemberId] = useState(null);
+  const [lessons, setLessons] = useState([]);
   const [insights, setInsights] = useState(null);
   const [history, setHistory] = useState([]);
   const [error, setError] = useState(null);
@@ -100,6 +102,16 @@ export default function Cycles() {
       ]);
       setInsights(insightData);
       setHistory(listData?.cycles ?? []);
+
+      // Education is separate from the cycle data and must never block
+      // it: a person opening Orbit to log a period should still see
+      // their calendar if the library is empty or unreachable.
+      try {
+        const library = await contentApi.list('orbit');
+        setLessons(library?.items ?? library?.content ?? []);
+      } catch {
+        setLessons([]);
+      }
     } catch (err) {
       setError(err.message);
     }
@@ -207,6 +219,41 @@ export default function Cycles() {
           ))}
         </Card>
       ) : null}
+
+      <Text style={styles.section}>Elimu ya afya ya uzazi</Text>
+      {lessons.length === 0 ? (
+        <Card>
+          <Text style={styles.muted}>
+            Makala za uzazi wa mpango na afya ya ngono zinakuja hivi karibuni.
+          </Text>
+        </Card>
+      ) : (
+        lessons.map((lesson) => (
+          <Pressable
+            key={lesson.slug}
+            onPress={() => router.push({ pathname: '/article', params: { slug: lesson.slug } })}
+            accessibilityRole="button"
+            style={({ pressed }) => [pressed && styles.pressed]}
+          >
+            <Card>
+              <View style={styles.lessonRow}>
+                <View style={styles.lessonIcon}>
+                  <Ionicons name="book-outline" size={18} color={colors.primary} />
+                </View>
+                <View style={styles.historyText}>
+                  <Text style={styles.historyTitle}>{lesson.title}</Text>
+                  {lesson.tags?.length ? (
+                    <Text style={styles.muted} numberOfLines={1}>
+                      {lesson.tags.filter((tag) => tag !== 'orbit').join(' · ')}
+                    </Text>
+                  ) : null}
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={colors.subtle} />
+              </View>
+            </Card>
+          </Pressable>
+        ))
+      )}
 
       <Text style={styles.section}>Kumbukumbu</Text>
       {history.length === 0 ? (
@@ -606,7 +653,7 @@ function formatDate(dateOnly) {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.md, paddingBottom: spacing.xl },
+  content: { flexGrow: 1, padding: spacing.md, paddingBottom: spacing.xl },
   pressed: { opacity: 0.75 },
   disabled: { opacity: 0.5 },
   muted: { fontSize: 13, color: colors.muted, marginTop: 2 },
@@ -726,6 +773,15 @@ const styles = StyleSheet.create({
   noteRow: { flexDirection: 'row', gap: spacing.xs, alignItems: 'flex-start', marginBottom: 4 },
   noteText: { flex: 1, fontSize: 12, color: colors.text, lineHeight: 17 },
 
+  lessonRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  lessonIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.md,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   historyRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
   historyIcon: {
     width: 36,

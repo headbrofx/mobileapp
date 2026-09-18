@@ -99,7 +99,7 @@ export default function Profile() {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.md, paddingBottom: spacing.xl },
+  content: { flexGrow: 1, padding: spacing.md, paddingBottom: spacing.xl },
 
   menuRow: { flexDirection: 'row' },
   header: { alignItems: 'center', paddingVertical: spacing.lg },
