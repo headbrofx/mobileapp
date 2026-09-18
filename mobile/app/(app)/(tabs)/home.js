@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,19 +19,22 @@ import {
 } from '../../../lib/api';
 import { useSession } from '../../../lib/session';
 import { ErrorBox, MenuButton } from '../../../lib/ui';
-import { colors, font, radius, shadow, spacing } from '../../../lib/theme';
+import { colors, font, radius, shadow, spacing, type } from '../../../lib/theme';
 import { serviceColour, serviceIcon, serviceImage } from '../../../lib/services-meta';
 
-// The home screen, matched to the supplied design element for element:
-// gradient hero with logo, tagline and bell; the full-width booking
-// button; six filled service cards; a featured service; the next
-// appointment with its status pill; and the two shortcut cards.
+// The home screen, element for element from the design.
 //
-// The one thing that cannot be copied is the photography. The design
-// puts a photo behind the hero and another on the featured card. There
-// are none, so those places hold a gradient and the service's own
-// colour — the layout, sizes and radii are the design's, so real
-// photographs drop in without moving anything.
+// It sits on the page background, not on a green hero. The earlier
+// version filled the top third with a gradient, which read as a
+// dashboard; the design opens on the brand in small type and then a
+// photograph, so the first thing a person meets is a face.
+//
+// The service tiles are flat colour with a white icon, and that is the
+// design, not a fallback. There are photographs for every service now
+// and they are deliberately not used here — eight photographs shrunk to
+// a 100pt tile become eight brown smudges and the grid stops being
+// scannable. Photographs belong where they are big enough to read: the
+// hero, the featured card, and the service browser.
 
 const STATUS_SW = {
   REQUESTED: 'Imeombwa',
@@ -45,10 +49,24 @@ const STATUS_SW = {
   RESCHEDULED: 'Imehairishwa',
 };
 
+// "Kesho, saa 10:00" reads better than a date somebody has to decode.
+const when = (value) => {
+  const date = new Date(value);
+  const today = new Date();
+  const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+  const time = date.toLocaleTimeString('sw-TZ', { hour: '2-digit', minute: '2-digit' });
+
+  const sameDay = (a, b) => a.toDateString() === b.toDateString();
+  if (sameDay(date, today)) return `Leo, saa ${time}`;
+  if (sameDay(date, tomorrow)) return `Kesho, saa ${time}`;
+  return `${date.toLocaleDateString('sw-TZ', { day: 'numeric', month: 'short' })}, saa ${time}`;
+};
 
 export default function Home() {
   const router = useRouter();
   const { user } = useSession();
+  const { width } = useWindowDimensions();
+  const heroHeight = Math.round(Math.min(width * 0.52, 260));
 
   const [services, setServices] = useState([]);
   const [visits, setVisits] = useState([]);
@@ -93,7 +111,6 @@ export default function Home() {
   // outlive the service it points at.
   const featured =
     services.find((service) => service.name === 'Elderly Care') ?? services[0] ?? null;
-  const featuredColour = featured ? serviceColour(featured.name) : colors.primary;
 
   return (
     <ScrollView
@@ -101,69 +118,81 @@ export default function Home() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <LinearGradient
-        colors={['#0E7A5F', '#0A5C47']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.hero}
-      >
-        <View style={styles.heroTop}>
-          <MenuButton tint={colors.onPrimary} />
-          <View style={styles.brand}>
-            <Image
-              source={require('../../../assets/wordmark.png')}
-              style={styles.wordmark}
-              resizeMode="contain"
-              accessibilityLabel="Afya Nyumbani"
-            />
-            <Text style={styles.brandTag}>Huduma ya afya mlangoni kwako</Text>
-          </View>
-
-          <Pressable
-            onPress={() => router.push('/notifications')}
-            accessibilityRole="button"
-            accessibilityLabel={unread > 0 ? `Taarifa ${unread} mpya` : 'Taarifa'}
-            style={({ pressed }) => [styles.bell, pressed && styles.pressed]}
-          >
-            <Ionicons name="notifications-outline" size={22} color={colors.onPrimary} />
-            {unread > 0 ? (
-              <View style={styles.bellBadge}>
-                <Text style={styles.bellCount}>{unread > 9 ? '9+' : unread}</Text>
-              </View>
-            ) : null}
-          </Pressable>
+      <View style={styles.topBar}>
+        <MenuButton />
+        <Image
+          source={require('../../../assets/logo-mark.png')}
+          style={styles.mark}
+          resizeMode="contain"
+          accessible={false}
+        />
+        <View style={styles.brandText}>
+          <Image
+            source={require('../../../assets/wordmark.png')}
+            style={styles.wordmark}
+            resizeMode="contain"
+            accessibilityLabel="Afya Nyumbani"
+          />
+          <Text style={styles.brandTag}>Huduma ya afya mlangoni kwako</Text>
         </View>
 
+        <Pressable
+          onPress={() => router.push('/notifications')}
+          accessibilityRole="button"
+          accessibilityLabel={unread > 0 ? `Taarifa ${unread} mpya` : 'Taarifa'}
+          hitSlop={8}
+          style={({ pressed }) => [pressed && styles.pressed]}
+        >
+          <Ionicons name="notifications-outline" size={23} color={colors.text} />
+          {unread > 0 ? (
+            <View style={styles.bellBadge}>
+              <Text style={styles.bellCount}>{unread > 9 ? '9+' : unread}</Text>
+            </View>
+          ) : null}
+        </Pressable>
+      </View>
+
+      <View style={styles.gutter}>
         <Text style={styles.greeting}>Habari, {user?.name?.split(' ')[0] ?? 'Karibu'}!</Text>
         <Text style={styles.tagline}>Huduma bora ya afya, ukiwa nyumbani kwako.</Text>
-      </LinearGradient>
+      </View>
 
-      <View style={styles.body}>
+      <View style={styles.heroWrap}>
+        <Image
+          source={require('../../../assets/hero.png')}
+          style={[styles.hero, { height: heroHeight }]}
+          resizeMode="cover"
+        />
+
+        {/* The design hangs the button off the foot of the picture,
+            which is what stops the two reading as separate blocks. */}
         <Pressable
           onPress={() => router.push('/book')}
           accessibilityRole="button"
           style={({ pressed }) => [styles.ctaWrap, pressed && styles.pressed]}
         >
           <LinearGradient
-            colors={['#0E7A5F', '#0A5C47']}
+            colors={[colors.primary, colors.primaryDark]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.cta}
           >
             <View style={styles.ctaIcon}>
-              <Ionicons name="calendar" size={19} color={colors.onPrimary} />
+              <Ionicons name="calendar" size={18} color={colors.onPrimary} />
             </View>
             <Text style={styles.ctaText}>Omba ziara ya nyumbani</Text>
-            <Ionicons name="arrow-forward" size={20} color={colors.onPrimary} />
+            <Ionicons name="arrow-forward" size={19} color={colors.onPrimary} />
           </LinearGradient>
         </Pressable>
+      </View>
 
+      <View style={styles.gutter}>
         <ErrorBox error={error} />
 
         <SectionHeader title="Huduma zetu" onPress={() => router.push('/services')} />
 
         <View style={styles.grid}>
-          {services.slice(0, 6).map((service, index) => (
+          {services.slice(0, 6).map((service) => (
             <Pressable
               key={service.id}
               onPress={() => router.push('/book')}
@@ -171,16 +200,6 @@ export default function Home() {
               style={({ pressed }) => [styles.tileWrap, pressed && styles.pressed]}
             >
               <View style={[styles.tile, { backgroundColor: serviceColour(service.name) }]}>
-                {serviceImage(service.name) ? (
-                  <Image
-                    source={serviceImage(service.name)}
-                    style={styles.tilePhoto}
-                    resizeMode="cover"
-                  />
-                ) : null}
-                {/* A wash over the photograph, so the name stays
-                    readable whatever the picture underneath is doing. */}
-                <View style={styles.tileScrim} />
                 <View style={styles.tileIcon}>
                   <Ionicons name={serviceIcon(service.name)} size={19} color="#FFFFFF" />
                 </View>
@@ -194,7 +213,7 @@ export default function Home() {
 
         {featured ? (
           <Pressable
-            onPress={() => router.push('/book')}
+            onPress={() => router.push('/services')}
             accessibilityRole="button"
             style={({ pressed }) => [styles.featured, pressed && styles.pressed]}
           >
@@ -206,25 +225,26 @@ export default function Home() {
               />
             ) : (
               <View
-                style={[styles.featuredImage, styles.featuredFallback, { backgroundColor: featuredColour }]}
+                style={[
+                  styles.featuredImage,
+                  styles.featuredFallback,
+                  { backgroundColor: serviceColour(featured.name) },
+                ]}
               >
-                <Ionicons name={serviceIcon(featured.name)} size={30} color="#FFFFFF" />
+                <Ionicons name={serviceIcon(featured.name)} size={28} color="#FFFFFF" />
               </View>
             )}
 
             <View style={styles.featuredText}>
-              <Text style={styles.featuredLabel}>Huduma maalum</Text>
+              <Text style={styles.featuredLabel}>HUDUMA MAALUM</Text>
               <Text style={styles.featuredTitle}>{featured.name}</Text>
               <Text style={styles.featuredBody} numberOfLines={2}>
-                {featured.description ??
-                  (featured.basePriceTzs
-                    ? `Kuanzia TZS ${Number(featured.basePriceTzs).toLocaleString('en-US')}`
-                    : 'Huduma ya karibu, nyumbani kwako.')}
+                {featured.description ?? 'Huduma ya karibu, nyumbani kwako.'}
               </Text>
             </View>
 
             <View style={styles.featuredArrow}>
-              <Ionicons name="arrow-forward" size={18} color={colors.onPrimary} />
+              <Ionicons name="arrow-forward" size={17} color={colors.onPrimary} />
             </View>
           </Pressable>
         ) : null}
@@ -235,47 +255,58 @@ export default function Home() {
           <Pressable
             onPress={() => router.push('/appointments')}
             accessibilityRole="button"
-            style={({ pressed }) => [styles.appointment, pressed && styles.pressed]}
+            style={({ pressed }) => [styles.visitCard, pressed && styles.pressed]}
           >
-            <View style={styles.appointmentIcon}>
-              <Ionicons name="medkit" size={20} color="#3B82F6" />
+            <View
+              style={[
+                styles.visitIcon,
+                { backgroundColor: `${serviceColour(upcoming.service?.name)}1A` },
+              ]}
+            >
+              <Ionicons
+                name={serviceIcon(upcoming.service?.name)}
+                size={19}
+                color={serviceColour(upcoming.service?.name)}
+              />
             </View>
-            <View style={styles.appointmentText}>
-              <Text style={styles.appointmentTitle} numberOfLines={1}>
-                {upcoming.locationAddress}
+
+            <View style={styles.visitText}>
+              <Text style={styles.visitTitle} numberOfLines={1}>
+                {upcoming.service?.name ?? 'Ziara ya nyumbani'}
               </Text>
-              <Text style={styles.appointmentWhen}>
-                {new Date(upcoming.scheduledAt).toLocaleString('sw-TZ')}
-              </Text>
+              <Text style={styles.muted}>{when(upcoming.scheduledAt)}</Text>
             </View>
-            <View style={styles.pill}>
-              <Text style={styles.pillText}>{STATUS_SW[upcoming.status] ?? upcoming.status}</Text>
+
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{STATUS_SW[upcoming.status] ?? upcoming.status}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={17} color={colors.subtle} />
+            <Ionicons name="chevron-forward" size={18} color={colors.subtle} />
           </Pressable>
         ) : (
-          <View style={styles.empty}>
-            <Text style={styles.emptyText}>
-              Huna ziara inayokuja. Omba muuguzi kwa kitufe hapo juu.
-            </Text>
+          <View style={styles.visitCard}>
+            <View style={[styles.visitIcon, { backgroundColor: colors.primaryLight }]}>
+              <Ionicons name="calendar-outline" size={19} color={colors.primary} />
+            </View>
+            <View style={styles.visitText}>
+              <Text style={styles.visitTitle}>Huna ziara inayokuja</Text>
+              <Text style={styles.muted}>Omba muuguzi kwa kitufe hapo juu.</Text>
+            </View>
           </View>
         )}
 
-        <View style={styles.shortcutRow}>
-          <Shortcut
+        <View style={styles.quickRow}>
+          <QuickCard
             icon="calendar-outline"
-            tint="#EAF2FE"
-            colour="#3B82F6"
+            tint="#3B82F6"
             title="Ziara zangu"
-            subtitle="Ona ziara zote"
+            hint="Ona ziara zote"
             onPress={() => router.push('/appointments')}
           />
-          <Shortcut
+          <QuickCard
             icon="headset-outline"
-            tint="#E6F2EE"
-            colour={colors.primary}
+            tint={colors.primary}
             title="Msaada"
-            subtitle="Una swali? Uliza"
+            hint="Una swali? Uliza"
             onPress={() => router.push('/ask')}
           />
         </View>
@@ -288,28 +319,30 @@ function SectionHeader({ title, onPress }) {
   return (
     <View style={styles.sectionRow}>
       <Text style={styles.section}>{title}</Text>
-      <Pressable onPress={onPress} accessibilityRole="button" style={styles.viewAll}>
-        <Text style={styles.viewAllText}>Zote</Text>
-        <Ionicons name="arrow-forward" size={13} color={colors.primary} />
+      <Pressable onPress={onPress} accessibilityRole="button" hitSlop={8}>
+        <View style={styles.viewAll}>
+          <Text style={styles.viewAllText}>Zote</Text>
+          <Ionicons name="arrow-forward" size={13} color={colors.primary} />
+        </View>
       </Pressable>
     </View>
   );
 }
 
-function Shortcut({ icon, tint, colour, title, subtitle, onPress }) {
+function QuickCard({ icon, tint, title, hint, onPress }) {
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      style={({ pressed }) => [styles.shortcut, pressed && styles.pressed]}
+      style={({ pressed }) => [styles.quickCard, pressed && styles.pressed]}
     >
-      <View style={[styles.shortcutIcon, { backgroundColor: tint }]}>
-        <Ionicons name={icon} size={18} color={colour} />
+      <View style={[styles.quickIcon, { backgroundColor: `${tint}1A` }]}>
+        <Ionicons name={icon} size={18} color={tint} />
       </View>
-      <View style={styles.shortcutText}>
-        <Text style={styles.shortcutTitle}>{title}</Text>
-        <Text style={styles.shortcutSubtitle} numberOfLines={1}>
-          {subtitle}
+      <View style={styles.quickText}>
+        <Text style={styles.quickTitle}>{title}</Text>
+        <Text style={styles.quickHint} numberOfLines={1}>
+          {hint}
         </Text>
       </View>
     </Pressable>
@@ -317,58 +350,62 @@ function Shortcut({ icon, tint, colour, title, subtitle, onPress }) {
 }
 
 const styles = StyleSheet.create({
-  content: { flexGrow: 1, paddingBottom: spacing.xl, backgroundColor: colors.bg },
-  pressed: { opacity: 0.8 },
+  content: { flexGrow: 1, paddingTop: spacing.md, paddingBottom: spacing.xl },
+  gutter: { paddingHorizontal: spacing.md },
+  pressed: { opacity: 0.75 },
+  muted: { ...type.small, color: colors.muted, marginTop: 2 },
 
-  hero: {
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs + 2,
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl + spacing.md,
-    borderBottomLeftRadius: radius.xl,
-    borderBottomRightRadius: radius.xl,
+    marginBottom: spacing.md,
   },
-  heroTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
-  brand: { flex: 1 },
-  wordmark: { width: 118, height: 48 },
-  brandTag: { color: colors.onPrimary, fontSize: 11, opacity: 0.85, marginTop: 0 },
-  bell: { padding: spacing.xs },
+  mark: { width: 40, height: 28 },
+  brandText: { flex: 1 },
+  wordmark: { width: 92, height: 37, alignSelf: 'flex-start' },
+  brandTag: { ...type.tiny, fontSize: 9, color: colors.muted, marginTop: -3 },
   bellBadge: {
     position: 'absolute',
-    top: 0,
-    right: 0,
+    top: -4,
+    right: -5,
     minWidth: 17,
     height: 17,
     borderRadius: 9,
     paddingHorizontal: 4,
-    backgroundColor: colors.brandOrange,
+    backgroundColor: colors.danger,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  bellCount: { color: '#FFFFFF', fontSize: 10, fontFamily: font.extrabold },
+  bellCount: { color: '#FFFFFF', fontSize: 10, fontFamily: font.bold },
 
-  greeting: { color: colors.onPrimary, fontSize: 23, fontFamily: font.extrabold, marginTop: spacing.md },
-  tagline: { color: colors.onPrimary, fontSize: 13, opacity: 0.9, marginTop: 4, lineHeight: 18 },
+  greeting: { ...type.display, color: colors.text },
+  tagline: { ...type.body, color: colors.muted, marginTop: 2 },
 
-  body: { paddingHorizontal: spacing.md, marginTop: -spacing.lg - spacing.xs },
-
-  ctaWrap: { borderRadius: radius.lg, ...shadow.card, marginBottom: spacing.md },
+  // The button hangs below the picture, so the wrapper leaves room for
+  // the half that overlaps.
+  heroWrap: { marginTop: spacing.md, marginBottom: spacing.xxl },
+  hero: { width: '100%', borderRadius: radius.xl },
+  ctaWrap: { position: 'absolute', left: spacing.md, right: spacing.md, bottom: -26 },
   cta: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
     borderRadius: radius.lg,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.md - 2,
     paddingHorizontal: spacing.md,
+    ...shadow.lifted,
   },
   ctaIcon: {
-    width: 32,
-    height: 32,
+    width: 34,
+    height: 34,
     borderRadius: radius.sm,
-    backgroundColor: 'rgba(255,255,255,0.18)',
+    backgroundColor: 'rgba(255,255,255,0.22)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  ctaText: { flex: 1, color: colors.onPrimary, fontSize: 16, fontFamily: font.bold },
+  ctaText: { flex: 1, ...type.bodyStrong, color: colors.onPrimary },
 
   sectionRow: {
     flexDirection: 'row',
@@ -377,23 +414,19 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
-  section: { fontSize: 18, fontFamily: font.extrabold, color: colors.text },
-  viewAll: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  viewAllText: { color: colors.primary, fontFamily: font.semibold, fontSize: 13 },
+  section: { ...type.section, color: colors.text },
+  viewAll: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  viewAllText: { ...type.label, color: colors.primary },
 
-  grid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -spacing.xs / 2 },
-  tileWrap: { width: '33.333%', paddingHorizontal: spacing.xs / 2, marginBottom: spacing.sm },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  tileWrap: { width: '31.5%', flexGrow: 1 },
   tile: {
     borderRadius: radius.lg,
     padding: spacing.sm,
-    minHeight: 112,
+    minHeight: 104,
     justifyContent: 'space-between',
-    // The photograph is positioned absolutely inside, so it has to be
-    // clipped to the rounded corner rather than spilling past it.
-    overflow: 'hidden',
+    ...shadow.card,
   },
-  tilePhoto: { ...StyleSheet.absoluteFillObject, width: undefined, height: undefined },
-  tileScrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(8,32,25,0.42)' },
   tileIcon: {
     width: 32,
     height: 32,
@@ -402,98 +435,81 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tileText: { color: '#FFFFFF', fontSize: 12, fontFamily: font.bold, lineHeight: 15 },
+  tileText: { ...type.tiny, fontFamily: font.bold, color: '#FFFFFF' },
 
   featured: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.primaryLight,
     borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
     padding: spacing.sm,
-    marginTop: spacing.xs,
-    ...shadow.card,
+    marginTop: spacing.md,
   },
-  featuredImage: {
-    width: 74,
-    height: 74,
-    borderRadius: radius.md,
-  },
+  featuredImage: { width: 76, height: 76, borderRadius: radius.md },
   featuredFallback: { alignItems: 'center', justifyContent: 'center' },
   featuredText: { flex: 1 },
-  featuredLabel: { fontSize: 11, color: colors.primary, fontFamily: font.bold },
-  featuredTitle: { fontSize: 16, fontFamily: font.extrabold, color: colors.text, marginTop: 1 },
-  featuredBody: { fontSize: 12, color: colors.muted, marginTop: 2, lineHeight: 17 },
+  featuredLabel: { ...type.tiny, fontSize: 9, color: colors.muted, letterSpacing: 0.8 },
+  featuredTitle: { ...type.bodyStrong, fontFamily: font.bold, color: colors.text, marginTop: 1 },
+  featuredBody: { ...type.small, color: colors.muted, marginTop: 1 },
   featuredArrow: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  appointment: {
+  visitCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.hairline,
     padding: spacing.sm + 2,
     ...shadow.card,
   },
-  appointmentIcon: {
-    width: 42,
-    height: 42,
+  visitIcon: {
+    width: 40,
+    height: 40,
     borderRadius: radius.md,
-    backgroundColor: '#EAF2FE',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  appointmentText: { flex: 1 },
-  appointmentTitle: { fontSize: 14, fontFamily: font.bold, color: colors.text },
-  appointmentWhen: { fontSize: 12, color: colors.muted, marginTop: 1 },
-  pill: {
+  visitText: { flex: 1 },
+  visitTitle: { ...type.bodyStrong, color: colors.text },
+  badge: {
     backgroundColor: colors.successBg,
     borderRadius: radius.pill,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
   },
-  pillText: { color: colors.primary, fontSize: 11, fontFamily: font.bold },
+  badgeText: { ...type.tiny, fontSize: 10, fontFamily: font.bold, color: colors.primary },
 
-  empty: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
-  },
-  emptyText: { fontSize: 13, color: colors.muted, lineHeight: 19 },
-
-  shortcutRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
-  shortcut: {
+  quickRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
+  quickCard: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.xs + 2,
     backgroundColor: colors.surface,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.hairline,
     padding: spacing.sm + 2,
+    ...shadow.card,
   },
-  shortcutIcon: {
+  quickIcon: {
     width: 34,
     height: 34,
     borderRadius: radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  shortcutText: { flex: 1 },
-  shortcutTitle: { fontSize: 13, fontFamily: font.bold, color: colors.text },
-  shortcutSubtitle: { fontSize: 11, color: colors.muted, marginTop: 1 },
+  quickText: { flex: 1 },
+  quickTitle: { ...type.label, color: colors.text },
+  quickHint: { ...type.tiny, fontSize: 10, color: colors.muted, marginTop: 1 },
 });
