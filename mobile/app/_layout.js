@@ -12,6 +12,7 @@ import {
   PlusJakartaSans_700Bold,
   PlusJakartaSans_800ExtraBold,
 } from '@expo-google-fonts/plus-jakarta-sans';
+import { I18nProvider } from '../lib/i18n';
 import { SessionProvider } from '../lib/session';
 import { colors, font, type } from '../lib/theme';
 
@@ -46,6 +47,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
+        <I18nProvider>
         <SessionProvider>
           <StatusBar style="light" />
           <Stack
@@ -66,6 +68,7 @@ export default function RootLayout() {
             <Stack.Screen name="(app)" options={{ headerShown: false }} />
           </Stack>
         </SessionProvider>
+        </I18nProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

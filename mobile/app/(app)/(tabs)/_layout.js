@@ -1,12 +1,15 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, font } from '../../../lib/theme';
+import { useI18n } from '../../../lib/i18n';
 
 // Bottom tabs, as the supplied design shows: the four things somebody
 // opens the app to do. Everything else — symptoms, family, cycles,
 // medicines, invoices, Afya AI — lives in the drawer above this, so the
 // tab bar stays four wide instead of becoming a menu.
 export default function TabsLayout() {
+  const { t } = useI18n();
+
   return (
     <Tabs
       screenOptions={{
@@ -26,14 +29,14 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Mwanzo',
+          title: t('nav.home'),
           tabBarIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="book"
         options={{
-          title: 'Omba',
+          title: t('nav.book'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="calendar-outline" size={size} color={color} />
           ),
@@ -42,7 +45,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="appointments"
         options={{
-          title: 'Ziara',
+          title: t('nav.visits'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="list-outline" size={size} color={color} />
           ),
@@ -51,7 +54,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Wasifu',
+          title: t('nav.profile'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />
           ),

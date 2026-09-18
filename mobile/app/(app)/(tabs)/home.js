@@ -14,9 +14,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   bookings as bookingsApi,
+  content as contentApi,
   notifications as notificationsApi,
   services as servicesApi,
 } from '../../../lib/api';
+import { useI18n } from '../../../lib/i18n';
 import { useSession } from '../../../lib/session';
 import { ErrorBox, MenuButton } from '../../../lib/ui';
 import { colors, font, radius, shadow, spacing, type } from '../../../lib/theme';
@@ -65,6 +67,7 @@ const when = (value) => {
 export default function Home() {
   const router = useRouter();
   const { user } = useSession();
+  const { t, language } = useI18n();
   const { width } = useWindowDimensions();
   const heroHeight = Math.round(Math.min(width * 0.52, 260));
   const tileWidth = (width - spacing.md * 2 - spacing.sm * 2) / 3;
@@ -72,6 +75,7 @@ export default function Home() {
   const [services, setServices] = useState([]);
   const [visits, setVisits] = useState([]);
   const [unread, setUnread] = useState(0);
+  const [tip, setTip] = useState(null);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -86,10 +90,27 @@ export default function Home() {
       setServices(serviceData?.services ?? []);
       setVisits(bookingData?.bookings ?? []);
       setUnread(notificationData?.unread ?? 0);
+
+      // The tip is decoration. It must never be the reason the rest of
+      // the screen fails to load.
+      try {
+        const library = await contentApi.list('tip');
+        const all = library?.items ?? library?.content ?? [];
+        const mine = all.filter((item) => (item.tags ?? []).includes(language));
+        if (mine.length > 0) {
+          // The same tip for everybody on a given day, and a different
+          // one tomorrow. A random pick would change on every refresh,
+          // which is not a daily tip.
+          const day = Math.floor(Date.now() / 86400000);
+          setTip(mine[day % mine.length]);
+        }
+      } catch {
+        setTip(null);
+      }
     } catch (err) {
       setError(err.message);
     }
-  }, []);
+  }, [language]);
 
   useFocusEffect(
     useCallback(() => {
@@ -133,7 +154,7 @@ export default function Home() {
             resizeMode="contain"
             accessibilityLabel="Afya Nyumbani"
           />
-          <Text style={styles.brandTag}>Huduma ya afya mlangoni kwako</Text>
+          <Text style={styles.brandTag}>{t('home.brandTag')}</Text>
         </View>
 
         <Pressable
@@ -155,8 +176,8 @@ export default function Home() {
       </View>
 
       <View style={styles.gutter}>
-        <Text style={styles.greeting}>Habari, {user?.name?.split(' ')[0] ?? 'Karibu'}!</Text>
-        <Text style={styles.tagline}>Huduma bora ya afya, ukiwa nyumbani kwako.</Text>
+        <Text style={styles.greeting}>{t('home.greeting')}, {user?.name?.split(' ')[0] ?? 'Karibu'}!</Text>
+        <Text style={styles.tagline}>{t('home.tagline')}</Text>
       </View>
 
       <View style={styles.heroWrap}>
@@ -182,7 +203,7 @@ export default function Home() {
             <View style={styles.ctaIcon}>
               <Ionicons name="calendar" size={18} color={colors.onPrimary} />
             </View>
-            <Text style={styles.ctaText}>Omba ziara ya nyumbani</Text>
+            <Text style={styles.ctaText}>{t('home.book')}</Text>
             <Ionicons name="arrow-forward" size={19} color={colors.onPrimary} />
           </LinearGradient>
         </Pressable>
@@ -191,7 +212,7 @@ export default function Home() {
       <View style={styles.gutter}>
         <ErrorBox error={error} />
 
-        <SectionHeader title="Huduma zetu" onPress={() => router.push('/services')} />
+        <SectionHeader title={t('home.ourServices')} label={t('common.all')} onPress={() => router.push('/services')} />
 
         <View style={styles.grid}>
           {services.slice(0, 6).map((service) => (
@@ -238,7 +259,7 @@ export default function Home() {
             )}
 
             <View style={styles.featuredText}>
-              <Text style={styles.featuredLabel}>HUDUMA MAALUM</Text>
+              <Text style={styles.featuredLabel}>{t('home.featured')}</Text>
               <Text style={styles.featuredTitle}>{featured.name}</Text>
               <Text style={styles.featuredBody} numberOfLines={2}>
                 {featured.description ?? 'Huduma ya karibu, nyumbani kwako.'}
@@ -251,7 +272,26 @@ export default function Home() {
           </Pressable>
         ) : null}
 
-        <SectionHeader title="Ziara inayofuata" onPress={() => router.push('/appointments')} />
+        {tip ? (
+          <Pressable
+            onPress={() => router.push({ pathname: '/article', params: { slug: tip.slug } })}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.tipCard, pressed && styles.pressed]}
+          >
+            <View style={styles.tipIcon}>
+              <Ionicons name="bulb-outline" size={19} color={colors.brandOrange} />
+            </View>
+            <View style={styles.rowText}>
+              <Text style={styles.tipLabel}>{t('home.tip')}</Text>
+              <Text style={styles.tipTitle} numberOfLines={2}>
+                {tip.title}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={17} color={colors.subtle} />
+          </Pressable>
+        ) : null}
+
+        <SectionHeader title={t('home.nextVisit')} label={t('common.all')} onPress={() => router.push('/appointments')} />
 
         {upcoming ? (
           <Pressable
@@ -290,8 +330,8 @@ export default function Home() {
               <Ionicons name="calendar-outline" size={19} color={colors.primary} />
             </View>
             <View style={styles.visitText}>
-              <Text style={styles.visitTitle}>Huna ziara inayokuja</Text>
-              <Text style={styles.muted}>Omba muuguzi kwa kitufe hapo juu.</Text>
+              <Text style={styles.visitTitle}>{t('home.noVisit')}</Text>
+              <Text style={styles.muted}>{t('home.noVisitHint')}</Text>
             </View>
           </View>
         )}
@@ -300,15 +340,15 @@ export default function Home() {
           <QuickCard
             icon="calendar-outline"
             tint="#3B82F6"
-            title="Ziara zangu"
-            hint="Ona ziara zote"
+            title={t('home.myVisits')}
+            hint={t('home.myVisitsHint')}
             onPress={() => router.push('/appointments')}
           />
           <QuickCard
             icon="headset-outline"
             tint={colors.primary}
-            title="Msaada"
-            hint="Una swali? Uliza"
+            title={t('home.support')}
+            hint={t('home.supportHint')}
             onPress={() => router.push('/ask')}
           />
         </View>
@@ -317,13 +357,13 @@ export default function Home() {
   );
 }
 
-function SectionHeader({ title, onPress }) {
+function SectionHeader({ title, label, onPress }) {
   return (
     <View style={styles.sectionRow}>
       <Text style={styles.section}>{title}</Text>
       <Pressable onPress={onPress} accessibilityRole="button" hitSlop={8}>
         <View style={styles.viewAll}>
-          <Text style={styles.viewAllText}>Zote</Text>
+          <Text style={styles.viewAllText}>{label}</Text>
           <Ionicons name="arrow-forward" size={13} color={colors.primary} />
         </View>
       </Pressable>
@@ -489,6 +529,29 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   badgeText: { ...type.tiny, fontSize: 10, fontFamily: font.bold, color: colors.primary },
+
+  rowText: { flex: 1 },
+  tipCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: '#FFF6EE',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: '#FFE6D2',
+    padding: spacing.sm + 2,
+    marginTop: spacing.md,
+  },
+  tipIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FFEBDA',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tipLabel: { ...type.tiny, fontSize: 9, color: colors.brandOrange, letterSpacing: 0.6 },
+  tipTitle: { ...type.bodyStrong, color: colors.text, marginTop: 1 },
 
   quickRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   quickCard: {

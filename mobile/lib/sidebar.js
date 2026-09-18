@@ -2,6 +2,7 @@ import { createContext, useContext, useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { LANGUAGES, useI18n } from './i18n';
 import { useSession } from './session';
 import { colors, font, spacing } from './theme';
 
@@ -21,18 +22,21 @@ import { colors, font, spacing } from './theme';
 const SidebarContext = createContext(null);
 
 const ITEMS = [
-  { icon: 'home-outline', label: 'Mwanzo', href: '/home' },
-  { icon: 'grid-outline', label: 'Huduma zetu', href: '/services' },
-  { icon: 'calendar-outline', label: 'Omba ziara', href: '/book' },
-  { icon: 'list-outline', label: 'Ziara zangu', href: '/appointments' },
-  { icon: 'chatbubble-ellipses-outline', label: 'Afya AI', href: '/ask' },
-  { icon: 'notifications-outline', label: 'Taarifa', href: '/notifications' },
-  { icon: 'pulse-outline', label: 'Ripoti dalili', href: '/symptoms' },
-  { icon: 'people-outline', label: 'Familia yangu', href: '/family' },
-  { icon: 'calendar-number-outline', label: 'Orbit', href: '/cycles' },
-  { icon: 'medical-outline', label: 'Dawa zangu', href: '/medications' },
-  { icon: 'receipt-outline', label: 'Ankara', href: '/invoices' },
-  { icon: 'person-outline', label: 'Wasifu', href: '/profile' },
+  { icon: 'home-outline', key: 'nav.home', href: '/home' },
+  // Orbit sits third, under the two things somebody opens the app to
+  // do. It is the reason a lot of people will keep the app installed
+  // rather than delete it after one visit, and it was buried ninth.
+  { icon: 'calendar-number-outline', key: 'nav.orbit', href: '/cycles', badge: 'nav.new' },
+  { icon: 'grid-outline', key: 'nav.services', href: '/services' },
+  { icon: 'calendar-outline', key: 'nav.bookVisit', href: '/book' },
+  { icon: 'list-outline', key: 'nav.myVisits', href: '/appointments' },
+  { icon: 'chatbubble-ellipses-outline', key: 'nav.ai', href: '/ask' },
+  { icon: 'notifications-outline', key: 'nav.notifications', href: '/notifications' },
+  { icon: 'pulse-outline', key: 'nav.symptoms', href: '/symptoms' },
+  { icon: 'people-outline', key: 'nav.family', href: '/family' },
+  { icon: 'medical-outline', key: 'nav.medications', href: '/medications' },
+  { icon: 'receipt-outline', key: 'nav.invoices', href: '/invoices' },
+  { icon: 'person-outline', key: 'nav.profile', href: '/profile' },
 ];
 
 export function SidebarProvider({ children }) {
@@ -67,6 +71,7 @@ function Sidebar() {
   const { closeSidebar } = useSidebar();
   const router = useRouter();
   const { user, signOut } = useSession();
+  const { t, language, setLanguage } = useI18n();
 
   function go(href) {
     closeSidebar();
@@ -108,10 +113,44 @@ function Sidebar() {
               style={({ pressed }) => [styles.item, pressed && styles.itemPressed]}
             >
               <Ionicons name={item.icon} size={20} color={colors.primary} />
-              <Text style={styles.itemText}>{item.label}</Text>
+              <Text style={styles.itemText}>{t(item.key)}</Text>
+              {item.badge ? (
+                <View style={styles.itemBadge}>
+                  <Text style={styles.itemBadgeText}>{t(item.badge)}</Text>
+                </View>
+              ) : null}
             </Pressable>
           ))}
         </ScrollView>
+
+        <View style={styles.languageRow}>
+          <Ionicons name="language-outline" size={18} color={colors.muted} />
+          <Text style={styles.languageLabel}>{t('settings.language')}</Text>
+          <View style={styles.languageChoices}>
+            {LANGUAGES.map((option) => (
+              <Pressable
+                key={option.code}
+                onPress={() => setLanguage(option.code)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: language === option.code }}
+                style={({ pressed }) => [
+                  styles.languageChip,
+                  language === option.code && styles.languageChipOn,
+                  pressed && styles.itemPressed,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.languageChipText,
+                    language === option.code && styles.languageChipTextOn,
+                  ]}
+                >
+                  {option.code.toUpperCase()}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
 
         <Pressable
           onPress={() => {
@@ -122,7 +161,7 @@ function Sidebar() {
           style={({ pressed }) => [styles.signOut, pressed && styles.itemPressed]}
         >
           <Ionicons name="log-out-outline" size={20} color={colors.danger} />
-          <Text style={styles.signOutText}>Toka</Text>
+          <Text style={styles.signOutText}>{t('common.signOut')}</Text>
         </Pressable>
       </View>
 
@@ -184,7 +223,36 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 4,
   },
   itemPressed: { backgroundColor: colors.primaryLight },
-  itemText: { fontSize: 15, color: colors.text },
+  itemText: { flex: 1, fontSize: 15, color: colors.text },
+  itemBadge: {
+    backgroundColor: colors.primary,
+    borderRadius: 999,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+  },
+  itemBadgeText: { color: colors.onPrimary, fontSize: 9, fontFamily: font.bold, letterSpacing: 0.4 },
+
+  languageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  languageLabel: { flex: 1, fontSize: 14, color: colors.muted },
+  languageChoices: { flexDirection: 'row', gap: 6 },
+  languageChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  languageChipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+  languageChipText: { fontSize: 11, fontFamily: font.bold, color: colors.muted },
+  languageChipTextOn: { color: colors.onPrimary },
 
   signOut: {
     flexDirection: 'row',
