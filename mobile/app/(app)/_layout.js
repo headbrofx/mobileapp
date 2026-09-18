@@ -42,6 +42,7 @@ export default function AppLayout() {
         <Stack.Screen name="article" options={{ title: 'Soma' }} />
         <Stack.Screen name="medications" options={{ title: 'Dawa zangu' }} />
         <Stack.Screen name="invoices" options={{ title: 'Ankara' }} />
+        <Stack.Screen name="settings" options={{ title: 'Mipangilio' }} />
       </Stack>
     </SidebarProvider>
   );

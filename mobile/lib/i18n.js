@@ -40,6 +40,7 @@ const SW = {
   'nav.family': 'Familia yangu',
   'nav.medications': 'Dawa zangu',
   'nav.invoices': 'Ankara',
+  'nav.settings': 'Mipangilio',
   'nav.new': 'MPYA',
 
   'home.greeting': 'Habari',
@@ -81,6 +82,7 @@ const SW = {
   'orbit.nothingYet': 'Bado hujaandika chochote.',
 
   'settings.language': 'Lugha',
+  'settings.theme': 'Rangi ya app',
 };
 
 const EN = {
@@ -108,6 +110,7 @@ const EN = {
   'nav.family': 'My family',
   'nav.medications': 'My medicines',
   'nav.invoices': 'Invoices',
+  'nav.settings': 'Settings',
   'nav.new': 'NEW',
 
   'home.greeting': 'Hello',
@@ -149,6 +152,7 @@ const EN = {
   'orbit.nothingYet': "You haven't logged anything yet.",
 
   'settings.language': 'Language',
+  'settings.theme': 'App colour',
 };
 
 const DICTIONARIES = { sw: SW, en: EN };

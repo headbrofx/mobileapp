@@ -37,6 +37,7 @@ const ITEMS = [
   { icon: 'medical-outline', key: 'nav.medications', href: '/medications' },
   { icon: 'receipt-outline', key: 'nav.invoices', href: '/invoices' },
   { icon: 'person-outline', key: 'nav.profile', href: '/profile' },
+  { icon: 'settings-outline', key: 'nav.settings', href: '/settings' },
 ];
 
 export function SidebarProvider({ children }) {

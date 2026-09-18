@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="sw">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Afya Nyumbani</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #EFE8E0; }
+    </style>
+  </head>
+  <body>
+    <!--
+      The app is a single page: every route is drawn by JavaScript from
+      index.html, and the host has no rewrite rule, so asking the server
+      for /home or /settings directly gets a 404. That happens on an
+      ordinary refresh, which is not an error anybody should be shown.
+
+      Render serves this file for a path it does not have. Sending it to
+      the root hands the request back to the app, which then decides
+      where it belongs: Home when somebody is signed in, the sign-in
+      screen when they are not.
+    -->
+    <script>
+      window.location.replace('/');
+    </script>
+  </body>
+</html>

@@ -1,10 +1,9 @@
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSession } from '../../../lib/session';
-import { BASE_URL } from '../../../lib/api';
 import { LANGUAGES, useI18n } from '../../../lib/i18n';
 import { MenuButton } from '../../../lib/ui';
 import { colors, font, radius, shadow, spacing, type } from '../../../lib/theme';
@@ -135,7 +134,26 @@ export default function Profile() {
 
       <Text style={styles.groupTitle}>Mipangilio</Text>
       <View style={styles.group}>
-        <View style={[styles.row, styles.rowDivider]}>
+        <Pressable
+          onPress={() => router.push('/settings')}
+          accessibilityRole="button"
+          style={({ pressed }) => [styles.row, styles.rowDivider, pressed && styles.rowPressed]}
+        >
+          <View style={styles.rowIcon}>
+            <Ionicons name="color-palette-outline" size={19} color={colors.primary} />
+          </View>
+          <View style={styles.rowText}>
+            <Text style={styles.rowLabel}>Mipangilio</Text>
+            <Text style={styles.rowHint}>Rangi ya app na lugha</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.subtle} />
+        </Pressable>
+
+        {/* The language chips stay here as well as in Settings. It is
+            the one setting somebody changes in passing, and sending
+            them two screens deep for it would be worse than the
+            duplication. */}
+        <View style={styles.row}>
           <View style={styles.rowIcon}>
             <Ionicons name="language-outline" size={19} color={colors.primary} />
           </View>
@@ -163,21 +181,6 @@ export default function Profile() {
             ))}
           </View>
         </View>
-
-        <Pressable
-          onPress={() => Linking.openURL(`${BASE_URL}/privacy`)}
-          accessibilityRole="link"
-          style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-        >
-          <View style={styles.rowIcon}>
-            <Ionicons name="lock-closed-outline" size={19} color={colors.primary} />
-          </View>
-          <View style={styles.rowText}>
-            <Text style={styles.rowLabel}>Sera ya faragha</Text>
-            <Text style={styles.rowHint}>Taarifa zako zinatumikaje</Text>
-          </View>
-          <Ionicons name="open-outline" size={17} color={colors.subtle} />
-        </Pressable>
       </View>
 
       <Pressable
