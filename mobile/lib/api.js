@@ -1,11 +1,11 @@
 import Constants from 'expo-constants';
-import * as SecureStore from 'expo-secure-store';
+import { deleteItem, getItem, setItem } from './storage';
 
 // One place that knows how to talk to the Afya Nyumbani API.
 //
-// Tokens live in SecureStore rather than AsyncStorage: on Android that
-// is the Keystore, so a refresh token — which is a key to somebody's
-// health records — is not sitting in plain text on the device.
+// Where the tokens live is storage.js's problem: the Keystore on a
+// phone, sessionStorage in a browser, because a browser has no
+// keychain to offer. Everything below is the same either way.
 //
 // The access token is short-lived by design. Rather than making every
 // screen think about that, a 401 here refreshes once and replays the
@@ -25,17 +25,17 @@ export function setSessionLostHandler(handler) {
 }
 
 export async function saveTokens({ accessToken, refreshToken }) {
-  await SecureStore.setItemAsync(ACCESS_KEY, accessToken);
-  await SecureStore.setItemAsync(REFRESH_KEY, refreshToken);
+  await setItem(ACCESS_KEY, accessToken);
+  await setItem(REFRESH_KEY, refreshToken);
 }
 
 export async function clearTokens() {
-  await SecureStore.deleteItemAsync(ACCESS_KEY);
-  await SecureStore.deleteItemAsync(REFRESH_KEY);
+  await deleteItem(ACCESS_KEY);
+  await deleteItem(REFRESH_KEY);
 }
 
 export async function getAccessToken() {
-  return SecureStore.getItemAsync(ACCESS_KEY);
+  return getItem(ACCESS_KEY);
 }
 
 // An error carrying what the API actually said, so a screen can show
@@ -73,7 +73,7 @@ async function parse(response) {
 }
 
 async function refreshSession() {
-  const refreshToken = await SecureStore.getItemAsync(REFRESH_KEY);
+  const refreshToken = await getItem(REFRESH_KEY);
   if (!refreshToken) return false;
 
   const response = await fetch(`${BASE_URL}/api/auth/refresh`, {
@@ -96,7 +96,7 @@ async function send(path, { method = 'GET', body, auth = true, retrying = false 
   const headers = { 'Content-Type': 'application/json' };
 
   if (auth) {
-    const token = await SecureStore.getItemAsync(ACCESS_KEY);
+    const token = await getItem(ACCESS_KEY);
     if (token) headers.Authorization = `Bearer ${token}`;
   }
 

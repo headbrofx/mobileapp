@@ -20,6 +20,8 @@
       "package": "com.afyanyumbani.app"
     },
     "web": {
+      "bundler": "metro",
+      "output": "single",
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
