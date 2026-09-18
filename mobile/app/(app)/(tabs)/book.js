@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { bookings, familyMembers, services as servicesApi } from '../../../lib/api';
 import { Card, ErrorBox, Field, MenuButton } from '../../../lib/ui';
-import { colors, font, radius, shadow, spacing } from '../../../lib/theme';
+import { colors, font, radius, shadow, spacing, type } from '../../../lib/theme';
 import { serviceColour, serviceIcon, serviceTint } from '../../../lib/services-meta';
 
 // Requesting a home visit, as the design lays it out: four steps with a
@@ -342,10 +342,17 @@ function ServiceRow({ service, selected, onPress }) {
       </View>
       <View style={styles.rowText}>
         <Text style={styles.serviceName}>{service.name}</Text>
-        <Text style={styles.muted} numberOfLines={2}>
-          {service.basePriceTzs ? `Kuanzia ${tzs(service.basePriceTzs)}` : service.description}
-          {service.durationMinutes ? ` · dakika ${service.durationMinutes}` : ''}
-        </Text>
+        {service.description ? (
+          <Text style={styles.muted} numberOfLines={2}>
+            {service.description}
+          </Text>
+        ) : null}
+        {service.basePriceTzs ? (
+          <Text style={styles.rowPrice}>
+            Kuanzia {tzs(service.basePriceTzs)}
+            {service.durationMinutes ? ` · dakika ${service.durationMinutes}` : ''}
+          </Text>
+        ) : null}
       </View>
       <Ionicons
         name={selected ? 'checkmark-circle' : 'ellipse-outline'}
@@ -476,6 +483,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   serviceRowSelected: {
+    backgroundColor: colors.primaryLight,
     borderColor: colors.primary,
     borderWidth: 2,
     backgroundColor: colors.primaryLight,
@@ -483,12 +491,13 @@ const styles = StyleSheet.create({
   serviceName: { fontSize: 15, fontFamily: font.semibold, color: colors.text },
 
   rowIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: radius.md,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  rowPrice: { ...type.tiny, fontFamily: font.bold, color: colors.primary, marginTop: 3 },
   rowText: { flex: 1 },
 
   choice: {
