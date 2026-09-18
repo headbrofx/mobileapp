@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LANGUAGES, useI18n } from './i18n';
@@ -67,6 +67,13 @@ export function useSidebar() {
   return context;
 }
 
+// Two letters at most: a long name in a 40px circle is a smear.
+function initials(name) {
+  const parts = (name ?? '').trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  return (parts[0][0] + (parts[1]?.[0] ?? '')).toUpperCase();
+}
+
 function Sidebar() {
   const { closeSidebar } = useSidebar();
   const router = useRouter();
@@ -82,12 +89,12 @@ function Sidebar() {
     <View style={styles.overlay}>
       <View style={styles.panel}>
         <View style={styles.header}>
-          <Image
-            source={require('../assets/logo-mark.png')}
-            style={styles.mark}
-            resizeMode="contain"
-            accessible={false}
-          />
+          {/* The user, not the logo. The house-and-stethoscope mark
+              used to sit here; with it gone from the rest of the app
+              this row is better served by whose account it is. */}
+          <View style={styles.avatar} accessible={false}>
+            <Text style={styles.avatarText}>{initials(user?.name)}</Text>
+          </View>
           <View style={styles.headerText}>
             <Text style={styles.name} numberOfLines={1}>
               {user?.name ?? 'Karibu'}
@@ -210,7 +217,15 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
     marginBottom: spacing.xs,
   },
-  mark: { width: 44, height: 31 },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: { fontFamily: font.bold, fontSize: 15, color: colors.primary },
   headerText: { flex: 1 },
   name: { fontSize: 16, fontFamily: font.bold, color: colors.text },
   phone: { fontSize: 13, color: colors.muted, marginTop: 1 },

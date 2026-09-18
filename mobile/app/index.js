@@ -1,5 +1,6 @@
 import { Redirect } from 'expo-router';
-import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { Wordmark } from '../lib/brand';
 import { useSession } from '../lib/session';
 import { colors, spacing } from '../lib/theme';
 
@@ -15,12 +16,7 @@ export default function Index() {
   if (loading) {
     return (
       <View style={styles.container}>
-        <Image
-          source={require('../assets/wordmark.png')}
-          style={styles.wordmark}
-          resizeMode="contain"
-          accessibilityLabel="Afya Nyumbani"
-        />
+        <Wordmark size={34} align="center" style={styles.wordmark} />
         <ActivityIndicator color={colors.primary} />
       </View>
     );
@@ -36,5 +32,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.cream,
   },
-  wordmark: { width: 260, height: 106, marginBottom: spacing.lg },
+  wordmark: { marginBottom: spacing.lg },
 });

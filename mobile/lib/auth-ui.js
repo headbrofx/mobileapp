@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -10,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Wordmark } from './brand';
 import { colors, font, radius, shadow, spacing, type } from './theme';
 
 // The pieces the sign-in and sign-up screens are built from.
@@ -21,11 +21,10 @@ import { colors, font, radius, shadow, spacing, type } from './theme';
 
 // --- Brand header -----------------------------------------------------
 //
-// The design draws a flat house-and-heart mark with clean two-tone
-// lettering. That is not the logo this business owns — theirs is the
-// orange house with a stethoscope and the raised lettering underneath.
-// The layout here follows the design; the artwork is the real one,
-// because inventing a logo is not mine to do.
+// The design draws the name in clean two-tone lettering with the
+// tagline beneath. That is what this is now: the house-and-stethoscope
+// mark has gone at the owner's request, and the name is set as text so
+// nothing can crop it. See lib/brand.js for why the picture went.
 
 export function BrandHeader({ onBack }) {
   return (
@@ -42,27 +41,9 @@ export function BrandHeader({ onBack }) {
         </Pressable>
       ) : null}
 
-      <Image
-        source={require('../assets/logo-mark.png')}
-        style={styles.mark}
-        resizeMode="contain"
-        accessible={false}
-      />
-
-      {/* The wordmark and the tagline are one block, sized to the
-          wordmark rather than to the row. Letting the tagline stretch
-          across the remaining width is what made the header look like
-          three loose pieces instead of a logo. */}
       <View style={styles.brandText}>
-        <Image
-          source={require('../assets/wordmark.png')}
-          style={styles.wordmark}
-          resizeMode="contain"
-          accessibilityLabel="Afya Nyumbani"
-        />
-        <Text style={styles.tagline} numberOfLines={2}>
-          Huduma bora ya afya, ndani ya nyumba yako.
-        </Text>
+        <Wordmark size={28} />
+        <Text style={styles.tagline}>Huduma bora ya afya, ndani ya nyumba yako.</Text>
       </View>
     </View>
   );
@@ -269,13 +250,8 @@ const styles = StyleSheet.create({
 
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs + 2 },
   back: { paddingRight: spacing.xs },
-  // 1.43:1 and 2.45:1 are the artwork's own ratios. Boxes that do not
-  // match them make 'contain' letterbox the logo into a sliver, which
-  // is what the first attempt did.
-  mark: { width: 54, height: 38 },
-  brandText: { alignItems: 'flex-start' },
-  wordmark: { width: 124, height: 50 },
-  tagline: { ...type.tiny, color: colors.muted, marginTop: -2, width: 158 },
+  brandText: { flex: 1, alignItems: 'flex-start' },
+  tagline: { ...type.tiny, color: colors.muted, marginTop: 2 },
 
   fieldWrap: { marginBottom: spacing.md },
   label: { ...type.label, color: colors.text, marginBottom: spacing.xs },

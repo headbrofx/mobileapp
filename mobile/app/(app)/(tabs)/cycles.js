@@ -12,9 +12,9 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { content as contentApi, cycles as cyclesApi, familyMembers } from '../../lib/api';
-import { Card, ErrorBox } from '../../lib/ui';
-import { colors, font, radius, shadow, spacing } from '../../lib/theme';
+import { content as contentApi, cycles as cyclesApi, familyMembers } from '../../../lib/api';
+import { Card, ErrorBox, ScreenHeader } from '../../../lib/ui';
+import { colors, font, radius, shadow, spacing } from '../../../lib/theme';
 
 // Orbit — period tracking, on a calendar.
 //
@@ -177,6 +177,10 @@ export default function Cycles() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
+      {/* Orbit is a tab now, so it carries its own header: the stack
+          header that used to sit above it is gone. */}
+      <ScreenHeader title="Orbit" subtitle="Mzunguko wako na elimu ya afya ya uzazi" />
+
       <ErrorBox error={error} />
 
       <CountdownCard insights={insights} />
@@ -653,7 +657,7 @@ function formatDate(dateOnly) {
 }
 
 const styles = StyleSheet.create({
-  content: { flexGrow: 1, padding: spacing.md, paddingBottom: spacing.xl },
+  content: { flexGrow: 1, padding: spacing.md, paddingTop: spacing.sm, paddingBottom: spacing.xl },
   pressed: { opacity: 0.75 },
   disabled: { opacity: 0.5 },
   muted: { fontSize: 13, color: colors.muted, marginTop: 2 },

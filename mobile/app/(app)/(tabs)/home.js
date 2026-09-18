@@ -21,6 +21,7 @@ import {
 import { useI18n } from '../../../lib/i18n';
 import { useSession } from '../../../lib/session';
 import { ErrorBox, MenuButton } from '../../../lib/ui';
+import { Wordmark } from '../../../lib/brand';
 import { colors, font, radius, shadow, spacing, type } from '../../../lib/theme';
 import { serviceColour, serviceIcon, serviceImage } from '../../../lib/services-meta';
 
@@ -68,9 +69,15 @@ export default function Home() {
   const router = useRouter();
   const { user } = useSession();
   const { t, language } = useI18n();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const heroHeight = Math.round(Math.min(width * 0.52, 260));
   const tileWidth = (width - spacing.md * 2 - spacing.sm * 2) / 3;
+  // The tiles are sized from the screen, not from a fixed number. A
+  // 640-tall budget Android and an 850-tall Pro Max both get two rows
+  // that fill their share of the page instead of one looking cramped
+  // and the other leaving a gap under it. Clamped so the picture cannot
+  // become a postage stamp on a small phone or a poster on a tablet.
+  const tileHeight = Math.round(Math.min(Math.max(height * 0.125, 88), 132));
 
   const [services, setServices] = useState([]);
   const [visits, setVisits] = useState([]);
@@ -141,19 +148,8 @@ export default function Home() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <View style={styles.topBar}>
-        <Image
-          source={require('../../../assets/logo-mark.png')}
-          style={styles.mark}
-          resizeMode="contain"
-          accessible={false}
-        />
         <View style={styles.brandText}>
-          <Image
-            source={require('../../../assets/wordmark.png')}
-            style={styles.wordmark}
-            resizeMode="contain"
-            accessibilityLabel="Afya Nyumbani"
-          />
+          <Wordmark size={21} />
           <Text style={styles.brandTag}>{t('home.brandTag')}</Text>
         </View>
 
@@ -222,7 +218,12 @@ export default function Home() {
               accessibilityRole="button"
               style={({ pressed }) => [{ width: tileWidth }, pressed && styles.pressed]}
             >
-              <View style={[styles.tile, { backgroundColor: serviceColour(service.name) }]}>
+              <View
+                style={[
+                  styles.tile,
+                  { height: tileHeight, backgroundColor: serviceColour(service.name) },
+                ]}
+              >
                 <View style={styles.tileIcon}>
                   <Ionicons name={serviceIcon(service.name)} size={19} color="#FFFFFF" />
                 </View>
@@ -404,10 +405,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     marginBottom: spacing.md,
   },
-  mark: { width: 40, height: 28 },
   brandText: { flex: 1 },
-  wordmark: { width: 92, height: 37, alignSelf: 'flex-start' },
-  brandTag: { ...type.tiny, fontSize: 9, color: colors.muted, marginTop: -3 },
+  brandTag: { ...type.tiny, fontSize: 10, color: colors.muted, marginTop: 1 },
   bellBadge: {
     position: 'absolute',
     top: -4,
@@ -464,7 +463,6 @@ const styles = StyleSheet.create({
   tile: {
     borderRadius: radius.lg,
     padding: spacing.sm,
-    minHeight: 94,
     justifyContent: 'space-between',
     ...shadow.card,
   },

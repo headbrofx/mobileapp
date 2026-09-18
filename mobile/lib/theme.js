@@ -1,37 +1,48 @@
 import { Dimensions, Platform } from 'react-native';
 
-// The palette, taken from the design the owner supplied.
+// The palette.
 //
-// A note on how this got here, because it changed twice. The first
-// version used a green I had picked before looking at anything. The
-// logo turned out to be orange and blue, so it moved to those. Then the
-// design arrived and it is green after all — so green it is, and the
-// logo's colours stay as accents.
+// A note on how this got here, because it has changed three times. The
+// first version used a green I had picked before looking at anything.
+// The logo turned out to be orange and blue, so it moved to those. Then
+// the design arrived and it was green, so green it was. Now the owner
+// has asked to see orange, which is where the logo started.
 //
-// Green happens to be the safest of the three for this app. The
-// emergency panel is red, and red beside green is as far apart as this
-// palette gets; red beside orange is the pair somebody with colour
-// blindness cannot separate.
+// Orange costs something, and the cost is paid here rather than on the
+// screens. Red beside orange is the pair somebody with colour blindness
+// cannot separate, and the emergency panel is red. So two things
+// changed alongside the brand colour:
 //
-// Service colours used to live here as a list indexed by position,
-// which is how the same service ended up a different colour on each
-// screen. They now live in services-meta.js, keyed by name.
+//   - danger is darker than it was. Against this orange it is a
+//     difference in lightness, not only in hue, which is the part that
+//     survives colour blindness and a phone in the sun.
+//   - success is no longer the brand colour. While the brand was green,
+//     "done" and "ours" were the same green and nobody noticed. With an
+//     orange brand, green is free to mean one thing: this went through.
+//
+// The orange itself is a deeper cut of the logo's #FD6000. The logo
+// colour reads at 3.07:1 against white, which is below the floor for
+// text; this one reads at 5.09:1, near enough the green it replaces
+// (5.29:1) that nothing on any screen gets harder to read.
+//
+// Service colours live in services-meta.js, keyed by name, which is why
+// the same service is the same colour on every screen.
 
 export const colors = {
-  bg: '#F4F7F6',
+  bg: '#F7F5F3',
   surface: '#FFFFFF',
   // A second surface, so a white card has something to sit on rather
   // than dissolving into the page behind it.
-  surfaceAlt: '#FBFCFC',
-  border: '#E6ECEA',
-  hairline: '#F0F4F3',
-  text: '#101A17',
-  muted: '#64766F',
-  subtle: '#9AA8A3',
+  surfaceAlt: '#FDFBFA',
+  border: '#ECE6E1',
+  hairline: '#F5F0EC',
+  text: '#1A120D',
+  muted: '#76685F',
+  subtle: '#A89B92',
 
-  primary: '#0E7A5F',
-  primaryDark: '#09563F',
-  primaryLight: '#E6F2EE',
+  primary: '#C44200',
+  primaryDark: '#933000',
+  primaryLight: '#FDEDE3',
   onPrimary: '#FFFFFF',
 
   // The logo's own colours, kept for accents.
@@ -40,10 +51,12 @@ export const colors = {
   cream: '#EFE8E0',
 
   // Reserved for emergencies. Nothing decorative uses this, so when a
-  // screen turns this colour it means one thing only.
-  danger: '#B3261E',
-  dangerBg: '#FDEDEC',
+  // screen turns this colour it means one thing only. Darker than the
+  // brand orange on purpose — see the note above.
+  danger: '#8A1008',
+  dangerBg: '#FCEAE8',
 
+  // Green now means finished, and nothing else.
   success: '#0E7A5F',
   successBg: '#E6F2EE',
 };
@@ -115,20 +128,20 @@ export const radius = { sm: 10, md: 16, lg: 20, xl: 26, xxl: 34, pill: 999 };
 export const shadow = {
   card: Platform.select({
     ios: {
-      shadowColor: '#0A2A22',
+      shadowColor: '#2B1A10',
       shadowOpacity: 0.05,
       shadowRadius: 14,
       shadowOffset: { width: 0, height: 4 },
     },
-    default: { elevation: 2, shadowColor: '#0A2A22' },
+    default: { elevation: 2, shadowColor: '#2B1A10' },
   }),
   lifted: Platform.select({
     ios: {
-      shadowColor: '#062018',
+      shadowColor: '#1C0F07',
       shadowOpacity: 0.16,
       shadowRadius: 26,
       shadowOffset: { width: 0, height: 12 },
     },
-    default: { elevation: 8, shadowColor: '#062018' },
+    default: { elevation: 8, shadowColor: '#1C0F07' },
   }),
 };

@@ -12,9 +12,14 @@ import { colors, font } from '../../lib/theme';
 // lib/sidebar.js, which is a Modal this app controls and which can be
 // checked in a browser.
 //
-// The four main destinations carry their own tab bar and their own
+// The five tab destinations carry their own tab bar and their own
 // headers, so the stack stays out of their way. Everything else gets
-// the green header with the menu button on the left.
+// the brand header with the menu button on the left.
+//
+// Orbit and Afya AI moved down into the tab bar and My visits moved up
+// here, at the owner's request. The paths did not change — a route
+// group is not part of the URL — so every link to /cycles, /ask and
+// /appointments still lands where it did.
 
 export default function AppLayout() {
   return (
@@ -30,11 +35,10 @@ export default function AppLayout() {
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="services" options={{ title: 'Chagua huduma' }} />
-        <Stack.Screen name="ask" options={{ title: 'Afya AI' }} />
+        <Stack.Screen name="appointments" options={{ title: 'Ziara zangu' }} />
         <Stack.Screen name="notifications" options={{ title: 'Taarifa' }} />
         <Stack.Screen name="symptoms" options={{ title: 'Ripoti dalili' }} />
         <Stack.Screen name="family" options={{ title: 'Familia yangu' }} />
-        <Stack.Screen name="cycles" options={{ title: 'Orbit' }} />
         <Stack.Screen name="article" options={{ title: 'Soma' }} />
         <Stack.Screen name="medications" options={{ title: 'Dawa zangu' }} />
         <Stack.Screen name="invoices" options={{ title: 'Ankara' }} />

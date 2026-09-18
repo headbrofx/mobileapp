@@ -3,10 +3,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, font } from '../../../lib/theme';
 import { useI18n } from '../../../lib/i18n';
 
-// Bottom tabs, as the supplied design shows: the four things somebody
-// opens the app to do. Everything else — symptoms, family, cycles,
-// medicines, invoices, Afya AI — lives in the drawer above this, so the
-// tab bar stays four wide instead of becoming a menu.
+// Bottom tabs: the five things somebody opens the app to do.
+//
+// This was Home, Book, My visits, Profile. The owner moved Orbit and
+// Afya AI down here and sent My visits up to the menu, and the reasoning
+// is sound: Orbit and the AI are what bring somebody back between
+// visits, and a list of past bookings is something you go looking for
+// rather than something you reach for. My visits is still one tap away —
+// from the menu, and from its own card on Home.
+//
+// Everything else — symptoms, family, medicines, invoices — stays in the
+// menu, so the bar stops at five instead of becoming a second menu.
 export default function TabsLayout() {
   const { t } = useI18n();
 
@@ -23,14 +30,30 @@ export default function TabsLayout() {
           paddingBottom: 8,
           paddingTop: 6,
         },
-        tabBarLabelStyle: { fontSize: 11, fontFamily: font.semibold },
+        // Five labels where there were four. Without the font locked and
+        // a slightly tighter size, "Afya AI" wraps to two lines on a
+        // 360-wide phone and pushes the whole bar out of line.
+        tabBarLabelStyle: { fontSize: 10.5, fontFamily: font.semibold },
+        tabBarAllowFontScaling: false,
+        tabBarItemStyle: { paddingHorizontal: 2 },
       }}
     >
       <Tabs.Screen
         name="home"
         options={{
           title: t('nav.home'),
-          tabBarIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="cycles"
+        options={{
+          title: t('nav.orbit'),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar-number-outline" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -38,16 +61,16 @@ export default function TabsLayout() {
         options={{
           title: t('nav.book'),
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar-outline" size={size} color={color} />
+            <Ionicons name="add-circle-outline" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="appointments"
+        name="ask"
         options={{
-          title: t('nav.visits'),
+          title: t('nav.ai'),
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="list-outline" size={size} color={color} />
+            <Ionicons name="chatbubble-ellipses-outline" size={size} color={color} />
           ),
         }}
       />

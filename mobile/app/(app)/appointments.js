@@ -2,10 +2,10 @@ import { useCallback, useState } from 'react';
 import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { bookings as bookingsApi } from '../../../lib/api';
-import { Card, ErrorBox, ScreenHeader } from '../../../lib/ui';
-import { colors, font, radius, shadow, spacing, type } from '../../../lib/theme';
-import { serviceColour, serviceIcon } from '../../../lib/services-meta';
+import { bookings as bookingsApi } from '../../lib/api';
+import { Card, ErrorBox } from '../../lib/ui';
+import { colors, font, radius, shadow, spacing, type } from '../../lib/theme';
+import { serviceColour, serviceIcon } from '../../lib/services-meta';
 
 // "My Care" from the design: what is coming, who is coming, how far
 // along it is, and what has already happened.
@@ -147,7 +147,10 @@ export default function Appointments() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <ScreenHeader title="Ziara zangu" subtitle="Huduma zako na safari ya matibabu" />
+      {/* No ScreenHeader here any more: this screen left the tab bar
+          and now sits in the stack, which draws its own title and menu
+          button. Two headers is one too many. */}
+      <Text style={styles.subtitle}>Huduma zako na safari ya matibabu</Text>
 
       <ErrorBox error={error} />
 
@@ -408,6 +411,7 @@ function Timeline({ visit }) {
 }
 
 const styles = StyleSheet.create({
+  subtitle: { ...type.small, color: colors.muted, marginBottom: spacing.md },
   content: { flexGrow: 1, padding: spacing.md, paddingBottom: spacing.xl },
   pressed: { opacity: 0.75 },
   disabled: { opacity: 0.5 },
