@@ -276,6 +276,23 @@ describe('Phase 5 — Full lifecycle transitions', () => {
       .send({ reason: 'Changed my mind' });
     expect(cancelAfterComplete.status).toBe(409);
   });
+
+  it('sends the client the nurse’s name and nothing else about them', async () => {
+    // The app names the nurse on the visit card, so the name has to be
+    // in the list response, not only the detail one. The phone and
+    // email must not be: a nested include is exactly where they leak
+    // out by accident, and a client has no business with either.
+    const res = await request(app)
+      .get('/api/bookings')
+      .set('Authorization', `Bearer ${clientToken}`);
+    expect(res.status).toBe(200);
+
+    const booking = res.body.data.bookings.find((item) => item.id === bookingId);
+    expect(booking.staff.user.name).toEqual(expect.any(String));
+    expect(booking.staff.user.phone).toBeUndefined();
+    expect(booking.staff.user.email).toBeUndefined();
+    expect(booking.staff.user.passwordHash).toBeUndefined();
+  });
 });
 
 describe('Phase 5 — Reject, reassign, reschedule, cancel', () => {
