@@ -12,24 +12,27 @@ const router = Router();
 //
 // What it says was written from the schema and the access-control code,
 // not from a template — every claim below is one this codebase actually
-// keeps. Two things are deliberately left as placeholders for the
-// owner: the contact address and the effective date. Publishing
-// somebody's personal email on a public page is their decision, not
-// mine, and a policy dated by a machine that has not been reviewed
-// would be a lie about when it was agreed.
+// keeps.
+//
+// The contact address and effective date were placeholders until the
+// owner supplied them, because publishing an email on a public page is
+// their decision and a policy dated by a machine nobody had read would
+// be a lie about when it was agreed. The address here is the business
+// one they gave for this purpose; the owner's personal address is
+// deliberately not on this page.
 //
 // This is a starting point written by an engineer who knows the system,
 // not legal advice. Tanzania's Personal Data Protection Act 2022 and
 // its regulations apply to this business, and somebody qualified should
 // read this before it goes near a store listing.
 
-const CONTACT_PLACEHOLDER = '[weka barua pepe ya kampuni hapa]';
-const EFFECTIVE_PLACEHOLDER = '[weka tarehe baada ya kuipitia]';
+const CONTACT_EMAIL = 'afyanyumbanicare@gmail.com';
+const EFFECTIVE_DATE = '18 Septemba 2026';
 
 const POLICY = `
 <h1>Sera ya Faragha</h1>
 <p class="lead">Afya Nyumbani Home Care Services Ltd, Dar es Salaam, Tanzania.</p>
-<p class="meta">Inaanza kutumika: ${EFFECTIVE_PLACEHOLDER} &middot; Mawasiliano: ${CONTACT_PLACEHOLDER}</p>
+<p class="meta">Inaanza kutumika: ${EFFECTIVE_DATE} &middot; Mawasiliano: <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
 
 <div class="notice">
   <strong>Rasimu.</strong> Hati hii imeandikwa kutokana na jinsi mfumo
@@ -119,6 +122,13 @@ ni wa kwenda kwa mtu, si wa kuendelea kuitumia app.</p>
 <h2>9. Mabadiliko</h2>
 <p>Sera hii ikibadilika, tutabadilisha tarehe iliyo juu na kuweka toleo
 jipya hapa hapa.</p>
+
+<h2>10. Wasiliana nasi</h2>
+<p>Kwa swali lolote kuhusu taarifa zako, au kutumia haki zako
+zilizoelezwa hapo juu — kuona ulizonazo, kuzirekebisha, au kufuta
+akaunti yako — tuandikie:</p>
+<p><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
+<p>Afya Nyumbani Home Care Services Ltd, Dar es Salaam, Tanzania.</p>
 `;
 
 const PAGE = `<!doctype html>
@@ -138,6 +148,7 @@ const PAGE = `<!doctype html>
   h2 { font-size: 1.1rem; margin: 32px 0 8px; color: #0D408F; }
   .lead { margin: 0; font-weight: 600; }
   .meta { color: #657A71; font-size: 0.9rem; margin-top: 4px; }
+  a { color: #0D408F; }
   .notice {
     background: #FFF3EA; border-left: 4px solid #FD6000;
     padding: 12px 16px; margin: 24px 0; border-radius: 6px; font-size: 0.95rem;
