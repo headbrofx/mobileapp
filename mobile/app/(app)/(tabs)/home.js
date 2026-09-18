@@ -67,6 +67,7 @@ export default function Home() {
   const { user } = useSession();
   const { width } = useWindowDimensions();
   const heroHeight = Math.round(Math.min(width * 0.52, 260));
+  const tileWidth = (width - spacing.md * 2 - spacing.sm * 2) / 3;
 
   const [services, setServices] = useState([]);
   const [visits, setVisits] = useState([]);
@@ -119,7 +120,6 @@ export default function Home() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <View style={styles.topBar}>
-        <MenuButton />
         <Image
           source={require('../../../assets/logo-mark.png')}
           style={styles.mark}
@@ -150,6 +150,8 @@ export default function Home() {
             </View>
           ) : null}
         </Pressable>
+
+        <MenuButton />
       </View>
 
       <View style={styles.gutter}>
@@ -197,7 +199,7 @@ export default function Home() {
               key={service.id}
               onPress={() => router.push('/book')}
               accessibilityRole="button"
-              style={({ pressed }) => [styles.tileWrap, pressed && styles.pressed]}
+              style={({ pressed }) => [{ width: tileWidth }, pressed && styles.pressed]}
             >
               <View style={[styles.tile, { backgroundColor: serviceColour(service.name) }]}>
                 <View style={styles.tileIcon}>
@@ -380,7 +382,7 @@ const styles = StyleSheet.create({
   },
   bellCount: { color: '#FFFFFF', fontSize: 10, fontFamily: font.bold },
 
-  greeting: { ...type.display, color: colors.text },
+  greeting: { ...type.title, fontFamily: font.extrabold, fontSize: type.display.fontSize - 5, color: colors.text },
   tagline: { ...type.body, color: colors.muted, marginTop: 2 },
 
   // The button hangs below the picture, so the wrapper leaves room for
@@ -419,23 +421,22 @@ const styles = StyleSheet.create({
   viewAllText: { ...type.label, color: colors.primary },
 
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  tileWrap: { width: '31.5%', flexGrow: 1 },
   tile: {
     borderRadius: radius.lg,
     padding: spacing.sm,
-    minHeight: 104,
+    minHeight: 94,
     justifyContent: 'space-between',
     ...shadow.card,
   },
   tileIcon: {
-    width: 32,
-    height: 32,
+    width: 30,
+    height: 30,
     borderRadius: radius.sm,
     backgroundColor: 'rgba(255,255,255,0.22)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tileText: { ...type.tiny, fontFamily: font.bold, color: '#FFFFFF' },
+  tileText: { ...type.tiny, fontSize: 10, lineHeight: 13, fontFamily: font.bold, color: '#FFFFFF' },
 
   featured: {
     flexDirection: 'row',
