@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { useSession } from '../../../lib/session';
 import { BASE_URL } from '../../../lib/api';
 import { Card, MenuButton } from '../../../lib/ui';
-import { colors, radius, spacing } from '../../../lib/theme';
+import { colors, font, radius, spacing } from '../../../lib/theme';
 
 // The fourth tab. Everything about the account, plus a way into the
 // screens that are not frequent enough to earn a tab of their own — the
@@ -112,8 +112,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.sm,
   },
-  initials: { fontSize: 26, fontWeight: '700', color: colors.primary },
-  name: { fontSize: 19, fontWeight: '700', color: colors.text },
+  initials: { fontSize: 26, fontFamily: font.bold, color: colors.primary },
+  name: { fontSize: 19, fontFamily: font.bold, color: colors.text },
   phone: { fontSize: 14, color: colors.muted, marginTop: 2 },
 
   list: { padding: 0, overflow: 'hidden' },
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rowText: { flex: 1 },
-  rowLabel: { fontSize: 15, fontWeight: '600', color: colors.text },
+  rowLabel: { fontSize: 15, fontFamily: font.semibold, color: colors.text },
   rowHint: { fontSize: 12, color: colors.muted, marginTop: 1 },
 
   signOut: {
@@ -146,5 +146,5 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     marginTop: spacing.sm,
   },
-  signOutText: { color: colors.danger, fontSize: 15, fontWeight: '600' },
+  signOutText: { color: colors.danger, fontSize: 15, fontFamily: font.semibold },
 });

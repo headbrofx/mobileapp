@@ -3,7 +3,7 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSession } from './session';
-import { colors, spacing } from './theme';
+import { colors, font, spacing } from './theme';
 
 // The sidebar menu.
 //
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   },
   mark: { width: 44, height: 31 },
   headerText: { flex: 1 },
-  name: { fontSize: 16, fontWeight: '700', color: colors.text },
+  name: { fontSize: 16, fontFamily: font.bold, color: colors.text },
   phone: { fontSize: 13, color: colors.muted, marginTop: 1 },
 
   item: {
@@ -195,6 +195,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
-  signOutText: { fontSize: 15, fontWeight: '600', color: colors.danger },
+  signOutText: { fontSize: 15, fontFamily: font.semibold, color: colors.danger },
 });
 

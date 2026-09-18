@@ -15,7 +15,7 @@ import { useSession } from '../lib/session';
 import { clientProfile, familyMembers, healthProfile, BASE_URL } from '../lib/api';
 import { ErrorBox } from '../lib/ui';
 import { BrandFooter, BrandHeader, CheckBox, GradientButton, IconField, Stepper } from '../lib/auth-ui';
-import { colors, radius, spacing } from '../lib/theme';
+import { colors, font, radius, spacing } from '../lib/theme';
 
 // Sign-up as the design lays it out: four steps, one thing at a time.
 //
@@ -357,12 +357,12 @@ const styles = StyleSheet.create({
   content: { padding: spacing.lg, paddingTop: spacing.xl, paddingBottom: spacing.lg },
   pressed: { opacity: 0.75 },
 
-  title: { fontSize: 26, fontWeight: '800', color: colors.text, marginTop: spacing.lg },
+  title: { fontSize: 26, fontFamily: font.extrabold, color: colors.text, marginTop: spacing.lg },
   subtitle: { fontSize: 14, color: colors.muted, marginTop: 3, marginBottom: spacing.lg, lineHeight: 19 },
 
   agreeRow: { marginBottom: spacing.lg },
   agreeText: { fontSize: 13, color: colors.muted, lineHeight: 19 },
-  link: { color: colors.primary, fontWeight: '700', fontSize: 13 },
+  link: { color: colors.primary, fontFamily: font.bold, fontSize: 13 },
   linkRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
 
   note: {
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
   noteText: { flex: 1, fontSize: 12, color: colors.text, lineHeight: 17 },
 
   skip: { alignItems: 'center', paddingVertical: spacing.md },
-  skipText: { color: colors.muted, fontSize: 13, fontWeight: '600' },
+  skipText: { color: colors.muted, fontSize: 13, fontFamily: font.semibold },
 
   done: { alignItems: 'center', paddingVertical: spacing.md },
   doneIcon: {
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.md,
   },
-  doneTitle: { fontSize: 20, fontWeight: '800', color: colors.text },
+  doneTitle: { fontSize: 20, fontFamily: font.extrabold, color: colors.text },
   doneText: {
     fontSize: 14,
     color: colors.muted,

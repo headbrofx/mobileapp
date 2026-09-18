@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { SidebarProvider } from '../../lib/sidebar';
 import { MenuButton } from '../../lib/ui';
-import { colors } from '../../lib/theme';
+import { colors, font } from '../../lib/theme';
 
 // The signed-in half of the app.
 //
@@ -23,7 +23,7 @@ export default function AppLayout() {
         screenOptions={{
           headerStyle: { backgroundColor: colors.primary },
           headerTintColor: colors.onPrimary,
-          headerTitleStyle: { fontWeight: '600' },
+          headerTitleStyle: { fontFamily: font.semibold },
           contentStyle: { backgroundColor: colors.bg },
           headerLeft: () => <MenuButton tint={colors.onPrimary} />,
         }}

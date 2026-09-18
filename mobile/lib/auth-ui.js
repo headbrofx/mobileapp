@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors, radius, shadow, spacing } from './theme';
+import { colors, font, radius, shadow, spacing, type } from './theme';
 
 // The pieces the sign-in and sign-up screens are built from.
 //
@@ -275,10 +275,10 @@ const styles = StyleSheet.create({
   mark: { width: 54, height: 38 },
   brandText: { alignItems: 'flex-start' },
   wordmark: { width: 124, height: 50 },
-  tagline: { fontSize: 10, color: colors.muted, marginTop: -2, lineHeight: 13, width: 150 },
+  tagline: { ...type.tiny, color: colors.muted, marginTop: -2, width: 158 },
 
   fieldWrap: { marginBottom: spacing.md },
-  label: { fontSize: 13, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
+  label: { ...type.label, color: colors.text, marginBottom: spacing.xs },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -286,15 +286,22 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
     borderRadius: radius.md,
-    paddingHorizontal: spacing.sm + 2,
-    minHeight: 52,
+    paddingHorizontal: spacing.sm + 4,
+    minHeight: 56,
+    ...shadow.card,
   },
   inputRowError: { borderColor: colors.danger },
   inputIcon: { marginRight: spacing.xs + 2 },
-  input: { flex: 1, fontSize: 15, color: colors.text, paddingVertical: spacing.sm + 2 },
+  input: {
+    flex: 1,
+    ...type.body,
+    fontSize: type.body.fontSize + 1,
+    color: colors.text,
+    paddingVertical: spacing.sm + 3,
+  },
   eye: { paddingLeft: spacing.xs },
-  hint: { fontSize: 11, color: colors.muted, marginTop: 4 },
-  fieldError: { fontSize: 12, color: colors.danger, marginTop: 4 },
+  hint: { ...type.tiny, color: colors.muted, marginTop: 5 },
+  fieldError: { ...type.tiny, color: colors.danger, marginTop: 5 },
 
   dividerRow: {
     flexDirection: 'row',
@@ -303,20 +310,21 @@ const styles = StyleSheet.create({
     marginVertical: spacing.lg,
   },
   dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
-  dividerText: { fontSize: 12, color: colors.muted },
+  dividerText: { ...type.small, color: colors.subtle },
 
   social: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.xs,
+    gap: spacing.xs + 2,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.md,
-    paddingVertical: spacing.sm + 4,
+    paddingVertical: spacing.md - 1,
+    ...shadow.card,
   },
-  socialText: { fontSize: 14, fontWeight: '600', color: colors.text },
+  socialText: { ...type.bodyStrong, color: colors.text },
 
   gradientButton: {
     flexDirection: 'row',
@@ -325,18 +333,19 @@ const styles = StyleSheet.create({
     gap: spacing.xs + 2,
     borderRadius: radius.pill,
     paddingVertical: spacing.md,
-    minHeight: 54,
-    ...shadow.card,
+    minHeight: 56,
+    ...shadow.lifted,
   },
-  gradientButtonText: { color: colors.onPrimary, fontSize: 16, fontWeight: '700' },
+  gradientButtonText: { fontFamily: font.bold, fontSize: type.body.fontSize + 2, color: colors.onPrimary },
 
   checkRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.xs + 2 },
   checkBox: {
-    width: 20,
-    height: 20,
-    borderRadius: 5,
+    width: 21,
+    height: 21,
+    borderRadius: 6,
     borderWidth: 1.5,
     borderColor: colors.border,
+    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 1,
@@ -351,20 +360,23 @@ const styles = StyleSheet.create({
   stepLineHidden: { backgroundColor: 'transparent' },
   stepLineDone: { backgroundColor: colors.primary },
   stepDot: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepDotOn: { backgroundColor: colors.primary },
-  stepNum: { fontSize: 12, fontWeight: '700', color: colors.muted },
+  stepDotOn: { backgroundColor: colors.primary, ...shadow.card },
+  stepNum: { ...type.tiny, fontFamily: font.bold, color: colors.muted },
   stepNumOn: { color: colors.onPrimary },
-  stepLabel: { fontSize: 10, color: colors.subtle, marginTop: 5, textAlign: 'center' },
-  stepLabelOn: { color: colors.primary, fontWeight: '700' },
+  stepLabel: { ...type.tiny, fontSize: 10, color: colors.subtle, marginTop: 6, textAlign: 'center' },
+  stepLabelOn: { color: colors.primary, fontFamily: font.bold },
 
-  footer: { alignItems: 'center', marginTop: spacing.lg },
+  // marginTop auto is what pins this to the bottom of a screen whose
+  // content does not otherwise reach it. Without it a short page floats
+  // in the middle of a tall phone with dead space underneath.
+  footer: { alignItems: 'center', marginTop: 'auto', paddingTop: spacing.lg },
   skyline: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -376,5 +388,5 @@ const styles = StyleSheet.create({
   footerWords: { flexDirection: 'row', alignItems: 'center' },
   footerWordWrap: { flexDirection: 'row', alignItems: 'center' },
   footerDot: { color: colors.subtle, fontSize: 11, marginHorizontal: spacing.xs },
-  footerWord: { color: colors.muted, fontSize: 11, fontWeight: '600' },
+  footerWord: { ...type.tiny, color: colors.muted },
 });

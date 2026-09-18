@@ -37,7 +37,8 @@
           "backgroundColor": "#EFE8E0"
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-font"
     ],
     "scheme": "afyanyumbani",
     "extra": {

@@ -18,7 +18,7 @@ import {
 } from '../../../lib/api';
 import { useSession } from '../../../lib/session';
 import { ErrorBox, MenuButton } from '../../../lib/ui';
-import { colors, radius, shadow, spacing } from '../../../lib/theme';
+import { colors, font, radius, shadow, spacing } from '../../../lib/theme';
 import { serviceColour, serviceIcon } from '../../../lib/services-meta';
 
 // The home screen, matched to the supplied design element for element:
@@ -326,9 +326,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  bellCount: { color: '#FFFFFF', fontSize: 10, fontWeight: '800' },
+  bellCount: { color: '#FFFFFF', fontSize: 10, fontFamily: font.extrabold },
 
-  greeting: { color: colors.onPrimary, fontSize: 23, fontWeight: '800', marginTop: spacing.md },
+  greeting: { color: colors.onPrimary, fontSize: 23, fontFamily: font.extrabold, marginTop: spacing.md },
   tagline: { color: colors.onPrimary, fontSize: 13, opacity: 0.9, marginTop: 4, lineHeight: 18 },
 
   body: { paddingHorizontal: spacing.md, marginTop: -spacing.lg - spacing.xs },
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  ctaText: { flex: 1, color: colors.onPrimary, fontSize: 16, fontWeight: '700' },
+  ctaText: { flex: 1, color: colors.onPrimary, fontSize: 16, fontFamily: font.bold },
 
   sectionRow: {
     flexDirection: 'row',
@@ -359,9 +359,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
-  section: { fontSize: 18, fontWeight: '800', color: colors.text },
+  section: { fontSize: 18, fontFamily: font.extrabold, color: colors.text },
   viewAll: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  viewAllText: { color: colors.primary, fontWeight: '600', fontSize: 13 },
+  viewAllText: { color: colors.primary, fontFamily: font.semibold, fontSize: 13 },
 
   grid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -spacing.xs / 2 },
   tileWrap: { width: '33.333%', paddingHorizontal: spacing.xs / 2, marginBottom: spacing.sm },
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tileText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700', lineHeight: 15 },
+  tileText: { color: '#FFFFFF', fontSize: 12, fontFamily: font.bold, lineHeight: 15 },
 
   featured: {
     flexDirection: 'row',
@@ -401,8 +401,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   featuredText: { flex: 1 },
-  featuredLabel: { fontSize: 11, color: colors.primary, fontWeight: '700' },
-  featuredTitle: { fontSize: 16, fontWeight: '800', color: colors.text, marginTop: 1 },
+  featuredLabel: { fontSize: 11, color: colors.primary, fontFamily: font.bold },
+  featuredTitle: { fontSize: 16, fontFamily: font.extrabold, color: colors.text, marginTop: 1 },
   featuredBody: { fontSize: 12, color: colors.muted, marginTop: 2, lineHeight: 17 },
   featuredArrow: {
     width: 36,
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   appointmentText: { flex: 1 },
-  appointmentTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
+  appointmentTitle: { fontSize: 14, fontFamily: font.bold, color: colors.text },
   appointmentWhen: { fontSize: 12, color: colors.muted, marginTop: 1 },
   pill: {
     backgroundColor: colors.successBg,
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
   },
-  pillText: { color: colors.primary, fontSize: 11, fontWeight: '700' },
+  pillText: { color: colors.primary, fontSize: 11, fontFamily: font.bold },
 
   empty: {
     backgroundColor: colors.surface,
@@ -472,6 +472,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   shortcutText: { flex: 1 },
-  shortcutTitle: { fontSize: 13, fontWeight: '700', color: colors.text },
+  shortcutTitle: { fontSize: 13, fontFamily: font.bold, color: colors.text },
   shortcutSubtitle: { fontSize: 11, color: colors.muted, marginTop: 1 },
 });

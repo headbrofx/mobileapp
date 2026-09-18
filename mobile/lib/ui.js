@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSidebar } from './sidebar';
-import { colors, radius, spacing } from './theme';
+import { colors, font, radius, shadow, spacing, type } from './theme';
 
 // Small shared pieces, so five screens do not each style a button
 // slightly differently.
@@ -117,43 +117,49 @@ export function ScreenHeader({ title, subtitle, right }) {
 
 const styles = StyleSheet.create({
   fieldWrap: { marginBottom: spacing.md },
-  label: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
+  label: { ...type.label, color: colors.text, marginBottom: spacing.xs },
   input: {
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
-    borderRadius: radius.sm,
+    borderRadius: radius.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
-    fontSize: 16,
+    paddingVertical: spacing.sm + 3,
+    ...type.body,
+    fontSize: type.body.fontSize + 1,
     color: colors.text,
+    minHeight: 52,
+    ...shadow.card,
   },
   inputError: { borderColor: colors.danger },
-  hint: { fontSize: 12, color: colors.muted, marginTop: 4 },
-  fieldError: { fontSize: 12, color: colors.danger, marginTop: 4 },
+  hint: { ...type.tiny, color: colors.muted, marginTop: 5 },
+  fieldError: { ...type.tiny, color: colors.danger, marginTop: 5 },
 
   button: {
     backgroundColor: colors.primary,
-    borderRadius: radius.sm,
-    paddingVertical: spacing.md,
+    borderRadius: radius.pill,
+    paddingVertical: spacing.md - 2,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 50,
+    minHeight: 54,
+    ...shadow.lifted,
   },
-  buttonGhost: { backgroundColor: 'transparent' },
+  buttonGhost: { backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.primary, shadowOpacity: 0, elevation: 0 },
   buttonPressed: { backgroundColor: colors.primaryDark },
   buttonDisabled: { opacity: 0.5 },
-  buttonText: { color: colors.onPrimary, fontSize: 16, fontWeight: '600' },
+  buttonText: { fontFamily: font.bold, fontSize: type.body.fontSize + 2, color: colors.onPrimary },
   buttonTextGhost: { color: colors.primary },
 
   errorBox: {
     backgroundColor: colors.dangerBg,
-    borderRadius: radius.sm,
+    borderRadius: radius.md,
     padding: spacing.md,
     marginBottom: spacing.md,
   },
-  errorText: { color: colors.danger, fontSize: 14 },
+  errorText: { ...type.small, color: colors.danger },
 
+  menuButton: { padding: 4, borderRadius: radius.sm },
+  menuPressed: { opacity: 0.6 },
   screenHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -161,18 +167,16 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   screenHeaderText: { flex: 1 },
-  screenTitle: { fontSize: 22, fontWeight: '800', color: colors.text },
-  screenSubtitle: { fontSize: 13, color: colors.muted, marginTop: 1 },
-
-  menuButton: { padding: 4, borderRadius: radius.sm },
-  menuPressed: { opacity: 0.6 },
+  screenTitle: { ...type.title, color: colors.text },
+  screenSubtitle: { ...type.small, color: colors.muted, marginTop: 2 },
 
   card: {
     backgroundColor: colors.surface,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.hairline,
     padding: spacing.md,
     marginBottom: spacing.sm,
+    ...shadow.card,
   },
 });

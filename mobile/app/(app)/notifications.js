@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { notifications as api } from '../../lib/api';
 import { Card, ErrorBox } from '../../lib/ui';
-import { colors, radius, spacing } from '../../lib/theme';
+import { colors, font, radius, spacing } from '../../lib/theme';
 
 // What the bell on the home screen is counting.
 //
@@ -117,7 +117,7 @@ export default function Notifications() {
 const styles = StyleSheet.create({
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   readAll: { alignSelf: 'flex-end', paddingVertical: spacing.sm },
-  readAllText: { color: colors.primary, fontWeight: '600' },
+  readAllText: { color: colors.primary, fontFamily: font.semibold },
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
   rowUnread: { borderColor: colors.primary },
   icon: {
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   text: { flex: 1 },
-  title: { fontSize: 15, fontWeight: '600', color: colors.text },
+  title: { fontSize: 15, fontFamily: font.semibold, color: colors.text },
   muted: { fontSize: 13, color: colors.muted, marginTop: 2, lineHeight: 19 },
   when: { fontSize: 11, color: colors.subtle, marginTop: 4 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary, marginTop: 6 },

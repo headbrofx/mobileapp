@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
+  useWindowDimensions,
   Platform,
   Pressable,
   ScrollView,
@@ -21,7 +22,7 @@ import {
   GradientButton,
   IconField,
 } from '../lib/auth-ui';
-import { colors, spacing } from '../lib/theme';
+import { colors, radius, spacing, type } from '../lib/theme';
 
 // The sign-in screen from the design.
 //
@@ -44,6 +45,10 @@ import { colors, spacing } from '../lib/theme';
 export default function Login() {
   const router = useRouter();
   const { signIn, signInWithGoogle } = useSession();
+  // The picture keeps the design's proportion on every phone rather
+  // than a height that is right on one and wrong on the rest.
+  const { width } = useWindowDimensions();
+  const heroHeight = Math.round(Math.min(width * 0.52, 260));
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -123,9 +128,13 @@ export default function Login() {
 
         {/* Full bleed, as the design has it: the picture runs to both
             edges and the page's side padding resumes below it. */}
-        <Image source={require('../assets/hero.png')} style={styles.hero} resizeMode="cover" />
+        <Image
+          source={require('../assets/hero.png')}
+          style={[styles.hero, { height: heroHeight }]}
+          resizeMode="cover"
+        />
 
-        <View style={styles.gutter}>
+        <View style={[styles.gutter, styles.form]}>
           <ErrorBox error={error} />
 
           <IconField
@@ -229,31 +238,32 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.bg },
-  content: { paddingTop: spacing.xl, paddingBottom: spacing.lg },
+  // flexGrow, not flex: the content still scrolls when it is taller
+  // than the screen, but stretches to fill when it is shorter — which
+  // is what stops a short page floating with dead space beneath it.
+  content: { flexGrow: 1, paddingTop: spacing.xl, paddingBottom: spacing.lg },
   gutter: { paddingHorizontal: spacing.lg },
+  form: { flex: 1 },
 
   headingRow: { flexDirection: 'row', alignItems: 'flex-start', marginTop: spacing.lg },
   headingText: { flex: 1 },
-  title: { fontSize: 26, fontWeight: '800', color: colors.text },
-  subtitle: { fontSize: 14, color: colors.muted, marginTop: 3, lineHeight: 19 },
+  title: { ...type.display, color: colors.text },
+  subtitle: { ...type.body, color: colors.muted, marginTop: 4 },
   // Stands in for the handwritten accent in the design. The script font
   // it uses is not one this app ships, so this is the nearest thing
   // without adding a download for decoration.
   script: {
-    fontSize: 13,
+    ...type.small,
     fontStyle: 'italic',
-    fontWeight: '700',
     color: colors.brandOrange,
     textAlign: 'right',
-    lineHeight: 17,
-    marginTop: 4,
+    marginTop: 6,
   },
 
   hero: {
     width: '100%',
-    height: 190,
-    borderBottomLeftRadius: 44,
-    borderBottomRightRadius: 44,
+    borderBottomLeftRadius: radius.xxl + 10,
+    borderBottomRightRadius: radius.xxl + 10,
     marginTop: spacing.md,
     marginBottom: spacing.lg,
   },
@@ -264,8 +274,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: spacing.lg,
   },
-  rememberText: { fontSize: 13, color: colors.muted },
-  link: { color: colors.primary, fontWeight: '700', fontSize: 13 },
+  rememberText: { ...type.small, color: colors.muted },
+  link: { ...type.label, color: colors.primary },
   linkRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
 
   registerRow: {
@@ -274,15 +284,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: spacing.lg,
   },
-  muted: { color: colors.muted, fontSize: 13 },
+  muted: { ...type.small, color: colors.muted },
 
   pending: {
     marginTop: spacing.lg,
     padding: spacing.md,
-    borderRadius: 14,
+    borderRadius: radius.lg,
     backgroundColor: colors.primaryLight,
   },
-  pendingTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
-  pendingText: { fontSize: 13, color: colors.muted, marginTop: 2, marginBottom: spacing.md, lineHeight: 18 },
+  pendingTitle: { ...type.section, color: colors.text },
+  pendingText: { ...type.small, color: colors.muted, marginTop: 3, marginBottom: spacing.md },
   cancelGoogle: { alignItems: 'center', paddingTop: spacing.sm },
 });

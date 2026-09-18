@@ -11,7 +11,7 @@ import {
 import { useFocusEffect } from 'expo-router';
 import { familyMembers as familyApi, symptoms as symptomsApi } from '../../lib/api';
 import { Button, Card, ErrorBox, Field } from '../../lib/ui';
-import { colors, radius, spacing } from '../../lib/theme';
+import { colors, font, radius, spacing } from '../../lib/theme';
 
 // Reporting a symptom.
 //
@@ -282,7 +282,7 @@ function Chip({ label, selected, onPress }) {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
-  label: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
+  label: { fontSize: 14, fontFamily: font.semibold, color: colors.text, marginBottom: spacing.xs },
   textarea: { minHeight: 80, textAlignVertical: 'top' },
 
   chips: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: spacing.md, marginRight: -spacing.xs },
@@ -298,22 +298,22 @@ const styles = StyleSheet.create({
   },
   chipSelected: { borderColor: colors.primary, borderWidth: 2, backgroundColor: colors.cream },
   chipText: { fontSize: 14, color: colors.text },
-  chipTextSelected: { color: colors.primary, fontWeight: '600' },
+  chipTextSelected: { color: colors.primary, fontFamily: font.semibold },
 
   heading: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: font.bold,
     color: colors.muted,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
   },
-  cardTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+  cardTitle: { fontSize: 16, fontFamily: font.semibold, color: colors.text },
   muted: { fontSize: 14, color: colors.muted, marginTop: 2, lineHeight: 20 },
 
   okCard: { marginBottom: spacing.lg },
-  okTitle: { fontSize: 16, fontWeight: '600', color: colors.primary },
+  okTitle: { fontSize: 16, fontFamily: font.semibold, color: colors.primary },
 
   emergency: {
     marginBottom: spacing.lg,
@@ -325,11 +325,11 @@ const styles = StyleSheet.create({
   },
   emergencyHeading: {
     fontSize: 13,
-    fontWeight: '800',
+    fontFamily: font.extrabold,
     color: colors.danger,
     letterSpacing: 1.2,
     marginBottom: spacing.sm,
   },
-  emergencyBody: { fontSize: 16, color: colors.danger, lineHeight: 23, fontWeight: '600' },
+  emergencyBody: { fontSize: 16, color: colors.danger, lineHeight: 23, fontFamily: font.semibold },
   emergencyMeta: { fontSize: 12, color: colors.danger, marginTop: spacing.sm, opacity: 0.85 },
 });

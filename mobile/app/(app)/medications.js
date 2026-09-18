@@ -3,7 +3,7 @@ import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native
 import { useFocusEffect } from 'expo-router';
 import { familyMembers, medications as medsApi } from '../../lib/api';
 import { Button, Card, ErrorBox } from '../../lib/ui';
-import { colors, spacing } from '../../lib/theme';
+import { colors, font, spacing } from '../../lib/theme';
 
 // Medicines and the doses coming up.
 //
@@ -153,14 +153,14 @@ const styles = StyleSheet.create({
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   heading: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: font.bold,
     color: colors.muted,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
     marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
-  cardTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+  cardTitle: { fontSize: 16, fontFamily: font.semibold, color: colors.text },
   muted: { fontSize: 14, color: colors.muted, marginTop: 2 },
   row: { flexDirection: 'row', marginTop: spacing.md, marginHorizontal: -spacing.xs },
   rowItem: { flex: 1, marginHorizontal: spacing.xs },

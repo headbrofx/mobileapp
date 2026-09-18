@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { bookings as bookingsApi } from '../../../lib/api';
 import { Card, ErrorBox, ScreenHeader } from '../../../lib/ui';
-import { colors, radius, shadow, spacing } from '../../../lib/theme';
+import { colors, font, radius, shadow, spacing } from '../../../lib/theme';
 import { serviceColour, serviceIcon } from '../../../lib/services-meta';
 
 // "My Care" from the design: what is coming, who is coming, how far
@@ -399,17 +399,17 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.75 },
   disabled: { opacity: 0.5 },
 
-  title: { fontSize: 24, fontWeight: '800', color: colors.text },
+  title: { fontSize: 24, fontFamily: font.extrabold, color: colors.text },
   subtitle: { fontSize: 14, color: colors.muted, marginBottom: spacing.md },
   section: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: font.bold,
     color: colors.text,
     marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
   sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  link: { color: colors.primary, fontWeight: '700', fontSize: 13 },
+  link: { color: colors.primary, fontFamily: font.bold, fontSize: 13 },
 
   card: { ...shadow.card },
   featured: { borderColor: colors.primaryLight, borderWidth: 1.5 },
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: spacing.sm,
   },
-  featuredLabel: { fontSize: 12, fontWeight: '800', color: colors.muted, letterSpacing: 0.6 },
+  featuredLabel: { fontSize: 12, fontFamily: font.extrabold, color: colors.muted, letterSpacing: 0.6 },
 
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   emptyRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm },
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   iconMuted: { backgroundColor: colors.bg },
-  cardTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
+  cardTitle: { fontSize: 15, fontFamily: font.semibold, color: colors.text },
   muted: { fontSize: 13, color: colors.muted, marginTop: 2, lineHeight: 18 },
   notes: {
     fontSize: 13,
@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  detailTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
+  detailTitle: { fontSize: 15, fontFamily: font.bold, color: colors.text },
   avatar: {
     width: 38,
     height: 38,
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { color: colors.onPrimary, fontWeight: '800', fontSize: 14 },
+  avatarText: { color: colors.onPrimary, fontFamily: font.extrabold, fontSize: 14 },
 
   actions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
   actionPrimary: {
@@ -480,7 +480,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     paddingVertical: spacing.sm + 2,
   },
-  actionPrimaryText: { color: colors.onPrimary, fontWeight: '700', fontSize: 14 },
+  actionPrimaryText: { color: colors.onPrimary, fontFamily: font.bold, fontSize: 14 },
   actionGhost: {
     flex: 1,
     flexDirection: 'row',
@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
     borderColor: colors.danger,
     paddingVertical: spacing.sm + 2,
   },
-  actionGhostText: { color: colors.danger, fontWeight: '700', fontSize: 14 },
+  actionGhostText: { color: colors.danger, fontFamily: font.bold, fontSize: 14 },
 
   primaryButton: {
     flexDirection: 'row',
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     paddingVertical: spacing.sm + 2,
   },
-  primaryButtonText: { color: colors.onPrimary, fontWeight: '700', fontSize: 15 },
+  primaryButtonText: { color: colors.onPrimary, fontFamily: font.bold, fontSize: 15 },
 
   badge: {
     backgroundColor: colors.successBg,
@@ -512,7 +512,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   badgeMuted: { backgroundColor: colors.bg },
-  badgeText: { color: colors.primary, fontSize: 11, fontWeight: '700' },
+  badgeText: { color: colors.primary, fontSize: 11, fontFamily: font.bold },
   badgeTextMuted: { color: colors.muted },
 
   stageRow: { flexDirection: 'row', gap: spacing.sm },
@@ -531,6 +531,6 @@ const styles = StyleSheet.create({
   railDone: { backgroundColor: colors.primary },
   stageText: { flex: 1, paddingBottom: spacing.md },
   stageTextLast: { paddingBottom: 0 },
-  stageLabel: { fontSize: 14, fontWeight: '600', color: colors.subtle },
-  stageLabelDone: { color: colors.text, fontWeight: '700' },
+  stageLabel: { fontSize: 14, fontFamily: font.semibold, color: colors.subtle },
+  stageLabelDone: { color: colors.text, fontFamily: font.bold },
 });

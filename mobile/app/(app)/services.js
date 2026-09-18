@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { services as servicesApi } from '../../lib/api';
 import { Card, ErrorBox } from '../../lib/ui';
-import { colors, radius, shadow, spacing } from '../../lib/theme';
+import { colors, font, radius, shadow, spacing } from '../../lib/theme';
 import { serviceColour, serviceIcon } from '../../lib/services-meta';
 
 // The design's "Select a Service" screen: the whole catalogue, one row
@@ -130,10 +130,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rowText: { flex: 1 },
-  name: { fontSize: 15, fontWeight: '700', color: colors.text },
+  name: { fontSize: 15, fontFamily: font.bold, color: colors.text },
   muted: { fontSize: 13, color: colors.muted, marginTop: 2, lineHeight: 18 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
-  price: { fontSize: 12, fontWeight: '700', color: colors.primary },
+  price: { fontSize: 12, fontFamily: font.bold, color: colors.primary },
   duration: { fontSize: 12, color: colors.subtle },
 
   note: {
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primaryLight,
     marginTop: spacing.sm,
   },
-  noteTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
+  noteTitle: { fontSize: 14, fontFamily: font.bold, color: colors.text },
 
   askButton: {
     flexDirection: 'row',
@@ -157,5 +157,5 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
     marginTop: spacing.xs,
   },
-  askText: { color: colors.primary, fontWeight: '700', fontSize: 15 },
+  askText: { color: colors.primary, fontFamily: font.bold, fontSize: 15 },
 });

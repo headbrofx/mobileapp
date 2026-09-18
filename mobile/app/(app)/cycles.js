@@ -14,7 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from 'expo-router';
 import { cycles as cyclesApi, familyMembers } from '../../lib/api';
 import { Card, ErrorBox } from '../../lib/ui';
-import { colors, radius, shadow, spacing } from '../../lib/theme';
+import { colors, font, radius, shadow, spacing } from '../../lib/theme';
 
 // Orbit — period tracking, on a calendar.
 //
@@ -612,7 +612,7 @@ const styles = StyleSheet.create({
   muted: { fontSize: 13, color: colors.muted, marginTop: 2 },
   section: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: font.bold,
     color: colors.text,
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
@@ -627,11 +627,11 @@ const styles = StyleSheet.create({
   countdownLabel: {
     color: colors.onPrimary,
     fontSize: 11,
-    fontWeight: '800',
+    fontFamily: font.extrabold,
     letterSpacing: 2,
     opacity: 0.8,
   },
-  countdownBig: { color: colors.onPrimary, fontSize: 34, fontWeight: '800', marginTop: spacing.xs },
+  countdownBig: { color: colors.onPrimary, fontSize: 34, fontFamily: font.extrabold, marginTop: spacing.xs },
   countdownText: { color: colors.onPrimary, fontSize: 14, opacity: 0.9 },
   countdownMeta: { flexDirection: 'row', gap: spacing.xs, marginTop: spacing.md, flexWrap: 'wrap' },
   chip: {
@@ -643,7 +643,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 5,
   },
-  chipText: { color: colors.onPrimary, fontSize: 12, fontWeight: '600' },
+  chipText: { color: colors.onPrimary, fontSize: 12, fontFamily: font.semibold },
   countdownCaveat: {
     color: colors.onPrimary,
     fontSize: 11,
@@ -660,13 +660,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   arrow: { padding: 4 },
-  calendarTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
+  calendarTitle: { fontSize: 16, fontFamily: font.bold, color: colors.text },
   weekRow: { flexDirection: 'row' },
   weekday: {
     flex: 1,
     textAlign: 'center',
     fontSize: 11,
-    fontWeight: '700',
+    fontFamily: font.bold,
     color: colors.subtle,
     marginBottom: 4,
   },
@@ -684,8 +684,8 @@ const styles = StyleSheet.create({
   dayPredicted: { borderWidth: 1.5, borderColor: '#EC4899', borderStyle: 'dashed' },
   dayToday: { borderWidth: 2, borderColor: colors.primary },
   dayText: { fontSize: 13, color: colors.text },
-  dayTextLogged: { color: '#FFFFFF', fontWeight: '700' },
-  dayTextPredicted: { color: '#EC4899', fontWeight: '600' },
+  dayTextLogged: { color: '#FFFFFF', fontFamily: font.bold },
+  dayTextPredicted: { color: '#EC4899', fontFamily: font.semibold },
   startDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: '#EC4899', marginTop: 2 },
 
   legend: {
@@ -707,7 +707,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     paddingVertical: spacing.md,
   },
-  logButtonText: { color: colors.onPrimary, fontSize: 15, fontWeight: '700' },
+  logButtonText: { color: colors.onPrimary, fontSize: 15, fontFamily: font.bold },
 
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.md },
   stat: {
@@ -719,7 +719,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     padding: spacing.sm + 2,
   },
-  statValue: { fontSize: 15, fontWeight: '700', color: colors.text, marginTop: 4 },
+  statValue: { fontSize: 15, fontFamily: font.bold, color: colors.text, marginTop: 4 },
   statLabel: { fontSize: 11, color: colors.muted, marginTop: 1 },
 
   noteCard: { backgroundColor: colors.primaryLight, borderColor: colors.primaryLight, marginTop: spacing.md },
@@ -736,7 +736,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   historyText: { flex: 1 },
-  historyTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
+  historyTitle: { fontSize: 15, fontFamily: font.semibold, color: colors.text },
   tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 6 },
   tag: {
     backgroundColor: colors.bg,
@@ -760,10 +760,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: spacing.md,
   },
-  sheetTitle: { fontSize: 18, fontWeight: '800', color: colors.text },
+  sheetTitle: { fontSize: 18, fontFamily: font.extrabold, color: colors.text },
   sheetLabel: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: font.bold,
     color: colors.text,
     marginBottom: spacing.xs,
     marginTop: spacing.sm,
@@ -788,7 +788,7 @@ const styles = StyleSheet.create({
   },
   choiceOn: { backgroundColor: colors.primaryLight, borderColor: colors.primary },
   choiceText: { fontSize: 12, color: colors.muted },
-  choiceTextOn: { color: colors.primary, fontWeight: '700' },
+  choiceTextOn: { color: colors.primary, fontFamily: font.bold },
   sheetSave: {
     alignItems: 'center',
     justifyContent: 'center',

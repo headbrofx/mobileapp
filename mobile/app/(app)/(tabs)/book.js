@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { bookings, familyMembers, services as servicesApi } from '../../../lib/api';
 import { Card, ErrorBox, Field, MenuButton } from '../../../lib/ui';
-import { colors, radius, shadow, spacing } from '../../../lib/theme';
+import { colors, font, radius, shadow, spacing } from '../../../lib/theme';
 import { serviceColour, serviceIcon, serviceTint } from '../../../lib/services-meta';
 
 // Requesting a home visit, as the design lays it out: four steps with a
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  title: { fontSize: 18, fontWeight: '700', color: colors.text, textAlign: 'center' },
+  title: { fontSize: 18, fontFamily: font.bold, color: colors.text, textAlign: 'center' },
 
   stepper: { flexDirection: 'row', marginTop: spacing.md },
   stepItem: { flex: 1, alignItems: 'center' },
@@ -446,17 +446,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stepDotActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  stepNum: { fontSize: 12, fontWeight: '700', color: colors.subtle },
+  stepNum: { fontSize: 12, fontFamily: font.bold, color: colors.subtle },
   stepNumActive: { color: colors.onPrimary },
   stepLabel: { fontSize: 11, color: colors.subtle, marginTop: 4 },
-  stepLabelActive: { color: colors.primary, fontWeight: '600' },
+  stepLabelActive: { color: colors.primary, fontFamily: font.semibold },
 
   content: { padding: spacing.md, paddingBottom: spacing.xl },
-  stepTitle: { fontSize: 17, fontWeight: '700', color: colors.text },
+  stepTitle: { fontSize: 17, fontFamily: font.bold, color: colors.text },
   stepHint: { fontSize: 14, color: colors.muted, marginBottom: spacing.md },
   label: {
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: font.bold,
     color: colors.text,
     marginTop: spacing.md,
     marginBottom: spacing.sm,
@@ -480,7 +480,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     backgroundColor: colors.primaryLight,
   },
-  serviceName: { fontSize: 15, fontWeight: '600', color: colors.text },
+  serviceName: { fontSize: 15, fontFamily: font.semibold, color: colors.text },
 
   rowIcon: {
     width: 42,
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     backgroundColor: colors.primaryLight,
   },
-  choiceTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
+  choiceTitle: { fontSize: 15, fontFamily: font.semibold, color: colors.text },
   choiceTitleSelected: { color: colors.primary },
 
   addLink: {
@@ -515,7 +515,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingVertical: spacing.sm,
   },
-  addLinkText: { color: colors.primary, fontWeight: '600', fontSize: 14 },
+  addLinkText: { color: colors.primary, fontFamily: font.semibold, fontSize: 14 },
 
   summary: { ...shadow.card },
   summaryHead: {
@@ -527,7 +527,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
     marginBottom: spacing.sm,
   },
-  summaryTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
+  summaryTitle: { fontSize: 16, fontFamily: font.bold, color: colors.text },
 
   line: {
     flexDirection: 'row',
@@ -536,7 +536,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   lineLabel: { fontSize: 12, color: colors.muted },
-  lineValue: { fontSize: 14, color: colors.text, fontWeight: '500', marginTop: 1 },
+  lineValue: { fontSize: 14, color: colors.text, fontFamily: font.medium, marginTop: 1 },
 
   pending: {
     flexDirection: 'row',
@@ -565,7 +565,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  backText: { color: colors.primary, fontWeight: '600' },
+  backText: { color: colors.primary, fontFamily: font.semibold },
   next: {
     flex: 1,
     flexDirection: 'row',
@@ -577,7 +577,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   nextDisabled: { opacity: 0.45 },
-  nextText: { color: colors.onPrimary, fontSize: 15, fontWeight: '700' },
+  nextText: { color: colors.onPrimary, fontSize: 15, fontFamily: font.bold },
 
   doneWrap: {
     flex: 1,
@@ -595,7 +595,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.md,
   },
-  doneTitle: { fontSize: 21, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
+  doneTitle: { fontSize: 21, fontFamily: font.bold, color: colors.text, marginBottom: spacing.xs },
   doneBody: {
     fontSize: 15,
     color: colors.muted,

@@ -3,7 +3,7 @@ import { RefreshControl, ScrollView, StyleSheet, Text } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { invoices as invoicesApi } from '../../lib/api';
 import { Card, ErrorBox } from '../../lib/ui';
-import { colors, spacing } from '../../lib/theme';
+import { colors, font, spacing } from '../../lib/theme';
 
 const STATUS_SW = {
   DRAFT: 'Rasimu',
@@ -83,6 +83,6 @@ export default function Invoices() {
 const styles = StyleSheet.create({
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   number: { fontSize: 14, color: colors.muted, letterSpacing: 0.4 },
-  amount: { fontSize: 20, fontWeight: '700', color: colors.text, marginVertical: 2 },
+  amount: { fontSize: 20, fontFamily: font.bold, color: colors.text, marginVertical: 2 },
   muted: { fontSize: 14, color: colors.muted, marginTop: 2 },
 });

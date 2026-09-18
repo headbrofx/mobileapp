@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../../lib/theme';
+import { colors, font } from '../../../lib/theme';
 
 // Bottom tabs, as the supplied design shows: the four things somebody
 // opens the app to do. Everything else — symptoms, family, cycles,
@@ -20,7 +20,7 @@ export default function TabsLayout() {
           paddingBottom: 8,
           paddingTop: 6,
         },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarLabelStyle: { fontSize: 11, fontFamily: font.semibold },
       }}
     >
       <Tabs.Screen

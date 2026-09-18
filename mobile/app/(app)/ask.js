@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { afyaAi } from '../../lib/api';
 import { Button, Card, ErrorBox, Field } from '../../lib/ui';
-import { colors, radius, spacing } from '../../lib/theme';
+import { colors, font, radius, spacing } from '../../lib/theme';
 
 // Afya AI.
 //
@@ -130,11 +130,11 @@ const styles = StyleSheet.create({
   },
   emergencyHeading: {
     fontSize: 13,
-    fontWeight: '800',
+    fontFamily: font.extrabold,
     color: colors.danger,
     letterSpacing: 1.2,
     marginBottom: spacing.sm,
   },
-  emergencyBody: { fontSize: 17, color: colors.danger, lineHeight: 25, fontWeight: '600' },
+  emergencyBody: { fontSize: 17, color: colors.danger, lineHeight: 25, fontFamily: font.semibold },
   emergencyMeta: { fontSize: 12, color: colors.danger, marginTop: spacing.sm, opacity: 0.8 },
 });
