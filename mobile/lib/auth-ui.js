@@ -49,6 +49,10 @@ export function BrandHeader({ onBack }) {
         accessible={false}
       />
 
+      {/* The wordmark and the tagline are one block, sized to the
+          wordmark rather than to the row. Letting the tagline stretch
+          across the remaining width is what made the header look like
+          three loose pieces instead of a logo. */}
       <View style={styles.brandText}>
         <Image
           source={require('../assets/wordmark.png')}
@@ -56,7 +60,46 @@ export function BrandHeader({ onBack }) {
           resizeMode="contain"
           accessibilityLabel="Afya Nyumbani"
         />
-        <Text style={styles.tagline}>Huduma bora ya afya, ndani ya nyumba yako.</Text>
+        <Text style={styles.tagline} numberOfLines={2}>
+          Huduma bora ya afya, ndani ya nyumba yako.
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+// The "or continue with" divider and the two provider buttons the
+// design draws under the sign-in form.
+//
+// The API has no OAuth — no provider configured, no callback, nothing —
+// so neither of these can sign anybody in yet. The owner asked for the
+// design exactly, so they are drawn exactly, and pressing one says
+// plainly that it is not switched on rather than failing silently or
+// pretending to work.
+export function SocialRow({ onUnavailable }) {
+  return (
+    <View>
+      <View style={styles.dividerRow}>
+        <View style={styles.dividerLine} />
+        <Text style={styles.dividerText}>Au endelea na</Text>
+        <View style={styles.dividerLine} />
+      </View>
+
+      <View style={styles.socialRow}>
+        {[
+          { key: 'Google', icon: 'logo-google', colour: '#DB4437' },
+          { key: 'Facebook', icon: 'logo-facebook', colour: '#1877F2' },
+        ].map((provider) => (
+          <Pressable
+            key={provider.key}
+            onPress={() => onUnavailable(provider.key)}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.social, pressed && styles.pressed]}
+          >
+            <Ionicons name={provider.icon} size={19} color={provider.colour} />
+            <Text style={styles.socialText}>{provider.key}</Text>
+          </Pressable>
+        ))}
       </View>
     </View>
   );
@@ -229,15 +272,15 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.75 },
   disabled: { opacity: 0.5 },
 
-  brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs + 2 },
   back: { paddingRight: spacing.xs },
   // 1.43:1 and 2.45:1 are the artwork's own ratios. Boxes that do not
   // match them make 'contain' letterbox the logo into a sliver, which
   // is what the first attempt did.
   mark: { width: 54, height: 38 },
-  brandText: { flex: 1 },
-  wordmark: { width: 118, height: 48, alignSelf: 'flex-start' },
-  tagline: { fontSize: 11, color: colors.muted, marginTop: 1, lineHeight: 15 },
+  brandText: { alignItems: 'flex-start' },
+  wordmark: { width: 124, height: 50 },
+  tagline: { fontSize: 10, color: colors.muted, marginTop: -2, lineHeight: 13, width: 150 },
 
   fieldWrap: { marginBottom: spacing.md },
   label: { fontSize: 13, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
@@ -257,6 +300,30 @@ const styles = StyleSheet.create({
   eye: { paddingLeft: spacing.xs },
   hint: { fontSize: 11, color: colors.muted, marginTop: 4 },
   fieldError: { fontSize: 12, color: colors.danger, marginTop: 4 },
+
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginVertical: spacing.lg,
+  },
+  dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
+  dividerText: { fontSize: 12, color: colors.muted },
+
+  socialRow: { flexDirection: 'row', gap: spacing.sm },
+  social: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingVertical: spacing.sm + 4,
+  },
+  socialText: { fontSize: 14, fontWeight: '600', color: colors.text },
 
   gradientButton: {
     flexDirection: 'row',
