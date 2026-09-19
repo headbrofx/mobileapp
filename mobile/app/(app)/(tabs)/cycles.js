@@ -15,6 +15,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { content as contentApi, cycles as cyclesApi, familyMembers } from '../../../lib/api';
 import { Card, ErrorBox, ScreenHeader } from '../../../lib/ui';
 import { colors, font, radius, shadow, spacing } from '../../../lib/theme';
+import { tx, useI18n } from '../../../lib/i18n';
 
 // Orbit — period tracking, on a calendar.
 //
@@ -78,6 +79,11 @@ const parse = (dateOnly) => {
 const todayIso = () => iso(Date.now());
 
 export default function Cycles() {
+  // Subscribes this screen to the chosen language. The tx() calls
+  // below read it from a module variable, which cannot re-render
+  // anything on its own, and a screen sits behind the navigator's
+  // memo. Reading the context is what gets past that.
+  useI18n();
   const router = useRouter();
   const [memberId, setMemberId] = useState(null);
   const [lessons, setLessons] = useState([]);
@@ -179,7 +185,7 @@ export default function Cycles() {
     >
       {/* Orbit is a tab now, so it carries its own header: the stack
           header that used to sit above it is gone. */}
-      <ScreenHeader title="Orbit" subtitle="Mzunguko wako na elimu ya afya ya uzazi" />
+      <ScreenHeader title="Orbit" subtitle={tx('Mzunguko wako na elimu ya afya ya uzazi')} />
 
       <ErrorBox error={error} />
 
@@ -207,7 +213,7 @@ export default function Cycles() {
           style={styles.logButton}
         >
           <Ionicons name="add-circle-outline" size={19} color={colors.onPrimary} />
-          <Text style={styles.logButtonText}>Andika hedhi</Text>
+          <Text style={styles.logButtonText}>{tx('Andika hedhi')}</Text>
         </LinearGradient>
       </Pressable>
 
@@ -224,12 +230,10 @@ export default function Cycles() {
         </Card>
       ) : null}
 
-      <Text style={styles.section}>Elimu ya afya ya uzazi</Text>
+      <Text style={styles.section}>{tx('Elimu ya afya ya uzazi')}</Text>
       {lessons.length === 0 ? (
         <Card>
-          <Text style={styles.muted}>
-            Makala za uzazi wa mpango na afya ya ngono zinakuja hivi karibuni.
-          </Text>
+          <Text style={styles.muted}>{tx('Makala za uzazi wa mpango na afya ya ngono zinakuja hivi karibuni.')}</Text>
         </Card>
       ) : (
         lessons.map((lesson) => (
@@ -259,10 +263,10 @@ export default function Cycles() {
         ))
       )}
 
-      <Text style={styles.section}>Kumbukumbu</Text>
+      <Text style={styles.section}>{tx('Kumbukumbu')}</Text>
       {history.length === 0 ? (
         <Card>
-          <Text style={styles.muted}>Bado hujaandika chochote.</Text>
+          <Text style={styles.muted}>{tx('Bado hujaandika chochote.')}</Text>
         </Card>
       ) : (
         history.slice(0, 12).map((cycle) => <HistoryRow key={cycle.id} cycle={cycle} />)
@@ -324,10 +328,8 @@ function CountdownCard({ insights }) {
         </>
       ) : (
         <>
-          <Text style={styles.countdownBig}>Bado</Text>
-          <Text style={styles.countdownText}>
-            Orbit inahitaji angalau mizunguko miwili kabla ya kukadiria ujao.
-          </Text>
+          <Text style={styles.countdownBig}>{tx('Bado')}</Text>
+          <Text style={styles.countdownText}>{tx('Orbit inahitaji angalau mizunguko miwili kabla ya kukadiria ujao.')}</Text>
         </>
       )}
     </LinearGradient>
@@ -354,7 +356,7 @@ function MonthCalendar({ offset, onOffset, loggedDays, predictedDays }) {
         <Pressable
           onPress={() => onOffset(offset - 1)}
           accessibilityRole="button"
-          accessibilityLabel="Mwezi uliopita"
+          accessibilityLabel={tx('Mwezi uliopita')}
           hitSlop={10}
           style={({ pressed }) => [styles.arrow, pressed && styles.pressed]}
         >
@@ -370,7 +372,7 @@ function MonthCalendar({ offset, onOffset, loggedDays, predictedDays }) {
         <Pressable
           onPress={() => onOffset(offset + 1)}
           accessibilityRole="button"
-          accessibilityLabel="Mwezi ujao"
+          accessibilityLabel={tx('Mwezi ujao')}
           hitSlop={10}
           style={({ pressed }) => [styles.arrow, pressed && styles.pressed]}
         >
@@ -428,15 +430,15 @@ function Legend() {
     <View style={styles.legend}>
       <View style={styles.legendItem}>
         <View style={[styles.legendSwatch, styles.dayLogged]} />
-        <Text style={styles.legendText}>Uliyoandika</Text>
+        <Text style={styles.legendText}>{tx('Uliyoandika')}</Text>
       </View>
       <View style={styles.legendItem}>
         <View style={[styles.legendSwatch, styles.dayPredicted]} />
-        <Text style={styles.legendText}>Makadirio</Text>
+        <Text style={styles.legendText}>{tx('Makadirio')}</Text>
       </View>
       <View style={styles.legendItem}>
         <View style={[styles.legendSwatch, styles.dayToday]} />
-        <Text style={styles.legendText}>Leo</Text>
+        <Text style={styles.legendText}>{tx('Leo')}</Text>
       </View>
     </View>
   );
@@ -542,14 +544,14 @@ function LogSheet({ open, busy, onClose, onSave }) {
       <View style={styles.sheetBackdrop}>
         <View style={styles.sheet}>
           <View style={styles.sheetHead}>
-            <Text style={styles.sheetTitle}>Andika hedhi</Text>
+            <Text style={styles.sheetTitle}>{tx('Andika hedhi')}</Text>
             <Pressable onPress={onClose} accessibilityRole="button" hitSlop={10}>
               <Ionicons name="close" size={22} color={colors.muted} />
             </Pressable>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false}>
-            <Text style={styles.sheetLabel}>Ilianza lini</Text>
+            <Text style={styles.sheetLabel}>{tx('Ilianza lini')}</Text>
             <TextInput
               style={styles.sheetInput}
               value={start}
@@ -559,7 +561,7 @@ function LogSheet({ open, busy, onClose, onSave }) {
               autoCapitalize="none"
             />
 
-            <Text style={styles.sheetLabel}>Iliisha lini (si lazima)</Text>
+            <Text style={styles.sheetLabel}>{tx('Iliisha lini (si lazima)')}</Text>
             <TextInput
               style={styles.sheetInput}
               value={end}
@@ -569,7 +571,7 @@ function LogSheet({ open, busy, onClose, onSave }) {
               autoCapitalize="none"
             />
 
-            <Text style={styles.sheetLabel}>Kiasi</Text>
+            <Text style={styles.sheetLabel}>{tx('Kiasi')}</Text>
             <View style={styles.chipRow}>
               {Object.entries(FLOW_SW).map(([key, label]) => (
                 <Choice
@@ -581,7 +583,7 @@ function LogSheet({ open, busy, onClose, onSave }) {
               ))}
             </View>
 
-            <Text style={styles.sheetLabel}>Dalili</Text>
+            <Text style={styles.sheetLabel}>{tx('Dalili')}</Text>
             <View style={styles.chipRow}>
               {SYMPTOMS.map((symptom) => (
                 <Choice
@@ -593,7 +595,7 @@ function LogSheet({ open, busy, onClose, onSave }) {
               ))}
             </View>
 
-            <Text style={styles.sheetLabel}>Hisia</Text>
+            <Text style={styles.sheetLabel}>{tx('Hisia')}</Text>
             <View style={styles.chipRow}>
               {MOODS.map((item) => (
                 <Choice
@@ -605,12 +607,12 @@ function LogSheet({ open, busy, onClose, onSave }) {
               ))}
             </View>
 
-            <Text style={styles.sheetLabel}>Maelezo (si lazima)</Text>
+            <Text style={styles.sheetLabel}>{tx('Maelezo (si lazima)')}</Text>
             <TextInput
               style={[styles.sheetInput, styles.sheetArea]}
               value={notes}
               onChangeText={setNotes}
-              placeholder="Chochote unachotaka kukumbuka"
+              placeholder={tx('Chochote unachotaka kukumbuka')}
               placeholderTextColor={colors.subtle}
               multiline
             />

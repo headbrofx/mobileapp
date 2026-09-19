@@ -12,6 +12,7 @@ import { useFocusEffect } from 'expo-router';
 import { familyMembers as familyApi, symptoms as symptomsApi } from '../../lib/api';
 import { Button, Card, ErrorBox, Field } from '../../lib/ui';
 import { colors, font, radius, spacing } from '../../lib/theme';
+import { tx, useI18n } from '../../lib/i18n';
 
 // Reporting a symptom.
 //
@@ -38,6 +39,11 @@ const UNITS = [
 ];
 
 export default function Symptoms() {
+  // Subscribes this screen to the chosen language. The tx() calls
+  // below read it from a module variable, which cannot re-render
+  // anything on its own, and a screen sits behind the navigator's
+  // memo. Reading the context is what gets past that.
+  useI18n();
   const [members, setMembers] = useState([]);
   const [memberId, setMemberId] = useState(null);
   const [catalogue, setCatalogue] = useState([]);
@@ -131,7 +137,7 @@ export default function Symptoms() {
 
         {members.length > 1 ? (
           <>
-            <Text style={styles.label}>Ni kwa ajili ya nani</Text>
+            <Text style={styles.label}>{tx('Ni kwa ajili ya nani')}</Text>
             <View style={styles.chips}>
               {members.map((member) => (
                 <Chip
@@ -146,8 +152,8 @@ export default function Symptoms() {
         ) : null}
 
         <Field
-          label="Dalili"
-          placeholder="mfano: Headache"
+          label={tx('Dalili')}
+          placeholder={tx('mfano: Headache')}
           value={name}
           onChangeText={setName}
         />
@@ -165,12 +171,12 @@ export default function Symptoms() {
           </View>
         ) : null}
 
-        <Text style={styles.label}>Ukali</Text>
+        <Text style={styles.label}>{tx('Ukali')}</Text>
         <View style={styles.chips}>
           {SEVERITIES.map((option) => (
             <Chip
               key={option.value}
-              label={option.label}
+              label={tx(option.label)}
               selected={severity === option.value}
               onPress={() => setSeverity(option.value)}
             />
@@ -178,8 +184,8 @@ export default function Symptoms() {
         </View>
 
         <Field
-          label="Imechukua muda gani (hiari)"
-          placeholder="mfano: 3"
+          label={tx('Imechukua muda gani (hiari)')}
+          placeholder={tx('mfano: 3')}
           value={durationValue}
           onChangeText={setDurationValue}
           keyboardType="number-pad"
@@ -188,7 +194,7 @@ export default function Symptoms() {
           {UNITS.map((option) => (
             <Chip
               key={option.value}
-              label={option.label}
+              label={tx(option.label)}
               selected={durationUnit === option.value}
               onPress={() => setDurationUnit(option.value)}
             />
@@ -196,8 +202,8 @@ export default function Symptoms() {
         </View>
 
         <Field
-          label="Maelezo (hiari)"
-          placeholder="Chochote kingine cha kuongeza"
+          label={tx('Maelezo (hiari)')}
+          placeholder={tx('Chochote kingine cha kuongeza')}
           value={notes}
           onChangeText={setNotes}
           multiline
@@ -206,23 +212,23 @@ export default function Symptoms() {
         />
 
         <Button
-          title="Tuma dalili"
+          title={tx('Tuma dalili')}
           onPress={submit}
           loading={busy}
           disabled={!memberId || name.trim().length < 2}
         />
 
-        <Text style={styles.heading}>Zilizopita</Text>
+        <Text style={styles.heading}>{tx('Zilizopita')}</Text>
         {history.length === 0 ? (
           <Card>
-            <Text style={styles.muted}>Bado hujaandika dalili yoyote.</Text>
+            <Text style={styles.muted}>{tx('Bado hujaandika dalili yoyote.')}</Text>
           </Card>
         ) : (
           history.slice(0, 10).map((symptom) => (
             <Card key={symptom.id}>
               <Text style={styles.cardTitle}>{symptom.name}</Text>
               <Text style={styles.muted}>
-                {SEVERITIES.find((s) => s.value === symptom.severity)?.label ?? symptom.severity}
+                {tx(SEVERITIES.find((s) => s.value === symptom.severity)?.label ?? symptom.severity)}
                 {symptom.occurredAt
                   ? ` · ${new Date(symptom.occurredAt).toLocaleDateString('sw-TZ')}`
                   : ''}
@@ -241,27 +247,22 @@ function Verdict({ symptom }) {
   if (flag?.isRedFlag) {
     return (
       <View style={styles.emergency}>
-        <Text style={styles.emergencyHeading}>ONA MTAALAMU</Text>
+        <Text style={styles.emergencyHeading}>{tx('ONA MTAALAMU')}</Text>
         {/* The API's own reasons, not a rewrite of them. */}
         {flag.reasons?.map((reason, index) => (
           <Text key={index} style={styles.emergencyBody}>
             • {reason}
           </Text>
         ))}
-        <Text style={styles.emergencyMeta}>
-          Hii ni ishara ya kuchunguzwa na mtu, si uchunguzi wa ugonjwa.
-        </Text>
+        <Text style={styles.emergencyMeta}>{tx('Hii ni ishara ya kuchunguzwa na mtu, si uchunguzi wa ugonjwa.')}</Text>
       </View>
     );
   }
 
   return (
     <Card style={styles.okCard}>
-      <Text style={styles.okTitle}>Imeandikwa</Text>
-      <Text style={styles.muted}>
-        Hakuna ishara ya hatari iliyogunduliwa kwa ulichoandika. Dalili ikizidi au
-        ikibadilika, iandike tena.
-      </Text>
+      <Text style={styles.okTitle}>{tx('Imeandikwa')}</Text>
+      <Text style={styles.muted}>{tx('Hakuna ishara ya hatari iliyogunduliwa kwa ulichoandika. Dalili ikizidi au ikibadilika, iandike tena.')}</Text>
     </Card>
   );
 }

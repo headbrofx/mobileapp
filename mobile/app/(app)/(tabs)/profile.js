@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSession } from '../../../lib/session';
-import { LANGUAGES, useI18n } from '../../../lib/i18n';
+import { LANGUAGES, tx, useI18n } from '../../../lib/i18n';
 import { MenuButton } from '../../../lib/ui';
 import { colors, font, radius, shadow, spacing, type } from '../../../lib/theme';
 
@@ -61,7 +61,7 @@ export default function Profile() {
           <Pressable
             onPress={() => router.push('/notifications')}
             accessibilityRole="button"
-            accessibilityLabel="Taarifa"
+            accessibilityLabel={tx('Taarifa')}
             hitSlop={8}
             style={({ pressed }) => [pressed && styles.pressed]}
           >
@@ -75,12 +75,12 @@ export default function Profile() {
           </View>
           <View style={styles.heroText}>
             <Text style={styles.name} numberOfLines={1}>
-              {user?.name ?? 'Karibu'}
+              {user?.name ?? tx('Karibu')}
             </Text>
             {user?.phone ? <Text style={styles.phone}>{user.phone}</Text> : null}
             <View style={styles.roleChip}>
               <Ionicons name="shield-checkmark" size={11} color={colors.onPrimary} />
-              <Text style={styles.roleText}>Akaunti imethibitishwa</Text>
+              <Text style={styles.roleText}>{tx('Akaunti imethibitishwa')}</Text>
             </View>
           </View>
         </View>
@@ -101,13 +101,13 @@ export default function Profile() {
               <Ionicons name={item.icon} size={19} color={colors.primary} />
             </View>
             <Text style={styles.shortcutText} numberOfLines={1}>
-              {item.label}
+              {tx(item.label)}
             </Text>
           </Pressable>
         ))}
       </View>
 
-      <Text style={styles.groupTitle}>Huduma zangu</Text>
+      <Text style={styles.groupTitle}>{tx('Huduma zangu')}</Text>
       <View style={styles.group}>
         {CARE.map((link, index) => (
           <Pressable
@@ -124,15 +124,15 @@ export default function Profile() {
               <Ionicons name={link.icon} size={19} color={colors.primary} />
             </View>
             <View style={styles.rowText}>
-              <Text style={styles.rowLabel}>{link.label}</Text>
-              <Text style={styles.rowHint}>{link.hint}</Text>
+              <Text style={styles.rowLabel}>{tx(link.label)}</Text>
+              <Text style={styles.rowHint}>{tx(link.hint)}</Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color={colors.subtle} />
           </Pressable>
         ))}
       </View>
 
-      <Text style={styles.groupTitle}>Mipangilio</Text>
+      <Text style={styles.groupTitle}>{tx('Mipangilio')}</Text>
       <View style={styles.group}>
         <Pressable
           onPress={() => router.push('/settings')}
@@ -143,8 +143,8 @@ export default function Profile() {
             <Ionicons name="color-palette-outline" size={19} color={colors.primary} />
           </View>
           <View style={styles.rowText}>
-            <Text style={styles.rowLabel}>Mipangilio</Text>
-            <Text style={styles.rowHint}>Rangi ya app na lugha</Text>
+            <Text style={styles.rowLabel}>{tx('Mipangilio')}</Text>
+            <Text style={styles.rowHint}>{tx('Rangi ya app na lugha')}</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color={colors.subtle} />
         </Pressable>
@@ -159,7 +159,7 @@ export default function Profile() {
           </View>
           <View style={styles.rowText}>
             <Text style={styles.rowLabel}>{t('settings.language')}</Text>
-            <Text style={styles.rowHint}>Kiswahili au English</Text>
+            <Text style={styles.rowHint}>{tx('Kiswahili au English')}</Text>
           </View>
           <View style={styles.chips}>
             {LANGUAGES.map((option) => (

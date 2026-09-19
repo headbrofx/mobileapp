@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { EN_BY_SW } from './i18n-en';
 import { getItem, setItem } from './storage';
 
 // Swahili and English.
@@ -164,9 +165,29 @@ export const LANGUAGES = [
 
 const I18nContext = createContext(null);
 
+// The chosen language, kept outside React as well as in it.
+//
+// tx() is exported as a plain function rather than only as a hook, so a
+// helper component three levels down a screen can translate a label
+// without every one of them taking a hook it does not otherwise need —
+// and so a string can be translated outside a component altogether.
+//
+// That is only safe because of two facts about this app, both checked:
+// every screen sits inside I18nProvider, so a language change re-renders
+// all of them, and nothing here is wrapped in React.memo, so none of
+// those re-renders is skipped. If either changes, a component reading
+// this could hold stale words, and the hook below is the way back.
+let current = 'sw';
+
+export function tx(swahili) {
+  return current === 'en' ? (EN_BY_SW[swahili] ?? swahili) : swahili;
+}
+
 export function I18nProvider({ children }) {
   const [language, setLanguage] = useState('sw');
   const [ready, setReady] = useState(false);
+
+  current = language;
 
   useEffect(() => {
     (async () => {
@@ -196,10 +217,19 @@ export function I18nProvider({ children }) {
     [language]
   );
 
-  const value = useMemo(() => ({ language, setLanguage: choose, t, ready }), [
+  // The same tx, handed out through the context as well, for the screens
+  // that already take the hook. Bound to `language` so a component that
+  // uses this one is re-rendered by React rather than by luck.
+  const boundTx = useCallback(
+    (swahili) => (language === 'en' ? (EN_BY_SW[swahili] ?? swahili) : swahili),
+    [language]
+  );
+
+  const value = useMemo(() => ({ language, setLanguage: choose, t, tx: boundTx, ready }), [
     language,
     choose,
     t,
+    boundTx,
     ready,
   ]);
 

@@ -16,6 +16,7 @@ import { clientProfile, familyMembers, healthProfile, BASE_URL } from '../lib/ap
 import { ErrorBox } from '../lib/ui';
 import { BrandFooter, BrandHeader, CheckBox, GradientButton, IconField, Stepper } from '../lib/auth-ui';
 import { colors, font, radius, spacing } from '../lib/theme';
+import { tx, useI18n } from '../lib/i18n';
 
 // Sign-up as the design lays it out: four steps, one thing at a time.
 //
@@ -36,6 +37,11 @@ const STEPS = ['Taarifa zako', 'Anwani', 'Afya', 'Tayari'];
 const PRIVACY_URL = `${BASE_URL}/privacy`;
 
 export default function Register() {
+  // Subscribes this screen to the chosen language. The tx() calls
+  // below read it from a module variable, which cannot re-render
+  // anything on its own, and a screen sits behind the navigator's
+  // memo. Reading the context is what gets past that.
+  useI18n();
   const router = useRouter();
   const { register } = useSession();
 
@@ -141,10 +147,8 @@ export default function Register() {
       >
         <BrandHeader onBack={step === 0 ? () => router.back() : undefined} />
 
-        <Text style={styles.title}>Fungua akaunti</Text>
-        <Text style={styles.subtitle}>
-          Jiunge na Afya Nyumbani upate huduma ya afya mlangoni kwako.
-        </Text>
+        <Text style={styles.title}>{tx('Fungua akaunti')}</Text>
+        <Text style={styles.subtitle}>{tx('Jiunge na Afya Nyumbani upate huduma ya afya mlangoni kwako.')}</Text>
 
         <Stepper steps={STEPS} current={step} />
 
@@ -153,45 +157,45 @@ export default function Register() {
         {step === 0 ? (
           <>
             <IconField
-              label="Jina lako kamili"
+              label={tx('Jina lako kamili')}
               icon="person-outline"
-              placeholder="Andika jina lako"
+              placeholder={tx('Andika jina lako')}
               value={name}
               onChangeText={setName}
               autoCapitalize="words"
             />
             <IconField
-              label="Namba ya simu"
+              label={tx('Namba ya simu')}
               icon="call-outline"
               placeholder="k.m. 0712 345 678"
-              hint="Tutaitumia kuwasiliana nawe"
+              hint={tx('Tutaitumia kuwasiliana nawe')}
               value={phone}
               onChangeText={setPhone}
               keyboardType="phone-pad"
               autoComplete="tel"
             />
             <IconField
-              label="Barua pepe (si lazima)"
+              label={tx('Barua pepe (si lazima)')}
               icon="mail-outline"
-              placeholder="jina@mfano.com"
+              placeholder={tx('jina@mfano.com')}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
             />
             <IconField
-              label="Nenosiri"
+              label={tx('Nenosiri')}
               icon="lock-closed-outline"
-              placeholder="Herufi 8 au zaidi"
+              placeholder={tx('Herufi 8 au zaidi')}
               value={password}
               onChangeText={setPassword}
               secure
               autoCapitalize="none"
             />
             <IconField
-              label="Thibitisha nenosiri"
+              label={tx('Thibitisha nenosiri')}
               icon="lock-closed-outline"
-              placeholder="Andika tena"
+              placeholder={tx('Andika tena')}
               value={confirm}
               onChangeText={setConfirm}
               secure
@@ -203,16 +207,14 @@ export default function Register() {
               <CheckBox checked={agreed} onToggle={() => setAgreed((on) => !on)}>
                 <Text style={styles.agreeText}>
                   Nakubali{' '}
-                  <Text style={styles.link} onPress={() => Linking.openURL(PRIVACY_URL)}>
-                    Sera ya Faragha
-                  </Text>
+                  <Text style={styles.link} onPress={() => Linking.openURL(PRIVACY_URL)}>{tx('Sera ya Faragha')}</Text>
                   .
                 </Text>
               </CheckBox>
             </View>
 
             <GradientButton
-              title="Endelea"
+              title={tx('Endelea')}
               onPress={createAccount}
               loading={busy}
               disabled={!canSubmitStepOne}
@@ -223,30 +225,30 @@ export default function Register() {
         {step === 1 ? (
           <>
             <IconField
-              label="Anwani ya nyumbani"
+              label={tx('Anwani ya nyumbani')}
               icon="location-outline"
-              placeholder="Mtaa, nyumba namba"
-              hint="Hapa ndipo muuguzi atakapokuja"
+              placeholder={tx('Mtaa, nyumba namba')}
+              hint={tx('Hapa ndipo muuguzi atakapokuja')}
               value={address}
               onChangeText={setAddress}
             />
             <IconField
-              label="Mji"
+              label={tx('Mji')}
               icon="business-outline"
               placeholder="Dar es Salaam"
               value={city}
               onChangeText={setCity}
             />
             <IconField
-              label="Mtu wa dharura"
+              label={tx('Mtu wa dharura')}
               icon="people-outline"
-              placeholder="Jina lake"
+              placeholder={tx('Jina lake')}
               value={emergencyName}
               onChangeText={setEmergencyName}
               autoCapitalize="words"
             />
             <IconField
-              label="Simu ya mtu wa dharura"
+              label={tx('Simu ya mtu wa dharura')}
               icon="call-outline"
               placeholder="0712 345 678"
               value={emergencyPhone}
@@ -254,7 +256,7 @@ export default function Register() {
               keyboardType="phone-pad"
             />
 
-            <GradientButton title="Endelea" onPress={saveAddress} loading={busy} />
+            <GradientButton title={tx('Endelea')} onPress={saveAddress} loading={busy} />
             <SkipLink onPress={() => setStep(2)} disabled={busy} />
           </>
         ) : null}
@@ -263,29 +265,27 @@ export default function Register() {
           <>
             <View style={styles.note}>
               <Ionicons name="lock-closed" size={16} color={colors.primary} />
-              <Text style={styles.noteText}>
-                Haya ni yako peke yako. Muuguzi anayekuja kwako ndiye pekee atayaona.
-              </Text>
+              <Text style={styles.noteText}>{tx('Haya ni yako peke yako. Muuguzi anayekuja kwako ndiye pekee atayaona.')}</Text>
             </View>
 
             <IconField
-              label="Magonjwa uliyonayo"
+              label={tx('Magonjwa uliyonayo')}
               icon="medkit-outline"
-              placeholder="k.m. kisukari, shinikizo la damu"
-              hint="Tenganisha kwa koma"
+              placeholder={tx('k.m. kisukari, shinikizo la damu')}
+              hint={tx('Tenganisha kwa koma')}
               value={conditions}
               onChangeText={setConditions}
             />
             <IconField
-              label="Vitu unavyoathiriwa navyo"
+              label={tx('Vitu unavyoathiriwa navyo')}
               icon="alert-circle-outline"
-              placeholder="k.m. penicillin"
-              hint="Tenganisha kwa koma"
+              placeholder={tx('k.m. penicillin')}
+              hint={tx('Tenganisha kwa koma')}
               value={allergies}
               onChangeText={setAllergies}
             />
             <IconField
-              label="Aina ya damu"
+              label={tx('Aina ya damu')}
               icon="water-outline"
               placeholder="k.m. O+"
               value={bloodType}
@@ -293,7 +293,7 @@ export default function Register() {
               autoCapitalize="characters"
             />
 
-            <GradientButton title="Endelea" onPress={saveHealth} loading={busy} />
+            <GradientButton title={tx('Endelea')} onPress={saveHealth} loading={busy} />
             <SkipLink onPress={() => setStep(3)} disabled={busy} />
           </>
         ) : null}
@@ -304,21 +304,19 @@ export default function Register() {
               <Ionicons name="checkmark" size={34} color={colors.onPrimary} />
             </View>
             <Text style={styles.doneTitle}>Karibu, {name.split(' ')[0] || 'rafiki'}!</Text>
-            <Text style={styles.doneText}>
-              Akaunti yako iko tayari. Sasa unaweza kuomba muuguzi aje nyumbani kwako.
-            </Text>
+            <Text style={styles.doneText}>{tx('Akaunti yako iko tayari. Sasa unaweza kuomba muuguzi aje nyumbani kwako.')}</Text>
             <View style={styles.doneAction}>
-              <GradientButton title="Anza" onPress={() => router.replace('/home')} icon="home" />
+              <GradientButton title={tx('Anza')} onPress={() => router.replace('/home')} icon="home" />
             </View>
           </View>
         ) : null}
 
         {step === 0 ? (
           <View style={styles.loginRow}>
-            <Text style={styles.muted}>Una akaunti tayari? </Text>
+            <Text style={styles.muted}>{tx('Una akaunti tayari?')}</Text>
             <Pressable onPress={() => router.replace('/login')} accessibilityRole="button" hitSlop={8}>
               <View style={styles.linkRow}>
-                <Text style={styles.link}>Ingia</Text>
+                <Text style={styles.link}>{tx('Ingia')}</Text>
                 <Ionicons name="arrow-forward" size={14} color={colors.primary} />
               </View>
             </Pressable>
@@ -339,7 +337,7 @@ function SkipLink({ onPress, disabled }) {
       accessibilityRole="button"
       style={({ pressed }) => [styles.skip, pressed && styles.pressed]}
     >
-      <Text style={styles.skipText}>Ruka kwa sasa</Text>
+      <Text style={styles.skipText}>{tx('Ruka kwa sasa')}</Text>
     </Pressable>
   );
 }

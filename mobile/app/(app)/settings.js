@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BASE_URL } from '../../lib/api';
-import { LANGUAGES, useI18n } from '../../lib/i18n';
+import { LANGUAGES, tx, useI18n } from '../../lib/i18n';
 import {
   THEMES,
   colors,
@@ -42,7 +42,7 @@ export default function Settings() {
 
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <Text style={styles.groupTitle}>Rangi ya app</Text>
+      <Text style={styles.groupTitle}>{tx('Rangi ya app')}</Text>
       <View style={styles.group}>
         {THEMES.map((theme, index) => {
           const active = theme.name === themeName;
@@ -65,13 +65,13 @@ export default function Settings() {
               </View>
 
               <View style={styles.rowText}>
-                <Text style={styles.rowLabel}>{theme.label}</Text>
+                <Text style={styles.rowLabel}>{tx(theme.label)}</Text>
                 <Text style={styles.rowHint}>
                   {active
-                    ? 'Inatumika sasa'
+                    ? tx('Inatumika sasa')
                     : waiting
-                      ? 'Imehifadhiwa — fungua app upya ionekane'
-                      : 'Gusa kuichagua'}
+                      ? tx('Imehifadhiwa — fungua app upya ionekane')
+                      : tx('Gusa kuichagua')}
                 </Text>
               </View>
 
@@ -89,8 +89,8 @@ export default function Settings() {
 
       <Text style={styles.note}>
         {Platform.OS === 'web'
-          ? 'Ukichagua rangi, ukurasa unajipakia upya mara moja.'
-          : 'Rangi mpya inaonekana ukifungua app upya.'}
+          ? tx('Ukichagua rangi, ukurasa unajipakia upya mara moja.')
+          : tx('Rangi mpya inaonekana ukifungua app upya.')}
       </Text>
 
       <Text style={styles.groupTitle}>{t('settings.language')}</Text>
@@ -126,7 +126,7 @@ export default function Settings() {
         })}
       </View>
 
-      <Text style={styles.groupTitle}>Kuhusu</Text>
+      <Text style={styles.groupTitle}>{tx('Kuhusu')}</Text>
       <View style={styles.group}>
         <Pressable
           onPress={() => Linking.openURL(`${BASE_URL}/privacy`)}
@@ -137,8 +137,8 @@ export default function Settings() {
             <Ionicons name="lock-closed-outline" size={19} color={colors.primary} />
           </View>
           <View style={styles.rowText}>
-            <Text style={styles.rowLabel}>Sera ya faragha</Text>
-            <Text style={styles.rowHint}>Taarifa zako zinatumikaje</Text>
+            <Text style={styles.rowLabel}>{tx('Sera ya faragha')}</Text>
+            <Text style={styles.rowHint}>{tx('Taarifa zako zinatumikaje')}</Text>
           </View>
           <Ionicons name="open-outline" size={17} color={colors.subtle} />
         </Pressable>

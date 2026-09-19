@@ -2,7 +2,7 @@ import { createContext, useContext, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { LANGUAGES, useI18n } from './i18n';
+import { LANGUAGES, tx, useI18n } from './i18n';
 import { useSession } from './session';
 import { colors, font, spacing } from './theme';
 
@@ -98,14 +98,14 @@ function Sidebar() {
           </View>
           <View style={styles.headerText}>
             <Text style={styles.name} numberOfLines={1}>
-              {user?.name ?? 'Karibu'}
+              {user?.name ?? tx('Karibu')}
             </Text>
             {user?.phone ? <Text style={styles.phone}>{user.phone}</Text> : null}
           </View>
           <Pressable
             onPress={closeSidebar}
             accessibilityRole="button"
-            accessibilityLabel="Funga menyu"
+            accessibilityLabel={tx('Funga menyu')}
             hitSlop={10}
           >
             <Ionicons name="close" size={22} color={colors.muted} />
@@ -178,7 +178,7 @@ function Sidebar() {
         style={styles.backdrop}
         onPress={closeSidebar}
         accessibilityRole="button"
-        accessibilityLabel="Funga menyu kwa kugusa pembeni"
+        accessibilityLabel={tx('Funga menyu kwa kugusa pembeni')}
       />
     </View>
   );

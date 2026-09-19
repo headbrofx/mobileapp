@@ -4,6 +4,7 @@ import { useFocusEffect } from 'expo-router';
 import { invoices as invoicesApi } from '../../lib/api';
 import { Card, ErrorBox } from '../../lib/ui';
 import { colors, font, spacing } from '../../lib/theme';
+import { tx, useI18n } from '../../lib/i18n';
 
 const STATUS_SW = {
   DRAFT: 'Rasimu',
@@ -22,6 +23,11 @@ function tzs(amount) {
 }
 
 export default function Invoices() {
+  // Subscribes this screen to the chosen language. The tx() calls
+  // below read it from a module variable, which cannot re-render
+  // anything on its own, and a screen sits behind the navigator's
+  // memo. Reading the context is what gets past that.
+  useI18n();
   const [list, setList] = useState([]);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -57,7 +63,7 @@ export default function Invoices() {
 
       {list.length === 0 ? (
         <Card>
-          <Text style={styles.muted}>Huna ankara yoyote.</Text>
+          <Text style={styles.muted}>{tx('Huna ankara yoyote.')}</Text>
         </Card>
       ) : (
         list.map((invoice) => (
@@ -65,12 +71,12 @@ export default function Invoices() {
             <Text style={styles.number}>{invoice.number}</Text>
             <Text style={styles.amount}>{tzs(invoice.amount)}</Text>
             <Text style={styles.muted}>
-              {STATUS_SW[invoice.status] ?? invoice.status}
+              {tx(STATUS_SW[invoice.status] ?? invoice.status)}
               {invoice.balance > 0 ? ` · Bado ${tzs(invoice.balance)}` : ''}
             </Text>
             {invoice.dueDate ? (
               <Text style={styles.muted}>
-                Ilipwe ifikapo {new Date(invoice.dueDate).toLocaleDateString('sw-TZ')}
+                {tx('Ilipwe ifikapo')} {new Date(invoice.dueDate).toLocaleDateString('sw-TZ')}
               </Text>
             ) : null}
           </Card>

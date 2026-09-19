@@ -9,6 +9,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSidebar } from './sidebar';
 import { colors, font, radius, shadow, spacing, type } from './theme';
+import { tx } from './i18n';
 
 // Small shared pieces, so five screens do not each style a button
 // slightly differently.
@@ -91,7 +92,7 @@ export function MenuButton({ tint = colors.text }) {
     <Pressable
       onPress={openSidebar}
       accessibilityRole="button"
-      accessibilityLabel="Fungua menyu"
+      accessibilityLabel={tx('Fungua menyu')}
       hitSlop={10}
       style={({ pressed }) => [styles.menuButton, pressed && styles.menuPressed]}
     >

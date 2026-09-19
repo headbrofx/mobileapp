@@ -5,6 +5,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { content as contentApi } from '../../lib/api';
 import { ErrorBox } from '../../lib/ui';
 import { colors, font, radius, spacing, type } from '../../lib/theme';
+import { tx, useI18n } from '../../lib/i18n';
 
 // One article, read in full.
 //
@@ -15,6 +16,11 @@ import { colors, font, radius, spacing, type } from '../../lib/theme';
 // that actually get used.
 
 export default function Article() {
+  // Subscribes this screen to the chosen language. The tx() calls
+  // below read it from a module variable, which cannot re-render
+  // anything on its own, and a screen sits behind the navigator's
+  // memo. Reading the context is what gets past that.
+  useI18n();
   const { slug } = useLocalSearchParams();
   const [article, setArticle] = useState(null);
   const [error, setError] = useState(null);
@@ -40,15 +46,13 @@ export default function Article() {
 
           <View style={styles.note}>
             <Ionicons name="information-circle-outline" size={16} color={colors.primary} />
-            <Text style={styles.noteText}>
-              Maelezo ya jumla. Kwa hali yako binafsi, ongea na muuguzi wako.
-            </Text>
+            <Text style={styles.noteText}>{tx('Maelezo ya jumla. Kwa hali yako binafsi, ongea na muuguzi wako.')}</Text>
           </View>
 
           {renderBody(article.body)}
         </>
       ) : !error ? (
-        <Text style={styles.muted}>Inapakia…</Text>
+        <Text style={styles.muted}>{tx('Inapakia…')}</Text>
       ) : null}
     </ScrollView>
   );

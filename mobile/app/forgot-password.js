@@ -6,6 +6,7 @@ import { auth } from '../lib/api';
 import { ErrorBox } from '../lib/ui';
 import { BrandFooter, BrandHeader, GradientButton, IconField } from '../lib/auth-ui';
 import { colors, font, radius, spacing } from '../lib/theme';
+import { tx, useI18n } from '../lib/i18n';
 
 // The design puts "Forgot password?" on the sign-in screen, so here is
 // where it goes.
@@ -22,6 +23,11 @@ import { colors, font, radius, spacing } from '../lib/theme';
 // would leave a person staring at a phone that is never going to buzz.
 
 export default function ForgotPassword() {
+  // Subscribes this screen to the chosen language. The tx() calls
+  // below read it from a module variable, which cannot re-render
+  // anything on its own, and a screen sits behind the navigator's
+  // memo. Reading the context is what gets past that.
+  useI18n();
   const router = useRouter();
   const [identifier, setIdentifier] = useState('');
   const [sent, setSent] = useState(false);
@@ -46,10 +52,8 @@ export default function ForgotPassword() {
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <BrandHeader onBack={() => router.back()} />
 
-        <Text style={styles.title}>Umesahau nenosiri?</Text>
-        <Text style={styles.subtitle}>
-          Andika namba ya simu au barua pepe uliyotumia kufungua akaunti.
-        </Text>
+        <Text style={styles.title}>{tx('Umesahau nenosiri?')}</Text>
+        <Text style={styles.subtitle}>{tx('Andika namba ya simu au barua pepe uliyotumia kufungua akaunti.')}</Text>
 
         <ErrorBox error={error} />
 
@@ -58,19 +62,16 @@ export default function ForgotPassword() {
             <View style={styles.sentIcon}>
               <Ionicons name="checkmark" size={30} color={colors.onPrimary} />
             </View>
-            <Text style={styles.sentTitle}>Ombi limepokelewa</Text>
-            <Text style={styles.sentText}>
-              Tumelipokea ombi lako. Kwa sasa msimbo wa kubadilisha nenosiri haupo kwenye ujumbe —
-              piga simu ofisini ili wakupe, kisha ubadilishe nenosiri lako.
-            </Text>
+            <Text style={styles.sentTitle}>{tx('Ombi limepokelewa')}</Text>
+            <Text style={styles.sentText}>{tx('Tumelipokea ombi lako. Kwa sasa msimbo wa kubadilisha nenosiri haupo kwenye ujumbe — piga simu ofisini ili wakupe, kisha ubadilishe nenosiri lako.')}</Text>
             <View style={styles.sentAction}>
-              <GradientButton title="Rudi kuingia" onPress={() => router.replace('/login')} icon="arrow-back" />
+              <GradientButton title={tx('Rudi kuingia')} onPress={() => router.replace('/login')} icon="arrow-back" />
             </View>
           </View>
         ) : (
           <>
             <IconField
-              label="Namba ya simu au barua pepe"
+              label={tx('Namba ya simu au barua pepe')}
               icon="person-outline"
               placeholder="0712 345 678"
               value={identifier}
@@ -79,7 +80,7 @@ export default function ForgotPassword() {
             />
 
             <GradientButton
-              title="Tuma ombi"
+              title={tx('Tuma ombi')}
               onPress={submit}
               loading={busy}
               disabled={identifier.trim().length < 3}
@@ -90,7 +91,7 @@ export default function ForgotPassword() {
               accessibilityRole="button"
               style={({ pressed }) => [styles.back, pressed && styles.pressed]}
             >
-              <Text style={styles.link}>Rudi kuingia</Text>
+              <Text style={styles.link}>{tx('Rudi kuingia')}</Text>
             </Pressable>
           </>
         )}

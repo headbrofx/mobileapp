@@ -6,6 +6,7 @@ import { services as servicesApi } from '../../lib/api';
 import { Card, ErrorBox } from '../../lib/ui';
 import { colors, font, radius, shadow, spacing } from '../../lib/theme';
 import { serviceColour, serviceIcon, serviceImage } from '../../lib/services-meta';
+import { tx, useI18n } from '../../lib/i18n';
 
 // The design's "Select a Service" screen: the whole catalogue, one row
 // each, readable before anything is chosen.
@@ -19,6 +20,11 @@ import { serviceColour, serviceIcon, serviceImage } from '../../lib/services-met
 const tzs = (amount) => `TZS ${Number(amount).toLocaleString('en-US')}`;
 
 export default function Services() {
+  // Subscribes this screen to the chosen language. The tx() calls
+  // below read it from a module variable, which cannot re-render
+  // anything on its own, and a screen sits behind the navigator's
+  // memo. Reading the context is what gets past that.
+  useI18n();
   const router = useRouter();
   const [list, setList] = useState([]);
   const [error, setError] = useState(null);
@@ -43,7 +49,7 @@ export default function Services() {
 
       {loading ? (
         <Card>
-          <Text style={styles.muted}>Inapakia…</Text>
+          <Text style={styles.muted}>{tx('Inapakia…')}</Text>
         </Card>
       ) : (
         list.map((service, index) => (
@@ -70,10 +76,10 @@ export default function Services() {
               ) : null}
               <View style={styles.metaRow}>
                 {service.basePriceTzs ? (
-                  <Text style={styles.price}>Kuanzia {tzs(service.basePriceTzs)}</Text>
+                  <Text style={styles.price}>{tx('Kuanzia')} {tzs(service.basePriceTzs)}</Text>
                 ) : null}
                 {service.durationMinutes ? (
-                  <Text style={styles.duration}>· dakika {service.durationMinutes}</Text>
+                  <Text style={styles.duration}>· {tx('Dakika')} {service.durationMinutes}</Text>
                 ) : null}
               </View>
             </View>
@@ -90,11 +96,8 @@ export default function Services() {
       <Card style={styles.note}>
         <Ionicons name="information-circle-outline" size={22} color={colors.primary} />
         <View style={styles.rowText}>
-          <Text style={styles.noteTitle}>Hujaona unayoitaka?</Text>
-          <Text style={styles.muted}>
-            Uliza Afya AI, au wasiliana nasi. Baadhi ya huduma zinaweza kupangwa kwa maombi
-            maalum.
-          </Text>
+          <Text style={styles.noteTitle}>{tx('Hujaona unayoitaka?')}</Text>
+          <Text style={styles.muted}>{tx('Uliza Afya AI, au wasiliana nasi. Baadhi ya huduma zinaweza kupangwa kwa maombi maalum.')}</Text>
         </View>
       </Card>
 
@@ -104,7 +107,7 @@ export default function Services() {
         style={({ pressed }) => [styles.askButton, pressed && styles.pressed]}
       >
         <Ionicons name="chatbubble-ellipses-outline" size={18} color={colors.primary} />
-        <Text style={styles.askText}>Uliza Afya AI</Text>
+        <Text style={styles.askText}>{tx('Uliza Afya AI')}</Text>
       </Pressable>
     </ScrollView>
   );

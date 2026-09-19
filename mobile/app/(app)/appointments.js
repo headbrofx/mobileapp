@@ -6,6 +6,7 @@ import { bookings as bookingsApi } from '../../lib/api';
 import { Card, ErrorBox } from '../../lib/ui';
 import { colors, font, radius, shadow, spacing, type } from '../../lib/theme';
 import { serviceColour, serviceIcon } from '../../lib/services-meta';
+import { tx, useI18n } from '../../lib/i18n';
 
 // "My Care" from the design: what is coming, who is coming, how far
 // along it is, and what has already happened.
@@ -80,6 +81,11 @@ const initials = (name = '') =>
     .join('');
 
 export default function Appointments() {
+  // Subscribes this screen to the chosen language. The tx() calls
+  // below read it from a module variable, which cannot re-render
+  // anything on its own, and a screen sits behind the navigator's
+  // memo. Reading the context is what gets past that.
+  useI18n();
   const router = useRouter();
   const [visits, setVisits] = useState([]);
   const [error, setError] = useState(null);
@@ -150,7 +156,7 @@ export default function Appointments() {
       {/* No ScreenHeader here any more: this screen left the tab bar
           and now sits in the stack, which draws its own title and menu
           button. Two headers is one too many. */}
-      <Text style={styles.subtitle}>Huduma zako na safari ya matibabu</Text>
+      <Text style={styles.subtitle}>{tx('Huduma zako na safari ya matibabu')}</Text>
 
       <ErrorBox error={error} />
 
@@ -163,7 +169,7 @@ export default function Appointments() {
             onCancel={() => confirmCancel(featured)}
           />
 
-          <Text style={styles.section}>Ratiba ya ziara</Text>
+          <Text style={styles.section}>{tx('Ratiba ya ziara')}</Text>
           <Card style={styles.card}>
             <Timeline visit={featured} />
           </Card>
@@ -175,8 +181,8 @@ export default function Appointments() {
               <Ionicons name="calendar-outline" size={20} color={colors.primary} />
             </View>
             <View style={styles.rowText}>
-              <Text style={styles.rowTitle}>Huna ziara inayokuja</Text>
-              <Text style={styles.muted}>Omba muuguzi aje nyumbani kwako.</Text>
+              <Text style={styles.rowTitle}>{tx('Huna ziara inayokuja')}</Text>
+              <Text style={styles.muted}>{tx('Omba muuguzi aje nyumbani kwako.')}</Text>
             </View>
           </View>
           <Pressable
@@ -185,14 +191,14 @@ export default function Appointments() {
             style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
           >
             <Ionicons name="add" size={18} color={colors.onPrimary} />
-            <Text style={styles.primaryButtonText}>Omba ziara</Text>
+            <Text style={styles.primaryButtonText}>{tx('Omba ziara')}</Text>
           </Pressable>
         </Card>
       )}
 
       {others.length > 0 ? (
         <>
-          <Text style={styles.section}>Nyingine zinazokuja</Text>
+          <Text style={styles.section}>{tx('Nyingine zinazokuja')}</Text>
           {others.map((visit) => (
             <CompactVisit key={visit.id} visit={visit} />
           ))}
@@ -200,7 +206,7 @@ export default function Appointments() {
       ) : null}
 
       <View style={styles.sectionRow}>
-        <Text style={styles.section}>Ziara zilizopita</Text>
+        <Text style={styles.section}>{tx('Ziara zilizopita')}</Text>
         {past.length > 3 ? (
           <Pressable onPress={() => setShowAllPast((value) => !value)} accessibilityRole="button">
             <View style={styles.viewAll}>
@@ -213,7 +219,7 @@ export default function Appointments() {
 
       {past.length === 0 ? (
         <Card>
-          <Text style={styles.muted}>Bado hakuna ziara iliyokamilika.</Text>
+          <Text style={styles.muted}>{tx('Bado hakuna ziara iliyokamilika.')}</Text>
         </Card>
       ) : (
         pastShown.map((visit) => <CompactVisit key={visit.id} visit={visit} past />)
@@ -234,10 +240,10 @@ function UpcomingCard({ visit, busy, onSupport, onCancel }) {
           <View style={[styles.rowIcon, { backgroundColor: colors.primaryLight }]}>
             <Ionicons name="calendar" size={18} color={colors.primary} />
           </View>
-          <Text style={styles.upcomingTitle}>Ziara ijayo nyumbani</Text>
+          <Text style={styles.upcomingTitle}>{tx('Ziara ijayo nyumbani')}</Text>
         </View>
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>{STATUS_SW[visit.status] ?? visit.status}</Text>
+          <Text style={styles.badgeText}>{tx(STATUS_SW[visit.status] ?? visit.status)}</Text>
         </View>
       </View>
 
@@ -273,7 +279,7 @@ function UpcomingCard({ visit, busy, onSupport, onCancel }) {
         <DetailRow
           icon="time-outline"
           tint={colors.subtle}
-          title="Muuguzi hajapangiwa bado"
+          title={tx('Muuguzi hajapangiwa bado')}
           sub="Tutakujulisha atakapopangiwa"
         />
       )}
@@ -294,7 +300,7 @@ function UpcomingCard({ visit, busy, onSupport, onCancel }) {
           style={({ pressed }) => [styles.actionPrimary, pressed && styles.pressed]}
         >
           <Ionicons name="chatbubble-ellipses" size={16} color={colors.onPrimary} />
-          <Text style={styles.actionPrimaryText}>Pata msaada</Text>
+          <Text style={styles.actionPrimaryText}>{tx('Pata msaada')}</Text>
         </Pressable>
 
         <Pressable
@@ -308,7 +314,7 @@ function UpcomingCard({ visit, busy, onSupport, onCancel }) {
           ]}
         >
           <Ionicons name="close-circle-outline" size={16} color={colors.danger} />
-          <Text style={styles.actionGhostText}>Ghairi ziara</Text>
+          <Text style={styles.actionGhostText}>{tx('Ghairi ziara')}</Text>
         </Pressable>
       </View>
     </Card>
@@ -352,7 +358,7 @@ function CompactVisit({ visit, past }) {
         </View>
         <View style={[styles.badge, past && !done && styles.badgeMuted]}>
           <Text style={[styles.badgeText, past && !done && styles.badgeTextMuted]}>
-            {STATUS_SW[visit.status] ?? visit.status}
+            {tx(STATUS_SW[visit.status] ?? visit.status)}
           </Text>
         </View>
         <Ionicons name="chevron-forward" size={17} color={colors.subtle} />

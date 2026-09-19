@@ -23,6 +23,7 @@ import {
   IconField,
 } from '../lib/auth-ui';
 import { colors, radius, spacing, type } from '../lib/theme';
+import { tx, useI18n } from '../lib/i18n';
 
 // The sign-in screen from the design.
 //
@@ -43,6 +44,11 @@ import { colors, radius, spacing, type } from '../lib/theme';
 // second panel below: same token, plus the number.
 
 export default function Login() {
+  // Subscribes this screen to the chosen language. The tx() calls
+  // below read it from a module variable, which cannot re-render
+  // anything on its own, and a screen sits behind the navigator's
+  // memo. Reading the context is what gets past that.
+  useI18n();
   const router = useRouter();
   const { signIn, signInWithGoogle } = useSession();
   // The picture keeps the design's proportion on every phone rather
@@ -119,8 +125,8 @@ export default function Login() {
 
           <View style={styles.headingRow}>
             <View style={styles.headingText}>
-              <Text style={styles.title}>Karibu tena</Text>
-              <Text style={styles.subtitle}>Ingia kwenye akaunti yako ili uendelee</Text>
+              <Text style={styles.title}>{tx('Karibu tena')}</Text>
+              <Text style={styles.subtitle}>{tx('Ingia kwenye akaunti yako ili uendelee')}</Text>
             </View>
             <Text style={styles.script}>Afya bora{'\n'}nyumbani</Text>
           </View>
@@ -138,7 +144,7 @@ export default function Login() {
           <ErrorBox error={error} />
 
           <IconField
-            label="Namba ya simu au barua pepe"
+            label={tx('Namba ya simu au barua pepe')}
             icon="mail-outline"
             placeholder="0712 345 678"
             value={identifier}
@@ -148,9 +154,9 @@ export default function Login() {
           />
 
           <IconField
-            label="Nenosiri"
+            label={tx('Nenosiri')}
             icon="lock-closed-outline"
-            placeholder="Nenosiri lako"
+            placeholder={tx('Nenosiri lako')}
             value={password}
             onChangeText={setPassword}
             secure
@@ -160,7 +166,7 @@ export default function Login() {
 
           <View style={styles.rememberRow}>
             <CheckBox checked={remember} onToggle={() => setRemember((on) => !on)}>
-              <Text style={styles.rememberText}>Nikumbuke</Text>
+              <Text style={styles.rememberText}>{tx('Nikumbuke')}</Text>
             </CheckBox>
 
             <Pressable
@@ -168,12 +174,12 @@ export default function Login() {
               accessibilityRole="button"
               hitSlop={8}
             >
-              <Text style={styles.link}>Umesahau nenosiri?</Text>
+              <Text style={styles.link}>{tx('Umesahau nenosiri?')}</Text>
             </Pressable>
           </View>
 
           <GradientButton
-            title="Ingia"
+            title={tx('Ingia')}
             onPress={submit}
             loading={busy}
             disabled={!identifier || !password}
@@ -182,12 +188,10 @@ export default function Login() {
           {pendingGoogle ? (
             <View style={styles.pending}>
               <Text style={styles.pendingTitle}>Karibu, {pendingGoogle.name}</Text>
-              <Text style={styles.pendingText}>
-                Tunahitaji namba yako ya simu ili muuguzi ajue pa kukufuata.
-              </Text>
+              <Text style={styles.pendingText}>{tx('Tunahitaji namba yako ya simu ili muuguzi ajue pa kukufuata.')}</Text>
 
               <IconField
-                label="Namba ya simu"
+                label={tx('Namba ya simu')}
                 icon="call-outline"
                 placeholder="0712 345 678"
                 value={googlePhone}
@@ -197,7 +201,7 @@ export default function Login() {
               />
 
               <GradientButton
-                title="Maliza kujisajili"
+                title={tx('Maliza kujisajili')}
                 onPress={finishGoogle}
                 loading={busy}
                 disabled={googlePhone.trim().length < 10}
@@ -208,7 +212,7 @@ export default function Login() {
                 accessibilityRole="button"
                 style={styles.cancelGoogle}
               >
-                <Text style={styles.muted}>Ghairi</Text>
+                <Text style={styles.muted}>{tx('Ghairi')}</Text>
               </Pressable>
             </View>
           ) : (
@@ -216,14 +220,14 @@ export default function Login() {
           )}
 
           <View style={styles.registerRow}>
-            <Text style={styles.muted}>Huna akaunti? </Text>
+            <Text style={styles.muted}>{tx('Huna akaunti?')}</Text>
             <Pressable
               onPress={() => router.push('/register')}
               accessibilityRole="button"
               hitSlop={8}
             >
               <View style={styles.linkRow}>
-                <Text style={styles.link}>Jisajili</Text>
+                <Text style={styles.link}>{tx('Jisajili')}</Text>
                 <Ionicons name="arrow-forward" size={14} color={colors.primary} />
               </View>
             </Pressable>

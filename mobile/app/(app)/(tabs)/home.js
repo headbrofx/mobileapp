@@ -18,7 +18,7 @@ import {
   notifications as notificationsApi,
   services as servicesApi,
 } from '../../../lib/api';
-import { useI18n } from '../../../lib/i18n';
+import { tx, useI18n } from '../../../lib/i18n';
 import { useSession } from '../../../lib/session';
 import { ErrorBox, MenuButton } from '../../../lib/ui';
 import { Wordmark } from '../../../lib/brand';
@@ -70,14 +70,20 @@ export default function Home() {
   const { user } = useSession();
   const { t, language } = useI18n();
   const { width, height } = useWindowDimensions();
-  const heroHeight = Math.round(Math.min(width * 0.52, 260));
+  // The hero and the tiles both take their size from the screen, so the
+  // first thing somebody sees fills the phone they are holding rather
+  // than a phone I happened to test on. A tall device gets a taller
+  // picture instead of a band of empty page under it; a short one gets
+  // a shorter picture instead of a hero that pushes everything else
+  // below the fold.
+  const heroHeight = Math.round(Math.min(Math.max(height * 0.27, 170), 300));
   const tileWidth = (width - spacing.md * 2 - spacing.sm * 2) / 3;
   // The tiles are sized from the screen, not from a fixed number. A
   // 640-tall budget Android and an 850-tall Pro Max both get two rows
   // that fill their share of the page instead of one looking cramped
   // and the other leaving a gap under it. Clamped so the picture cannot
   // become a postage stamp on a small phone or a poster on a tablet.
-  const tileHeight = Math.round(Math.min(Math.max(height * 0.125, 88), 132));
+  const tileHeight = Math.round(Math.min(Math.max(height * 0.135, 92), 140));
 
   const [services, setServices] = useState([]);
   const [visits, setVisits] = useState([]);
@@ -156,7 +162,7 @@ export default function Home() {
         <Pressable
           onPress={() => router.push('/notifications')}
           accessibilityRole="button"
-          accessibilityLabel={unread > 0 ? `Taarifa ${unread} mpya` : 'Taarifa'}
+          accessibilityLabel={unread > 0 ? `${tx('Taarifa')} ${unread}` : tx('Taarifa')}
           hitSlop={8}
           style={({ pressed }) => [pressed && styles.pressed]}
         >
@@ -172,7 +178,7 @@ export default function Home() {
       </View>
 
       <View style={styles.gutter}>
-        <Text style={styles.greeting}>{t('home.greeting')}, {user?.name?.split(' ')[0] ?? 'Karibu'}!</Text>
+        <Text style={styles.greeting}>{t('home.greeting')}, {user?.name?.split(' ')[0] ?? tx('Karibu')}!</Text>
         <Text style={styles.tagline}>{t('home.tagline')}</Text>
       </View>
 
@@ -321,7 +327,7 @@ export default function Home() {
             </View>
 
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>{STATUS_SW[upcoming.status] ?? upcoming.status}</Text>
+              <Text style={styles.badgeText}>{tx(STATUS_SW[upcoming.status] ?? upcoming.status)}</Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color={colors.subtle} />
           </Pressable>

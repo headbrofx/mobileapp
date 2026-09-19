@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+import { tx, useI18n } from '../../lib/i18n';
 import { SidebarProvider } from '../../lib/sidebar';
 import { MenuButton } from '../../lib/ui';
 import { colors, font } from '../../lib/theme';
@@ -22,6 +23,12 @@ import { colors, font } from '../../lib/theme';
 // /appointments still lands where it did.
 
 export default function AppLayout() {
+  // Read only so this layout re-renders when the language changes.
+  // The titles below are props, so React Navigation picks up the new
+  // ones on that render; without the subscription they would stay in
+  // whichever language the app started in.
+  useI18n();
+
   return (
     <SidebarProvider>
       <Stack
@@ -34,15 +41,15 @@ export default function AppLayout() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="services" options={{ title: 'Chagua huduma' }} />
-        <Stack.Screen name="appointments" options={{ title: 'Ziara zangu' }} />
-        <Stack.Screen name="notifications" options={{ title: 'Taarifa' }} />
-        <Stack.Screen name="symptoms" options={{ title: 'Ripoti dalili' }} />
-        <Stack.Screen name="family" options={{ title: 'Familia yangu' }} />
-        <Stack.Screen name="article" options={{ title: 'Soma' }} />
-        <Stack.Screen name="medications" options={{ title: 'Dawa zangu' }} />
-        <Stack.Screen name="invoices" options={{ title: 'Ankara' }} />
-        <Stack.Screen name="settings" options={{ title: 'Mipangilio' }} />
+        <Stack.Screen name="services" options={{ title: tx('Chagua huduma') }} />
+        <Stack.Screen name="appointments" options={{ title: tx('Ziara zangu') }} />
+        <Stack.Screen name="notifications" options={{ title: tx('Taarifa') }} />
+        <Stack.Screen name="symptoms" options={{ title: tx('Ripoti dalili') }} />
+        <Stack.Screen name="family" options={{ title: tx('Familia yangu') }} />
+        <Stack.Screen name="article" options={{ title: tx('Soma') }} />
+        <Stack.Screen name="medications" options={{ title: tx('Dawa zangu') }} />
+        <Stack.Screen name="invoices" options={{ title: tx('Ankara') }} />
+        <Stack.Screen name="settings" options={{ title: tx('Mipangilio') }} />
       </Stack>
     </SidebarProvider>
   );

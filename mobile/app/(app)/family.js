@@ -13,6 +13,7 @@ import { useFocusEffect } from 'expo-router';
 import { familyMembers as familyApi } from '../../lib/api';
 import { Button, Card, ErrorBox, Field } from '../../lib/ui';
 import { colors, font, radius, spacing } from '../../lib/theme';
+import { tx, useI18n } from '../../lib/i18n';
 
 // The people this account cares for.
 //
@@ -41,6 +42,11 @@ const GENDERS = [
 const LABEL = Object.fromEntries(RELATIONSHIPS.map((r) => [r.value, r.label]));
 
 export default function Family() {
+  // Subscribes this screen to the chosen language. The tx() calls
+  // below read it from a module variable, which cannot re-render
+  // anything on its own, and a screen sits behind the navigator's
+  // memo. Reading the context is what gets past that.
+  useI18n();
   const [members, setMembers] = useState([]);
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
@@ -132,34 +138,34 @@ export default function Family() {
 
         {adding ? (
           <Card style={styles.form}>
-            <Text style={styles.formTitle}>Ongeza mtu</Text>
+            <Text style={styles.formTitle}>{tx('Ongeza mtu')}</Text>
 
             <Field
-              label="Jina"
-              placeholder="Jina kamili"
+              label={tx('Jina')}
+              placeholder={tx('Jina kamili')}
               value={name}
               onChangeText={setName}
               error={fieldErrors.name}
             />
 
-            <Text style={styles.label}>Uhusiano wako naye</Text>
+            <Text style={styles.label}>{tx('Uhusiano wako naye')}</Text>
             <View style={styles.chips}>
               {RELATIONSHIPS.map((option) => (
                 <Chip
                   key={option.value}
-                  label={option.label}
+                  label={tx(option.label)}
                   selected={relationship === option.value}
                   onPress={() => setRelationship(option.value)}
                 />
               ))}
             </View>
 
-            <Text style={styles.label}>Jinsia (hiari)</Text>
+            <Text style={styles.label}>{tx('Jinsia (hiari)')}</Text>
             <View style={styles.chips}>
               {GENDERS.map((option) => (
                 <Chip
                   key={option.value}
-                  label={option.label}
+                  label={tx(option.label)}
                   selected={gender === option.value}
                   onPress={() => setGender(gender === option.value ? null : option.value)}
                 />
@@ -167,19 +173,19 @@ export default function Family() {
             </View>
 
             <Field
-              label="Tarehe ya kuzaliwa (hiari)"
+              label={tx('Tarehe ya kuzaliwa (hiari)')}
               placeholder="YYYY-MM-DD"
-              hint="Mfano: 1958-03-14"
+              hint={tx('Mfano: 1958-03-14')}
               value={dateOfBirth}
               onChangeText={setDateOfBirth}
               autoCapitalize="none"
               error={fieldErrors.dateOfBirth}
             />
 
-            <Button title="Hifadhi" onPress={submit} loading={busy} disabled={name.trim().length < 2} />
+            <Button title={tx('Hifadhi')} onPress={submit} loading={busy} disabled={name.trim().length < 2} />
             <View style={styles.cancel}>
               <Button
-                title="Ghairi"
+                title={tx('Ghairi')}
                 variant="ghost"
                 onPress={() => {
                   reset();
@@ -190,7 +196,7 @@ export default function Family() {
           </Card>
         ) : (
           <View style={styles.addWrap}>
-            <Button title="Ongeza mtu wa familia" onPress={() => setAdding(true)} />
+            <Button title={tx('Ongeza mtu wa familia')} onPress={() => setAdding(true)} />
           </View>
         )}
       </ScrollView>

@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Wordmark } from './brand';
 import { colors, font, radius, shadow, spacing, type } from './theme';
+import { tx } from './i18n';
 
 // The pieces the sign-in and sign-up screens are built from.
 //
@@ -33,7 +34,7 @@ export function BrandHeader({ onBack }) {
         <Pressable
           onPress={onBack}
           accessibilityRole="button"
-          accessibilityLabel="Rudi nyuma"
+          accessibilityLabel={tx('Rudi nyuma')}
           hitSlop={10}
           style={({ pressed }) => [styles.back, pressed && styles.pressed]}
         >
@@ -43,7 +44,7 @@ export function BrandHeader({ onBack }) {
 
       <View style={styles.brandText}>
         <Wordmark size={28} />
-        <Text style={styles.tagline}>Huduma bora ya afya, ndani ya nyumba yako.</Text>
+        <Text style={styles.tagline}>{tx('Huduma bora ya afya, ndani ya nyumba yako.')}</Text>
       </View>
     </View>
   );
@@ -58,7 +59,7 @@ export function SocialRow({ onPress, busy }) {
     <View>
       <View style={styles.dividerRow}>
         <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>Au endelea na</Text>
+        <Text style={styles.dividerText}>{tx('Au endelea na')}</Text>
         <View style={styles.dividerLine} />
       </View>
 
@@ -73,7 +74,7 @@ export function SocialRow({ onPress, busy }) {
         ) : (
           <>
             <Ionicons name="logo-google" size={19} color="#DB4437" />
-            <Text style={styles.socialText}>Endelea na Google</Text>
+            <Text style={styles.socialText}>{tx('Endelea na Google')}</Text>
           </>
         )}
       </Pressable>

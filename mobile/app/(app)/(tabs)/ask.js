@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { afyaAi } from '../../../lib/api';
 import { MenuButton } from '../../../lib/ui';
 import { colors, font, radius, shadow, spacing, type } from '../../../lib/theme';
+import { tx, useI18n } from '../../../lib/i18n';
 
 // Afya AI, as a conversation.
 //
@@ -43,6 +44,11 @@ const SUGGESTIONS = [
 ];
 
 export default function Ask() {
+  // Subscribes this screen to the chosen language. The tx() calls
+  // below read it from a module variable, which cannot re-render
+  // anything on its own, and a screen sits behind the navigator's
+  // memo. Reading the context is what gets past that.
+  useI18n();
   const insets = useSafeAreaInsets();
   const scroller = useRef(null);
   const [question, setQuestion] = useState('');
@@ -100,7 +106,7 @@ export default function Ask() {
           onPress={() => setMessages([])}
           disabled={messages.length === 0}
           accessibilityRole="button"
-          accessibilityLabel="Anza mazungumzo mapya"
+          accessibilityLabel={tx('Anza mazungumzo mapya')}
           hitSlop={8}
           style={({ pressed }) => [pressed && styles.pressed, messages.length === 0 && styles.faded]}
         >
@@ -133,21 +139,21 @@ export default function Ask() {
           <TextInput
             value={question}
             onChangeText={setQuestion}
-            placeholder="Uliza swali lolote la afya…"
+            placeholder={tx('Uliza swali lolote la afya…')}
             placeholderTextColor={colors.subtle}
             style={styles.input}
             multiline
             maxLength={500}
             onSubmitEditing={() => send()}
             blurOnSubmit={false}
-            accessibilityLabel="Swali lako"
+            accessibilityLabel={tx('Swali lako')}
           />
 
           <Pressable
             onPress={() => send()}
             disabled={!canSend}
             accessibilityRole="button"
-            accessibilityLabel="Tuma swali"
+            accessibilityLabel={tx('Tuma swali')}
             style={({ pressed }) => [
               styles.sendButton,
               !canSend && styles.sendButtonOff,
@@ -162,9 +168,7 @@ export default function Ask() {
           </Pressable>
         </View>
 
-        <Text style={styles.disclaimer}>
-          Afya AI hujibu kutoka maandishi yaliyothibitishwa tu. Si mbadala wa daktari.
-        </Text>
+        <Text style={styles.disclaimer}>{tx('Afya AI hujibu kutoka maandishi yaliyothibitishwa tu. Si mbadala wa daktari.')}</Text>
       </View>
     </KeyboardAvoidingView>
   );
@@ -183,10 +187,7 @@ function Welcome({ onPick }) {
         <Ionicons name="sparkles" size={26} color={colors.primary} />
       </View>
       <Text style={styles.welcomeTitle}>Afya AI</Text>
-      <Text style={styles.welcomeBody}>
-        Uliza kuhusu afya yako au huduma zetu. Majibu yanatoka kwenye maandishi
-        yaliyopitiwa na mtaalamu — hakuna kubahatisha.
-      </Text>
+      <Text style={styles.welcomeBody}>{tx('Uliza kuhusu afya yako au huduma zetu. Majibu yanatoka kwenye maandishi yaliyopitiwa na mtaalamu — hakuna kubahatisha.')}</Text>
 
       <View style={styles.chips}>
         {SUGGESTIONS.map((text) => (
@@ -196,7 +197,7 @@ function Welcome({ onPick }) {
             accessibilityRole="button"
             style={({ pressed }) => [styles.chip, pressed && styles.pressed]}
           >
-            <Text style={styles.chipText}>{text}</Text>
+            <Text style={styles.chipText}>{tx(text)}</Text>
             <Ionicons name="arrow-forward" size={14} color={colors.primary} />
           </Pressable>
         ))}
@@ -211,7 +212,7 @@ function Thinking() {
       <Avatar />
       <View style={[styles.bubble, styles.aiBubble, styles.thinking]}>
         <ActivityIndicator size="small" color={colors.muted} />
-        <Text style={styles.thinkingText}>Inatafuta jibu…</Text>
+        <Text style={styles.thinkingText}>{tx('Inatafuta jibu…')}</Text>
       </View>
     </View>
   );
@@ -257,7 +258,7 @@ function Message({ message }) {
       <View style={styles.emergency}>
         <View style={styles.emergencyHead}>
           <Ionicons name="warning" size={18} color={colors.danger} />
-          <Text style={styles.emergencyHeading}>DHARURA</Text>
+          <Text style={styles.emergencyHeading}>{tx('DHARURA')}</Text>
         </View>
         <Text style={styles.emergencyBody}>{data.answer}</Text>
         {data.redFlagCategories?.length ? (
@@ -276,18 +277,14 @@ function Message({ message }) {
         {data.outcome === 'ANSWERED' ? (
           <View style={styles.source}>
             <Ionicons name="shield-checkmark-outline" size={13} color={colors.success} />
-            <Text style={styles.sourceText}>
-              Limetoka kwenye maandishi yaliyosainiwa na mtaalamu
-            </Text>
+            <Text style={styles.sourceText}>{tx('Limetoka kwenye maandishi yaliyosainiwa na mtaalamu')}</Text>
           </View>
         ) : null}
 
         {data.outcome === 'NO_ANSWER' ? (
           <View style={styles.source}>
             <Ionicons name="help-circle-outline" size={13} color={colors.muted} />
-            <Text style={styles.sourceText}>
-              Hakuna jibu lililothibitishwa kwa swali hili bado
-            </Text>
+            <Text style={styles.sourceText}>{tx('Hakuna jibu lililothibitishwa kwa swali hili bado')}</Text>
           </View>
         ) : null}
       </View>

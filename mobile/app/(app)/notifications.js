@@ -5,6 +5,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { notifications as api } from '../../lib/api';
 import { Card, ErrorBox } from '../../lib/ui';
 import { colors, font, radius, spacing } from '../../lib/theme';
+import { tx, useI18n } from '../../lib/i18n';
 
 // What the bell on the home screen is counting.
 //
@@ -22,6 +23,11 @@ const ICONS = {
 };
 
 export default function Notifications() {
+  // Subscribes this screen to the chosen language. The tx() calls
+  // below read it from a module variable, which cannot re-render
+  // anything on its own, and a screen sits behind the navigator's
+  // memo. Reading the context is what gets past that.
+  useI18n();
   const router = useRouter();
   const [list, setList] = useState([]);
   const [unread, setUnread] = useState(0);
@@ -85,7 +91,7 @@ export default function Notifications() {
 
       {list.length === 0 ? (
         <Card>
-          <Text style={styles.muted}>Hakuna taarifa bado.</Text>
+          <Text style={styles.muted}>{tx('Hakuna taarifa bado.')}</Text>
         </Card>
       ) : (
         list.map((item) => (

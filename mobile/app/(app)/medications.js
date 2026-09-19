@@ -4,6 +4,7 @@ import { useFocusEffect } from 'expo-router';
 import { familyMembers, medications as medsApi } from '../../lib/api';
 import { Button, Card, ErrorBox } from '../../lib/ui';
 import { colors, font, spacing } from '../../lib/theme';
+import { tx, useI18n } from '../../lib/i18n';
 
 // Medicines and the doses coming up.
 //
@@ -13,6 +14,11 @@ import { colors, font, spacing } from '../../lib/theme';
 // hold that line if the screen in front of it crossed one.
 
 export default function Medications() {
+  // Subscribes this screen to the chosen language. The tx() calls
+  // below read it from a module variable, which cannot re-render
+  // anything on its own, and a screen sits behind the navigator's
+  // memo. Reading the context is what gets past that.
+  useI18n();
   const [memberId, setMemberId] = useState(null);
   const [due, setDue] = useState([]);
   const [list, setList] = useState([]);
@@ -72,10 +78,10 @@ export default function Medications() {
     >
       <ErrorBox error={error} />
 
-      <Text style={styles.heading}>Zinazofuata</Text>
+      <Text style={styles.heading}>{tx('Zinazofuata')}</Text>
       {due.length === 0 ? (
         <Card>
-          <Text style={styles.muted}>Hakuna dozi inayokuja katika masaa 48 yajayo.</Text>
+          <Text style={styles.muted}>{tx('Hakuna dozi inayokuja katika masaa 48 yajayo.')}</Text>
         </Card>
       ) : (
         due.map((dose) => (
@@ -91,14 +97,14 @@ export default function Medications() {
             <View style={styles.row}>
               <View style={styles.rowItem}>
                 <Button
-                  title="Nimekunywa"
+                  title={tx('Nimekunywa')}
                   onPress={() => mark(dose.id, 'TAKEN')}
                   loading={markingId === dose.id}
                 />
               </View>
               <View style={styles.rowItem}>
                 <Button
-                  title="Nimeruka"
+                  title={tx('Nimeruka')}
                   variant="ghost"
                   onPress={() => mark(dose.id, 'SKIPPED')}
                   disabled={markingId === dose.id}
@@ -111,7 +117,7 @@ export default function Medications() {
 
       {adherence && adherence.dosesAnswered > 0 ? (
         <>
-          <Text style={styles.heading}>Wiki iliyopita</Text>
+          <Text style={styles.heading}>{tx('Wiki iliyopita')}</Text>
           <Card>
             <Text style={styles.cardTitle}>{adherence.takenPercent}% zimekunywa</Text>
             <Text style={styles.muted}>
@@ -122,12 +128,10 @@ export default function Medications() {
         </>
       ) : null}
 
-      <Text style={styles.heading}>Dawa zako</Text>
+      <Text style={styles.heading}>{tx('Dawa zako')}</Text>
       {list.length === 0 ? (
         <Card>
-          <Text style={styles.muted}>
-            Hakuna dawa iliyoandikwa. Muuguzi wako ndiye anayeziandika hapa.
-          </Text>
+          <Text style={styles.muted}>{tx('Hakuna dawa iliyoandikwa. Muuguzi wako ndiye anayeziandika hapa.')}</Text>
         </Card>
       ) : (
         list.map((med) => (
