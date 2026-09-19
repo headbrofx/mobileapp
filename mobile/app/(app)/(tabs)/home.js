@@ -90,8 +90,15 @@ export default function Home() {
   // fragments in ten-point type. Two across doubles the width, so the
   // icon and the name both get room, and the third row is paid for out
   // of the picture above rather than out of the fold.
-  const tileWidth = (width - spacing.md * 2 - spacing.sm) / 2;
-  const tileHeight = Math.round(Math.min(Math.max(height * 0.125, 92), 132));
+  // Floored, and a pixel given back.
+  //
+  // Two tiles plus the gap came to exactly the available width — 166.5
+  // each on a 375-wide phone — and a fractional width that sums to the
+  // container rounds over it, so the second tile wrapped and the grid
+  // rendered one per row down the left. It looked like a layout choice
+  // and it was a rounding error.
+  const tileWidth = Math.floor((width - spacing.md * 2 - spacing.sm - 2) / 2);
+  const tileHeight = Math.round(Math.min(Math.max(height * 0.155, 100), 170));
   // Just under half the tile. At 52% the plate crowded the name and the
   // tile read as an icon with a caption; this leaves the two in
   // proportion.
@@ -110,16 +117,11 @@ export default function Home() {
   const BREATH = 16;
   const HERO_MIN = 110;
 
-  // How many rows fit, rather than a number decided here.
-  //
-  // Tiles this size cannot give a 640-tall Android three rows, a
-  // photograph, a greeting and a section heading above the fold — the
-  // arithmetic does not allow it, and the honest answer is two rows
-  // there and three on a normal phone. Four services with "Zote" beside
-  // the heading beats six where the last two are under the tab bar,
-  // because nobody scrolls for what they cannot see is there.
-  const rowSpace = height - TAB_BAR - ABOVE_GRID - BREATH - HERO_MIN;
-  const rows = rowSpace >= tileHeight * 3 + spacing.sm * 2 ? 3 : 2;
+  // Two columns, two rows, four services — the owner's call, and the
+  // one that fits every phone without the last row sliding under the
+  // tab bar. "Zote" beside the heading opens the full catalogue, so
+  // nothing is hidden, only held back.
+  const rows = 2;
   const shown = rows * 2;
 
   const gridHeight = tileHeight * rows + spacing.sm * (rows - 1);
