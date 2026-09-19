@@ -1,6 +1,8 @@
 'use strict';
 
 const service = require('../services/orbit.service');
+const checkins = require('../services/orbitCheckin.service');
+const patternsService = require('../services/orbitPatterns.service');
 const { success } = require('../utils/apiResponse');
 
 async function create(req, res, next) {
@@ -57,4 +59,83 @@ async function insights(req, res, next) {
   }
 }
 
-module.exports = { create, list, getOne, update, remove, insights };
+// --- Daily check-in ---
+
+async function saveCheckin(req, res, next) {
+  try {
+    const checkin = await checkins.save(req.familyMember.id, req.body);
+    return success(res, { message: 'Check-in saved', data: { checkin } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function listCheckins(req, res, next) {
+  try {
+    const rows = await checkins.list(req.familyMember.id, {
+      from: req.query.from,
+      to: req.query.to,
+    });
+    const streak = await checkins.streak(req.familyMember.id);
+    return success(res, { message: 'Check-ins', data: { checkins: rows, streak } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function todayCheckin(req, res, next) {
+  try {
+    const checkin = await checkins.getDay(req.familyMember.id, checkins.today());
+    const streak = await checkins.streak(req.familyMember.id);
+    return success(res, { message: "Today's check-in", data: { checkin, streak } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// --- What Orbit has noticed ---
+
+async function patterns(req, res, next) {
+  try {
+    const data = await patternsService.patterns(req.familyMember.id);
+    return success(res, { message: 'Patterns', data: { patterns: data } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function insight(req, res, next) {
+  try {
+    const data = await patternsService.todayInsight(req.familyMember.id);
+    return success(res, { message: "Today's insight", data: { insight: data } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function report(req, res, next) {
+  try {
+    const data = await patternsService.monthlyReport(req.familyMember.id, {
+      year: req.query.year ? Number(req.query.year) : undefined,
+      month: req.query.month ? Number(req.query.month) : undefined,
+    });
+    return success(res, { message: 'Monthly report', data: { report: data } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = {
+  saveCheckin,
+  listCheckins,
+  todayCheckin,
+  patterns,
+  insight,
+  report,
+  create,
+  list,
+  getOne,
+  update,
+  remove,
+  insights,
+};

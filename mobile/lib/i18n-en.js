@@ -22,6 +22,158 @@
 // Symptoms still read as Swahili in the source.
 
 export const EN_BY_SW = {
+  // --- Orbit ---
+  Faragha: 'Private',
+  Habari: 'Hello',
+  'Siku ya mzunguko': 'Cycle day',
+  'Bado hakuna mzunguko': 'No cycle recorded yet',
+  Inakadiriwa: 'Estimated',
+  Wastani: 'Average',
+  Uthabiti: 'Consistency',
+  Thabiti: 'Steady',
+  Inatofautiana: 'Varies',
+  Hedhi: 'Period',
+  'Baada ya hedhi': 'After period',
+  'Karibu na yai': 'Around ovulation',
+  'Kabla ya hedhi': 'Before period',
+  siku: 'days',
+  Leo: 'Today',
+  'Kutokana na mizunguko yako': 'Based on your last',
+  'iliyopita. Ni makadirio, si uhakika.': 'cycles. An estimate, not a certainty.',
+  'Orbit inahitaji angalau mizunguko miwili kabla ya kukadiria ujao.':
+    'Orbit needs at least two cycles before it can estimate the next one.',
+  'Orbit yako ndio kwanza inaanza': 'Your Orbit is just getting started',
+  'Orbit yako ndio kwanza inaanza. Andika tarehe ya hedhi yako ya mwisho ili ianze kujifunza mzunguko wako.':
+    'Your Orbit is just getting started. Record your last period so it can begin learning your cycle.',
+  'Fanya uchunguzi mfupi wa kila siku ili Orbit ianze kuona mwenendo wako binafsi.':
+    'Do the short daily check-in so Orbit can begin to see your own pattern.',
+  'Anza kufuatilia': 'Start tracking',
+  'Bado tunahitaji siku chache zaidi': 'We need a few more days yet',
+  'Umeandika siku': 'You have recorded',
+  'Orbit haitasema mwenendo wako kabla ya kuwa na uhakika.':
+    'Orbit will not describe your pattern before it can be sure.',
+  'Orbit leo': 'Orbit today',
+  'Hakuna mabadiliko makubwa kwenye ulichoandika siku hizi za karibuni.':
+    'No large change in what you have recorded recently.',
+  'Kutokana na siku': 'From the',
+  'ulizoandika.': 'days you recorded.',
+  'zimekuwa chini kidogo': 'has been a little lower',
+  'zimekuwa juu kidogo': 'has been a little higher',
+  'kuliko siku zako za awali.': 'than on your earlier days.',
+  Karibuni: 'Recent',
+  awali: 'earlier',
+  'Huu ni mwenendo wa kufuatilia, si uchunguzi wa ugonjwa.':
+    'This is a pattern worth monitoring, not a diagnosis.',
+  'Uchunguzi wa leo': "Today's check-in",
+  'Umeandika leo': 'Recorded today',
+  'Gusa kubadilisha ulichoandika.': 'Tap to change what you recorded.',
+  'Sekunde 20 — hisia, nguvu, maumivu, usingizi.': '20 seconds — mood, energy, pain, sleep.',
+  'wiki hii': 'this week',
+  'Hali kwa ujumla': 'Wellness snapshot',
+  'Ona zaidi': 'See more',
+  'MONITORING inamaanisha bado hakuna siku za kutosha kusema, si kwamba kuna tatizo.':
+    'MONITORING means there are not enough days to say yet, not that anything is wrong.',
+  Jifunze: 'Learn',
+  'Uliza Orbit': 'Ask Orbit',
+  'Maktaba inakuja': 'The library is coming',
+  'Makala za afya ya uzazi zinasubiri kupitiwa na mtaalamu kabla hazijachapishwa.':
+    'Reproductive health articles are waiting for a professional to review them before publication.',
+  'Ripoti ya mwezi': 'Monthly report',
+  'Muhtasari wa kushiriki na mtaalamu': 'A summary to share with a professional',
+  'Zungumza na mtaalamu': 'Talk to a professional',
+  'Orbit si mbadala wa mtaalamu wa afya. Unaweza kuomba muuguzi wakati wowote.':
+    'Orbit is not a substitute for a health professional. You can book a nurse at any time.',
+  'Makadirio yote yanatokana na ulichoandika mwenyewe. Si uchunguzi wa kitabibu.':
+    'Every estimate comes from what you recorded yourself. It is not a medical assessment.',
+  'Kalenda ya mzunguko': 'Cycle calendar',
+  'Mwenendo wa mwili wangu': 'My body patterns',
+  'Andika hedhi': 'Log a period',
+
+  // Orbit - check-in
+  'Hakuna swali la lazima. Jibu unachojua, ruka kisichokuhusu leo.':
+    'Nothing is required. Answer what you know, skip what does not apply today.',
+  Nguvu: 'Energy',
+  'Hamu ya kula': 'Appetite',
+  Chini: 'Low',
+  Juu: 'High',
+  Mbaya: 'Poor',
+  Mzuri: 'Good',
+  Makali: 'Severe',
+  'Hedhi leo': 'Period today',
+  Hakuna: 'None',
+  Matone: 'Spotting',
+  Nyingi: 'Heavy',
+  'Maumivu ya tumbo': 'Cramps',
+  Kuvimbiwa: 'Bloating',
+  'Maumivu ya kichwa': 'Headache',
+  'Maumivu ya mgongo': 'Backache',
+  Chunusi: 'Acne',
+  Majimaji: 'Discharge',
+  'Matiti kuuma': 'Tender breasts',
+  Kichefuchefu: 'Nausea',
+  Kizunguzungu: 'Dizziness',
+  'Ulichoandika ni chako. Muuguzi anaona tu ukiamua kushiriki naye.':
+    'What you record is yours. A nurse sees it only if you choose to share it.',
+
+  // Orbit - patterns
+  'ulizoandika katika siku': 'days recorded in the last',
+  'zilizopita, na mizunguko': 'days, and cycles',
+  'Wastani wako': 'Your averages',
+  'Bado hujaandika': 'Not recorded yet',
+  Siku: 'Days',
+  'Karibu na hedhi': 'Around your period',
+  'Bado hatujaweza kulinganisha': 'Not enough to compare yet',
+  'Orbit inahitaji angalau mizunguko': 'Orbit needs at least',
+  'iliyoandikwa, pamoja na siku za uchunguzi ndani na nje ya siku za kabla ya hedhi, kabla ya kulinganisha.':
+    'recorded cycles, plus check-ins both inside and outside the days before a period, before it will compare.',
+  'Siku 3 kabla': '3 days before',
+  'siku nyingine': 'other days',
+  na: 'and',
+  Tofauti: 'Differs',
+  Mtiririko: 'Flow',
+  'Mtiririko ulioandika umekuwa mzito zaidi siku 1–2 za mwanzo.':
+    'The flow you recorded has been heavier on the first 1–2 days.',
+  'Mtiririko ulioandika haujatofautiana sana kati ya siku za mwanzo na zinazofuata.':
+    'The flow you recorded has not differed much between the first days and the ones after.',
+  'za mwanzo ulizoandika.': 'first days you recorded.',
+  'Dalili zilizojirudia': 'Symptoms that recurred',
+  'Bado hakuna dalili iliyoandikwa': 'No symptoms recorded yet',
+  'Ukiweka alama kwenye dalili wakati wa uchunguzi, zitaonekana hapa.':
+    'Tick symptoms during a check-in and they will appear here.',
+  'Haya ni mahesabu ya ulichoandika mwenyewe, si uchunguzi wa kitabibu. Ukiona mabadiliko yanayokusumbua, zungumza na mtaalamu wa afya.':
+    'These are counts of what you recorded yourself, not a medical assessment. If you notice changes that worry you, speak to a health professional.',
+
+  // Orbit - report
+  'RIPOTI YA ORBIT': 'ORBIT REPORT',
+  Ulivyofuatilia: 'How you tracked',
+  'siku zilizoandikwa mwezi huu': 'days recorded this month',
+  'Siku chache zimeandikwa, kwa hiyo wastani hapa chini ni wa kuangalia kwa tahadhari.':
+    'Few days were recorded, so treat the averages below with caution.',
+  'Wastani wa mwezi': 'Monthly averages',
+  'Hujaandika mwezi huu': 'Not recorded this month',
+  Zilizoandikwa: 'Recorded',
+  'Urefu wa wastani': 'Average length',
+  'Hakuna ripoti ya mwezi huu bado': 'No report for this month yet',
+  'Ripoti hujengwa kutokana na uchunguzi wa kila siku. Anza kufuatilia na itaonekana hapa.':
+    'The report is built from daily check-ins. Start tracking and it will appear here.',
+  'Shiriki na mtaalamu wa afya': 'Share with a health professional',
+  'Omba muuguzi na mwoneshe muhtasari huu kwenye simu yako.':
+    'Book a nurse and show them this summary on your phone.',
+  'Ripoti hii ni muhtasari wa ulichoandika mwenyewe. Si uchunguzi wa kitabibu wala hairudishi haja ya kuonana na mtaalamu.':
+    'This report summarises what you recorded yourself. It is not a medical assessment and does not replace seeing a professional.',
+  Januari: 'January',
+  Februari: 'February',
+  Machi: 'March',
+  Aprili: 'April',
+  Mei: 'May',
+  Juni: 'June',
+  Julai: 'July',
+  Agosti: 'August',
+  Septemba: 'September',
+  Oktoba: 'October',
+  Novemba: 'November',
+  Desemba: 'December',
+
   // --- Afya AI ---
   'Afya AI hujibu kutoka maandishi yaliyothibitishwa tu. Si mbadala wa daktari.':
     'Afya AI answers only from verified writing. It is not a substitute for a doctor.',

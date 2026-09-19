@@ -193,6 +193,25 @@ export const symptoms = {
   report: (memberId, payload) => api.post(`/api/family-members/${memberId}/symptoms`, payload),
 };
 
+// Orbit: the daily check-in, and what the recorded days add up to.
+//
+// Each of these returns its own status — NO_DATA, INSUFFICIENT_DATA or
+// OBSERVED — rather than an empty object the screen has to guess about.
+// The screen renders the status, not the absence of data.
+export const orbit = {
+  today: (memberId) => api.get(`/api/family-members/${memberId}/orbit/checkins/today`),
+  checkins: (memberId) => api.get(`/api/family-members/${memberId}/orbit/checkins`),
+  saveCheckin: (memberId, payload) =>
+    api.post(`/api/family-members/${memberId}/orbit/checkins`, payload),
+  patterns: (memberId) => api.get(`/api/family-members/${memberId}/orbit/patterns`),
+  insight: (memberId) => api.get(`/api/family-members/${memberId}/orbit/insight`),
+  report: (memberId, params) =>
+    api.get(
+      `/api/family-members/${memberId}/orbit/report` +
+        (params?.year ? `?year=${params.year}&month=${params.month}` : '')
+    ),
+};
+
 export const cycles = {
   list: (memberId) => api.get(`/api/family-members/${memberId}/cycles`),
   insights: (memberId) => api.get(`/api/family-members/${memberId}/cycles/insights`),

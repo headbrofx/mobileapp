@@ -64,6 +64,37 @@ module.exports = {
   'PATCH /api/family-members/:familyMemberId': { tag: 'Family members', summary: 'Update a family member' },
 
   // --- Health record ---
+  // --- Orbit ---
+  'POST /api/family-members/:familyMemberId/orbit/checkins': {
+    tag: 'Orbit',
+    summary: "Save today's body check-in",
+    description:
+      'Upserts on the day. Only the fields sent are written, so saving energy alone leaves mood as it was. Every field is optional — a check-in nobody can finish is a check-in nobody does.',
+  },
+  'GET /api/family-members/:familyMemberId/orbit/checkins': {
+    tag: 'Orbit',
+    summary: 'Check-in history',
+  },
+  'GET /api/family-members/:familyMemberId/orbit/checkins/today': {
+    tag: 'Orbit',
+    summary: "Today's check-in, if it exists",
+  },
+  'GET /api/family-members/:familyMemberId/orbit/patterns': {
+    tag: 'Orbit',
+    summary: 'What the recorded data supports saying',
+    description:
+      'Every section carries its own status: NO_DATA, INSUFFICIENT_DATA or OBSERVED, with the number of days behind it. Nothing is asserted that the row count does not support, and nothing here is a diagnosis.',
+  },
+  'GET /api/family-members/:familyMemberId/orbit/insight': {
+    tag: 'Orbit',
+    summary: "One observation for today, or none",
+    description:
+      'Returns NO_DATA, INSUFFICIENT_DATA, STEADY or OBSERVED. An insight is only returned when it can be pointed back at the days it came from.',
+  },
+  'GET /api/family-members/:familyMemberId/orbit/report': {
+    tag: 'Orbit',
+    summary: 'Monthly summary for a calendar month',
+  },
   'GET /api/family-members/:familyMemberId/health-profile': { tag: 'Health', summary: 'Health profile' },
   'PATCH /api/family-members/:familyMemberId/health-profile': {
     tag: 'Health',

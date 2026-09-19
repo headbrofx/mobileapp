@@ -21,4 +21,28 @@ const createCycleSchema = z.object({
 
 const updateCycleSchema = createCycleSchema.partial();
 
-module.exports = { createCycleSchema, updateCycleSchema };
+// --- Daily check-in ---
+//
+// Every field optional, including all of them at once: somebody who
+// opens the check-in, ticks nothing and saves has still told Orbit that
+// today was unremarkable, and a row of nulls records that honestly.
+// The floors differ on purpose — pain starts at 0 because "no pain" is
+// an answer, the rest start at 1 because there is no such thing as
+// zero mood.
+const scale = z.number().int().min(1).max(5);
+
+const checkinSchema = z.object({
+  // Defaults to today in the service. Accepted here so a person can
+  // fill in yesterday, which is when most people remember.
+  checkinDate: dateOnly.optional(),
+  mood: scale.nullable().optional(),
+  energy: scale.nullable().optional(),
+  sleep: scale.nullable().optional(),
+  appetite: scale.nullable().optional(),
+  pain: z.number().int().min(0).max(5).nullable().optional(),
+  flow: z.enum(['NONE', 'SPOTTING', 'LIGHT', 'MEDIUM', 'HEAVY']).nullable().optional(),
+  symptoms: z.array(z.string().max(40)).max(20).optional(),
+  notes: z.string().max(2000).nullable().optional(),
+});
+
+module.exports = { createCycleSchema, updateCycleSchema, checkinSchema };

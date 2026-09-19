@@ -50,6 +50,12 @@ export default function AppLayout() {
         <Stack.Screen name="medications" options={{ title: tx('Dawa zangu') }} />
         <Stack.Screen name="invoices" options={{ title: tx('Ankara') }} />
         <Stack.Screen name="settings" options={{ title: tx('Mipangilio') }} />
+        {/* Orbit's own screens. The tab is the dashboard; these are the
+            places it sends you. */}
+        <Stack.Screen name="orbit-cycle" options={{ title: tx('Kalenda ya mzunguko') }} />
+        <Stack.Screen name="orbit-checkin" options={{ title: tx('Uchunguzi wa leo') }} />
+        <Stack.Screen name="orbit-patterns" options={{ title: tx('Mwenendo wa mwili wangu') }} />
+        <Stack.Screen name="orbit-report" options={{ title: tx('Ripoti ya mwezi') }} />
       </Stack>
     </SidebarProvider>
   );

@@ -9,7 +9,11 @@ const { createFamilyMemberSchema, updateFamilyMemberSchema } = require('../valid
 const { updateHealthProfileSchema } = require('../validators/healthProfile.validator');
 const { createVitalSchema, updateVitalSchema } = require('../validators/vitals.validator');
 const { createSymptomSchema, updateSymptomSchema } = require('../validators/symptom.validator');
-const { createCycleSchema, updateCycleSchema } = require('../validators/orbit.validator');
+const {
+  createCycleSchema,
+  updateCycleSchema,
+  checkinSchema,
+} = require('../validators/orbit.validator');
 const {
   updateNutritionProfileSchema,
   logMealSchema,
@@ -146,6 +150,52 @@ router.patch(
   orbitController.update
 );
 router.delete('/:familyMemberId/cycles/:cycleId', authenticate, loadOwnedFamilyMember, orbitController.remove);
+
+// --- Orbit: daily check-in and what it adds up to ---
+//
+// Static segments before the :cycleId route above would be shadowed, so
+// these live on their own paths rather than under /cycles.
+//
+// The order inside this block matters for the same reason: /checkins/today
+// is declared before nothing else can claim it, and the list route takes
+// no id at all, so there is none to swap for somebody else's.
+router.get(
+  '/:familyMemberId/orbit/checkins/today',
+  authenticate,
+  loadOwnedFamilyMember,
+  orbitController.todayCheckin
+);
+router.get(
+  '/:familyMemberId/orbit/checkins',
+  authenticate,
+  loadOwnedFamilyMember,
+  orbitController.listCheckins
+);
+router.post(
+  '/:familyMemberId/orbit/checkins',
+  authenticate,
+  loadOwnedFamilyMember,
+  validate(checkinSchema),
+  orbitController.saveCheckin
+);
+router.get(
+  '/:familyMemberId/orbit/patterns',
+  authenticate,
+  loadOwnedFamilyMember,
+  orbitController.patterns
+);
+router.get(
+  '/:familyMemberId/orbit/insight',
+  authenticate,
+  loadOwnedFamilyMember,
+  orbitController.insight
+);
+router.get(
+  '/:familyMemberId/orbit/report',
+  authenticate,
+  loadOwnedFamilyMember,
+  orbitController.report
+);
 
 // --- Nutrition (Phase 10) ---
 router.get('/:familyMemberId/nutrition', authenticate, loadOwnedFamilyMember, nutritionController.getProfile);
