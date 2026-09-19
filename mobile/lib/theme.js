@@ -199,6 +199,50 @@ export async function saveTheme(name) {
   return false;
 }
 
+// --- The dark screen -------------------------------------------------
+//
+// Afya AI is drawn on navy rather than on the page colour, at the
+// owner's request, and its palette does not follow the theme picker.
+//
+// That is deliberate. The three themes decide what the app's furniture
+// looks like; this screen is built from the two colours the business
+// already owns — the blue and the orange in its own logo — so it reads
+// as the same company whichever theme is on, instead of turning green
+// or blue-on-blue and losing the contrast the design depends on.
+//
+// The accent is a lighter cut of the logo orange. #FD6000 on this navy
+// reads at 5.9:1; the deeper #C44200 the light themes use would drop to
+// 3.2:1, which is under the floor for text.
+export const dark = {
+  bg: '#050B18',
+  bgDeep: '#02060F',
+  // Glass: a white veil rather than a solid, so the backdrop shows
+  // through and the cards read as one surface at different depths.
+  glass: 'rgba(255,255,255,0.045)',
+  glassStrong: 'rgba(255,255,255,0.075)',
+  border: 'rgba(255,255,255,0.10)',
+  text: '#FFFFFF',
+  muted: '#A8B8D0',
+  // 5.1:1 against the navy. The obvious slate grey for this job
+  // sits at 4.1:1, which is under the floor — and the text that uses
+  // it is the ten-point line saying this is not a doctor.
+  subtle: '#74839B',
+
+  accent: '#FF8A3D',
+  accentSoft: 'rgba(255,138,61,0.16)',
+  accentLine: 'rgba(255,138,61,0.45)',
+
+  glow: '#2E7BFF',
+  glowSoft: 'rgba(46,123,255,0.22)',
+  glowFaint: 'rgba(46,123,255,0.10)',
+
+  // Still the one colour that means go to hospital. Lifted off the
+  // light-theme red because a dark screen swallows it.
+  danger: '#FF6B5E',
+  dangerBg: 'rgba(255,107,94,0.12)',
+  dangerBorder: 'rgba(255,107,94,0.55)',
+};
+
 // --- Type ------------------------------------------------------------
 //
 // Plus Jakarta Sans, loaded at launch.

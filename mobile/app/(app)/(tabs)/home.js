@@ -22,7 +22,7 @@ import { tx, useI18n } from '../../../lib/i18n';
 import { useSession } from '../../../lib/session';
 import { ErrorBox, MenuButton } from '../../../lib/ui';
 import { Wordmark } from '../../../lib/brand';
-import { colors, font, radius, shadow, spacing, type } from '../../../lib/theme';
+import { colors, font, radius, scale, shadow, spacing, type } from '../../../lib/theme';
 import { serviceColour, serviceIcon, serviceImage } from '../../../lib/services-meta';
 
 // The home screen, element for element from the design.
@@ -70,20 +70,29 @@ export default function Home() {
   const { user } = useSession();
   const { t, language } = useI18n();
   const { width, height } = useWindowDimensions();
-  // The hero and the tiles both take their size from the screen, so the
-  // first thing somebody sees fills the phone they are holding rather
-  // than a phone I happened to test on. A tall device gets a taller
-  // picture instead of a band of empty page under it; a short one gets
-  // a shorter picture instead of a hero that pushes everything else
-  // below the fold.
-  const heroHeight = Math.round(Math.min(Math.max(height * 0.27, 170), 300));
+  // The service tiles come first, and the picture takes what is left.
+  //
+  // This used to be the other way round — the hero took a fixed share of
+  // the screen and the tiles went wherever they landed. On a 640-tall
+  // Android that put the bottom row twelve pixels under the tab bar:
+  // half the catalogue was invisible unless you knew to scroll. Sizing
+  // the picture from the room left over fixes both complaints at once,
+  // because a tall phone has room to spare and the hero grows into it
+  // while a short one gives the room to the tiles.
   const tileWidth = (width - spacing.md * 2 - spacing.sm * 2) / 3;
-  // The tiles are sized from the screen, not from a fixed number. A
-  // 640-tall budget Android and an 850-tall Pro Max both get two rows
-  // that fill their share of the page instead of one looking cramped
-  // and the other leaving a gap under it. Clamped so the picture cannot
-  // become a postage stamp on a small phone or a poster on a tablet.
   const tileHeight = Math.round(Math.min(Math.max(height * 0.135, 92), 140));
+
+  // Everything above the grid that is not the picture: the top bar, the
+  // greeting, the tagline, the button hanging off the hero and the
+  // section heading. Measured, not guessed, and scaled with the width
+  // because the type and the spacing are. BREATH is the slack that
+  // covers a greeting long enough to wrap onto a second line.
+  const ABOVE_GRID = scale(240);
+  const TAB_BAR = 62;
+  const BREATH = 16;
+  const gridHeight = tileHeight * 2 + spacing.sm;
+  const room = height - TAB_BAR - ABOVE_GRID - gridHeight - BREATH;
+  const heroHeight = Math.round(Math.min(Math.max(room, 120), 300));
 
   const [services, setServices] = useState([]);
   const [visits, setVisits] = useState([]);

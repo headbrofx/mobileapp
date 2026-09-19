@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, font } from '../../../lib/theme';
+import { colors, dark, font } from '../../../lib/theme';
 import { useI18n } from '../../../lib/i18n';
 
 // Bottom tabs: the five things somebody opens the app to do.
@@ -72,6 +72,18 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="chatbubble-ellipses-outline" size={size} color={color} />
           ),
+          // Afya AI is drawn on navy, so the bar under it is too. A
+          // light strip across the foot of a dark screen reads as a
+          // seam, and this is the one screen with its own surface.
+          tabBarStyle: {
+            backgroundColor: dark.bgDeep,
+            borderTopColor: dark.border,
+            height: 62,
+            paddingBottom: 8,
+            paddingTop: 6,
+          },
+          tabBarActiveTintColor: dark.accent,
+          tabBarInactiveTintColor: dark.subtle,
         }}
       />
       <Tabs.Screen
