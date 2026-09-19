@@ -79,8 +79,14 @@ export default function Home() {
   // the picture from the room left over fixes both complaints at once,
   // because a tall phone has room to spare and the hero grows into it
   // while a short one gives the room to the tiles.
-  const tileWidth = (width - spacing.md * 2 - spacing.sm * 2) / 3;
-  const tileHeight = Math.round(Math.min(Math.max(height * 0.135, 92), 140));
+  // Two across, not three. Three fitted six services into two rows but
+  // gave each one a 107-point column, which is narrower than the names
+  // are: "Medication Administration" came out as three stacked
+  // fragments in ten-point type. Two across doubles the width, so the
+  // icon and the name both get room, and the third row is paid for out
+  // of the picture above rather than out of the fold.
+  const tileWidth = (width - spacing.md * 2 - spacing.sm) / 2;
+  const tileHeight = Math.round(Math.min(Math.max(height * 0.1, 62), 96));
 
   // Everything above the grid that is not the picture: the top bar, the
   // greeting, the tagline, the button hanging off the hero and the
@@ -90,7 +96,7 @@ export default function Home() {
   const ABOVE_GRID = scale(240);
   const TAB_BAR = 62;
   const BREATH = 16;
-  const gridHeight = tileHeight * 2 + spacing.sm;
+  const gridHeight = tileHeight * 3 + spacing.sm * 2;
   const room = height - TAB_BAR - ABOVE_GRID - gridHeight - BREATH;
   const heroHeight = Math.round(Math.min(Math.max(room, 120), 300));
 
@@ -240,9 +246,9 @@ export default function Home() {
                 ]}
               >
                 <View style={styles.tileIcon}>
-                  <Ionicons name={serviceIcon(service.name)} size={19} color="#FFFFFF" />
+                  <Ionicons name={serviceIcon(service.name)} size={21} color="#FFFFFF" />
                 </View>
-                <Text style={styles.tileText} numberOfLines={3}>
+                <Text style={styles.tileText} numberOfLines={2}>
                   {service.name}
                 </Text>
               </View>
@@ -482,14 +488,14 @@ const styles = StyleSheet.create({
     ...shadow.card,
   },
   tileIcon: {
-    width: 30,
-    height: 30,
+    width: 34,
+    height: 34,
     borderRadius: radius.sm,
     backgroundColor: 'rgba(255,255,255,0.22)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tileText: { ...type.tiny, fontSize: 10, lineHeight: 13, fontFamily: font.bold, color: '#FFFFFF' },
+  tileText: { ...type.tiny, fontSize: 12, lineHeight: 15, fontFamily: font.bold, color: '#FFFFFF' },
 
   featured: {
     flexDirection: 'row',
