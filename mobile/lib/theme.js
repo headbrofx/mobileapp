@@ -120,19 +120,40 @@ export const THEMES = Object.entries(PALETTES).map(([name, entry]) => ({
 // web, SecureStore.getItem (not getItemAsync) on native. Wrapped,
 // because storage can be blocked, cleared or unavailable, and a theme
 // preference is never worth failing a launch over.
-function savedTheme() {
+function readPref(key, allowed, fallback) {
   try {
     const raw =
       Platform.OS === 'web'
-        ? globalThis.localStorage?.getItem(THEME_KEY)
-        : SecureStore.getItem(THEME_KEY);
-    return raw && PALETTES[raw] ? raw : DEFAULT_THEME;
+        ? globalThis.localStorage?.getItem(key)
+        : SecureStore.getItem(key);
+    return raw && allowed[raw] ? raw : fallback;
   } catch {
-    return DEFAULT_THEME;
+    return fallback;
   }
 }
 
-export const themeName = savedTheme();
+async function writePref(key, value) {
+  try {
+    if (Platform.OS === 'web') globalThis.localStorage?.setItem(key, value);
+    else await SecureStore.setItemAsync(key, value);
+  } catch {
+    return false;
+  }
+
+  if (Platform.OS === 'web') {
+    // The root, not a reload of wherever we happen to be. This is a
+    // single-page build and the host has no rewrite rule, so asking the
+    // server for /settings directly returns a 404 — reloading in place
+    // would turn every change into a broken page. The root always
+    // exists, and the app sends you on from there.
+    globalThis.location?.assign('/');
+    return true;
+  }
+
+  return false;
+}
+
+export const themeName = readPref(THEME_KEY, PALETTES, DEFAULT_THEME);
 
 const palette = PALETTES[themeName];
 
@@ -178,25 +199,12 @@ export const colors = {
 // Returns true when the change is already on screen.
 export async function saveTheme(name) {
   if (!PALETTES[name]) return false;
+  return writePref(THEME_KEY, name);
+}
 
-  try {
-    if (Platform.OS === 'web') globalThis.localStorage?.setItem(THEME_KEY, name);
-    else await SecureStore.setItemAsync(THEME_KEY, name);
-  } catch {
-    return false;
-  }
-
-  if (Platform.OS === 'web') {
-    // The root, not a reload of wherever we happen to be. This is a
-    // single-page build and the host has no rewrite rule, so asking the
-    // server for /settings directly returns a 404 — reloading in place
-    // would turn every colour change into a broken page. The root always
-    // exists, and the app sends you on from there.
-    globalThis.location?.assign('/');
-    return true;
-  }
-
-  return false;
+export async function saveTextSize(name) {
+  if (!TEXT_SIZES[name]) return false;
+  return writePref(TEXT_KEY, name);
 }
 
 // --- The dark screen -------------------------------------------------
@@ -270,6 +278,34 @@ export const font = {
 // Unclamped scaling makes small phones cramped and large ones look like
 // a children's book.
 
+// --- Text size -------------------------------------------------------
+//
+// Read at module load for the same reason the palette is: the sizes
+// below are baked into StyleSheets during import, and an async answer
+// would arrive after every screen had already been built.
+//
+// The range is deliberately narrow. Type carries layout with it — a
+// name that fits a tile at one size wraps at another — and this app has
+// grids and a five-item tab bar that a 1.5x jump would break. Three
+// steps eight points apart is enough to help somebody who is squinting
+// without turning the catalogue into a list of fragments. Anyone who
+// needs more than this needs their phone's own accessibility zoom,
+// which works on top of it.
+const TEXT_KEY = 'afya.textSize';
+
+const TEXT_SIZES = { small: 0.92, normal: 1, large: 1.12 };
+
+export const DEFAULT_TEXT_SIZE = 'normal';
+
+export const TEXT_SIZE_OPTIONS = [
+  { name: 'small', label: 'Madogo' },
+  { name: 'normal', label: 'Ya kawaida' },
+  { name: 'large', label: 'Makubwa' },
+];
+
+export const textSizeName = readPref(TEXT_KEY, TEXT_SIZES, DEFAULT_TEXT_SIZE);
+export const textScale = TEXT_SIZES[textSizeName];
+
 const BASE_WIDTH = 375;
 const { width: INITIAL_WIDTH } = Dimensions.get('window');
 
@@ -281,15 +317,27 @@ function factorFor(width) {
 export const scaleFactor = factorFor(INITIAL_WIDTH);
 export const scale = (size) => Math.round(size * scaleFactor);
 
+// Type only. Spacing keeps plain scale(), because the reader asked for
+// bigger words, not a looser page — and the grids are sized from the
+// screen, so widening every gap would push rows under the fold.
+const textScaleSize = (size) => Math.round(size * scaleFactor * textScale);
+const ts = textScaleSize;
+
+// The same thing, exported, for the places that write a size straight
+// into a StyleSheet instead of taking a token. Without it "Text size:
+// Large" would move half the app and leave the rest, which looks broken
+// rather than absent.
+export const fs = textScaleSize;
+
 export const type = {
-  display: { fontFamily: font.extrabold, fontSize: scale(28), lineHeight: scale(34) },
-  title: { fontFamily: font.bold, fontSize: scale(21), lineHeight: scale(27) },
-  section: { fontFamily: font.bold, fontSize: scale(16), lineHeight: scale(21) },
-  body: { fontFamily: font.regular, fontSize: scale(14), lineHeight: scale(20) },
-  bodyStrong: { fontFamily: font.semibold, fontSize: scale(14), lineHeight: scale(20) },
-  label: { fontFamily: font.semibold, fontSize: scale(13), lineHeight: scale(17) },
-  small: { fontFamily: font.regular, fontSize: scale(12), lineHeight: scale(16) },
-  tiny: { fontFamily: font.medium, fontSize: scale(11), lineHeight: scale(14) },
+  display: { fontFamily: font.extrabold, fontSize: ts(28), lineHeight: ts(34) },
+  title: { fontFamily: font.bold, fontSize: ts(21), lineHeight: ts(27) },
+  section: { fontFamily: font.bold, fontSize: ts(16), lineHeight: ts(21) },
+  body: { fontFamily: font.regular, fontSize: ts(14), lineHeight: ts(20) },
+  bodyStrong: { fontFamily: font.semibold, fontSize: ts(14), lineHeight: ts(20) },
+  label: { fontFamily: font.semibold, fontSize: ts(13), lineHeight: ts(17) },
+  small: { fontFamily: font.regular, fontSize: ts(12), lineHeight: ts(16) },
+  tiny: { fontFamily: font.medium, fontSize: ts(11), lineHeight: ts(14) },
 };
 
 export const spacing = {

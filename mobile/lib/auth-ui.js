@@ -10,7 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Wordmark } from './brand';
-import { colors, font, radius, shadow, spacing, type } from './theme';
+import { colors, font, fs, radius, shadow, spacing, type } from './theme';
 import { tx } from './i18n';
 
 // The pieces the sign-in and sign-up screens are built from.
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   stepDotOn: { backgroundColor: colors.primary, ...shadow.card },
   stepNum: { ...type.tiny, fontFamily: font.bold, color: colors.muted },
   stepNumOn: { color: colors.onPrimary },
-  stepLabel: { ...type.tiny, fontSize: 10, color: colors.subtle, marginTop: 6, textAlign: 'center' },
+  stepLabel: { ...type.tiny, fontSize: fs(10), color: colors.subtle, marginTop: 6, textAlign: 'center' },
   stepLabelOn: { color: colors.primary, fontFamily: font.bold },
 
   // marginTop auto is what pins this to the bottom of a screen whose
@@ -364,6 +364,6 @@ const styles = StyleSheet.create({
   building: { width: 9, backgroundColor: colors.primary, borderTopLeftRadius: 2, borderTopRightRadius: 2 },
   footerWords: { flexDirection: 'row', alignItems: 'center' },
   footerWordWrap: { flexDirection: 'row', alignItems: 'center' },
-  footerDot: { color: colors.subtle, fontSize: 11, marginHorizontal: spacing.xs },
+  footerDot: { color: colors.subtle, fontSize: fs(11), marginHorizontal: spacing.xs },
   footerWord: { ...type.tiny, color: colors.muted },
 });

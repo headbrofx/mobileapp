@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { bookings, familyMembers, services as servicesApi } from '../../../lib/api';
 import { Card, ErrorBox, Field, MenuButton } from '../../../lib/ui';
-import { colors, font, radius, scale, shadow, spacing, type } from '../../../lib/theme';
+import { colors, font, fs, radius, scale, shadow, spacing, type } from '../../../lib/theme';
 import { serviceColour, serviceIcon, serviceImage } from '../../../lib/services-meta';
 import { tx, useI18n } from '../../../lib/i18n';
 
@@ -614,8 +614,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerTitles: { flex: 1 },
-  title: { fontSize: 15, fontFamily: font.bold, color: colors.text },
-  subtitle: { ...type.tiny, fontSize: 10, color: colors.muted },
+  title: { fontSize: fs(15), fontFamily: font.bold, color: colors.text },
+  subtitle: { ...type.tiny, fontSize: fs(10), color: colors.muted },
   trust: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -625,7 +625,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
-  trustText: { fontSize: 9, lineHeight: 11, fontFamily: font.semibold, color: colors.success },
+  trustText: { fontSize: fs(9), lineHeight: fs(11), fontFamily: font.semibold, color: colors.success },
 
   // --- The welcome card at the head of step one ---
   welcome: {
@@ -648,7 +648,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   welcomeBadgeText: {
-    fontSize: 9,
+    fontSize: fs(9),
     fontFamily: font.extrabold,
     letterSpacing: 0.7,
     color: colors.onPrimary,
@@ -689,14 +689,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     paddingVertical: 6,
   },
-  promiseText: { fontSize: 9, fontFamily: font.semibold, color: colors.text },
+  promiseText: { fontSize: fs(9), fontFamily: font.semibold, color: colors.text },
   welcomeArt: { width: '38%' },
   welcomeImage: { width: '100%', height: '100%' },
   script: {
     position: 'absolute',
     top: spacing.sm,
     right: spacing.xs,
-    fontSize: 11,
+    fontSize: fs(11),
     fontStyle: 'italic',
     fontFamily: font.semibold,
     color: colors.onPrimary,
@@ -724,7 +724,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
-  filterText: { fontSize: 11, fontFamily: font.semibold, color: colors.muted },
+  filterText: { fontSize: fs(11), fontFamily: font.semibold, color: colors.muted },
 
   stepper: { flexDirection: 'row', marginTop: spacing.md },
   stepItem: { flex: 1, alignItems: 'center' },
@@ -742,22 +742,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stepDotActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  stepNum: { fontSize: 12, fontFamily: font.bold, color: colors.subtle },
+  stepNum: { fontSize: fs(12), fontFamily: font.bold, color: colors.subtle },
   stepNumActive: { color: colors.onPrimary },
-  stepLabel: { fontSize: 11, color: colors.subtle, marginTop: 4 },
+  stepLabel: { fontSize: fs(11), color: colors.subtle, marginTop: 4 },
   stepLabelActive: { color: colors.primary, fontFamily: font.semibold },
 
   content: { flexGrow: 1, padding: spacing.md, paddingBottom: spacing.xl },
-  stepTitle: { fontSize: 17, fontFamily: font.bold, color: colors.text },
-  stepHint: { fontSize: 14, color: colors.muted, marginBottom: spacing.md },
+  stepTitle: { fontSize: fs(17), fontFamily: font.bold, color: colors.text },
+  stepHint: { fontSize: fs(14), color: colors.muted, marginBottom: spacing.md },
   label: {
-    fontSize: 14,
+    fontSize: fs(14),
     fontFamily: font.bold,
     color: colors.text,
     marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
-  muted: { fontSize: 13, color: colors.muted, marginTop: 2 },
+  muted: { fontSize: fs(13), color: colors.muted, marginTop: 2 },
   textarea: { minHeight: 84, textAlignVertical: 'top' },
 
   serviceRow: {
@@ -772,7 +772,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     overflow: 'hidden',
   },
-  serviceName: { fontSize: 14, fontFamily: font.bold, color: colors.text },
+  serviceName: { fontSize: fs(14), fontFamily: font.bold, color: colors.text },
 
   rowIcon: {
     width: 44,
@@ -781,9 +781,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  rowPrice: { ...type.tiny, fontSize: 12, fontFamily: font.bold, marginTop: 2 },
+  rowPrice: { ...type.tiny, fontSize: fs(12), fontFamily: font.bold, marginTop: 2 },
   durationRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 },
-  duration: { fontSize: 10, color: colors.muted },
+  duration: { fontSize: fs(10), color: colors.muted },
   // The photograph sits between the words and the arrow, as the design
   // has it. It is decoration, so it never takes space the name needs:
   // a fixed strip, and the text column keeps flex.
@@ -847,7 +847,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     backgroundColor: colors.primaryLight,
   },
-  choiceTitle: { fontSize: 15, fontFamily: font.semibold, color: colors.text },
+  choiceTitle: { fontSize: fs(15), fontFamily: font.semibold, color: colors.text },
   choiceTitleSelected: { color: colors.primary },
 
   addLink: {
@@ -856,7 +856,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingVertical: spacing.sm,
   },
-  addLinkText: { color: colors.primary, fontFamily: font.semibold, fontSize: 14 },
+  addLinkText: { color: colors.primary, fontFamily: font.semibold, fontSize: fs(14) },
 
   summary: { ...shadow.card },
   summaryHead: {
@@ -868,7 +868,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
     marginBottom: spacing.sm,
   },
-  summaryTitle: { fontSize: 16, fontFamily: font.bold, color: colors.text },
+  summaryTitle: { fontSize: fs(16), fontFamily: font.bold, color: colors.text },
 
   line: {
     flexDirection: 'row',
@@ -876,8 +876,8 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingVertical: spacing.sm,
   },
-  lineLabel: { fontSize: 12, color: colors.muted },
-  lineValue: { fontSize: 14, color: colors.text, fontFamily: font.medium, marginTop: 1 },
+  lineLabel: { fontSize: fs(12), color: colors.muted },
+  lineValue: { fontSize: fs(14), color: colors.text, fontFamily: font.medium, marginTop: 1 },
 
   pending: {
     flexDirection: 'row',
@@ -886,7 +886,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryLight,
     borderColor: colors.primaryLight,
   },
-  pendingText: { flex: 1, fontSize: 13, color: colors.text, lineHeight: 19 },
+  pendingText: { flex: 1, fontSize: fs(13), color: colors.text, lineHeight: fs(19) },
 
   footer: {
     flexDirection: 'row',
@@ -918,7 +918,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   nextDisabled: { opacity: 0.45 },
-  nextText: { color: colors.onPrimary, fontSize: 15, fontFamily: font.bold },
+  nextText: { color: colors.onPrimary, fontSize: fs(15), fontFamily: font.bold },
 
   doneWrap: {
     flex: 1,
@@ -936,12 +936,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.md,
   },
-  doneTitle: { fontSize: 21, fontFamily: font.bold, color: colors.text, marginBottom: spacing.xs },
+  doneTitle: { fontSize: fs(21), fontFamily: font.bold, color: colors.text, marginBottom: spacing.xs },
   doneBody: {
-    fontSize: 15,
+    fontSize: fs(15),
     color: colors.muted,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: fs(22),
     marginBottom: spacing.lg,
   },
   doneButton: { flex: 0, alignSelf: 'stretch' },

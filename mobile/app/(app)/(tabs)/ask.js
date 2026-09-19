@@ -15,7 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { afyaAi } from '../../../lib/api';
 import { MenuButton } from '../../../lib/ui';
-import { dark, font, radius, scale, spacing, type } from '../../../lib/theme';
+import { dark, font, fs, radius, scale, spacing, type } from '../../../lib/theme';
 import { tx, useI18n } from '../../../lib/i18n';
 
 // Afya AI, on the dark screen the owner asked for.
@@ -569,12 +569,12 @@ const styles = StyleSheet.create({
   },
   emergencyHead: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.xs },
   emergencyHeading: {
-    fontSize: 13,
+    fontSize: fs(13),
     fontFamily: font.extrabold,
     color: dark.danger,
     letterSpacing: 1.2,
   },
-  emergencyBody: { fontSize: 17, color: dark.danger, lineHeight: 25, fontFamily: font.semibold },
+  emergencyBody: { fontSize: fs(17), color: dark.danger, lineHeight: fs(25), fontFamily: font.semibold },
   emergencyMeta: { ...type.small, color: dark.danger, marginTop: spacing.sm, opacity: 0.85 },
 
   // --- Composer ---
@@ -637,5 +637,5 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     paddingHorizontal: spacing.sm,
   },
-  disclaimer: { ...type.tiny, fontSize: 10, color: dark.subtle, flexShrink: 1 },
+  disclaimer: { ...type.tiny, fontSize: fs(10), color: dark.subtle, flexShrink: 1 },
 });

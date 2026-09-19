@@ -3,17 +3,7 @@ import { Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from
 import { Ionicons } from '@expo/vector-icons';
 import { BASE_URL } from '../../lib/api';
 import { LANGUAGES, tx, useI18n } from '../../lib/i18n';
-import {
-  THEMES,
-  colors,
-  font,
-  radius,
-  saveTheme,
-  shadow,
-  spacing,
-  themeName,
-  type,
-} from '../../lib/theme';
+import { TEXT_SIZE_OPTIONS, THEMES, colors, font, fs, radius, saveTextSize, saveTheme, shadow, spacing, textSizeName, themeName, type } from '../../lib/theme';
 
 // Settings: the language and the colour.
 //
@@ -29,6 +19,10 @@ import {
 // waits for the next launch, and this screen says so rather than leaving
 // somebody tapping a colour that appears to do nothing.
 
+// The three samples, in points, so the letters in the list are visibly
+// the sizes on offer.
+const SAMPLE = { small: 13, normal: 16, large: 19 };
+
 export default function Settings() {
   const { t, language, setLanguage } = useI18n();
   const [pending, setPending] = useState(null);
@@ -37,6 +31,12 @@ export default function Settings() {
     if (name === themeName) return;
     const applied = await saveTheme(name);
     // On web the line above reloads the page and nothing after it runs.
+    if (!applied) setPending(name);
+  }
+
+  async function chooseTextSize(name) {
+    if (name === textSizeName) return;
+    const applied = await saveTextSize(name);
     if (!applied) setPending(name);
   }
 
@@ -92,6 +92,51 @@ export default function Settings() {
           ? tx('Ukichagua rangi, ukurasa unajipakia upya mara moja.')
           : tx('Rangi mpya inaonekana ukifungua app upya.')}
       </Text>
+
+      <Text style={styles.groupTitle}>{tx('Ukubwa wa maandishi')}</Text>
+      <View style={styles.group}>
+        {TEXT_SIZE_OPTIONS.map((option, index) => {
+          const active = option.name === textSizeName;
+          const waiting = pending === option.name;
+
+          return (
+            <Pressable
+              key={option.name}
+              onPress={() => chooseTextSize(option.name)}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: active }}
+              style={({ pressed }) => [
+                styles.row,
+                index < TEXT_SIZE_OPTIONS.length - 1 && styles.rowDivider,
+                pressed && styles.rowPressed,
+              ]}
+            >
+              {/* The sample is drawn at the size it sells, not at the
+                  size the rest of the row happens to be. A list of
+                  three identical lines that say "small", "normal" and
+                  "large" tells you nothing about what you are picking. */}
+              <View style={styles.rowIcon}>
+                <Text style={[styles.sample, { fontSize: SAMPLE[option.name] }]}>Aa</Text>
+              </View>
+              <View style={styles.rowText}>
+                <Text style={styles.rowLabel}>{tx(option.label)}</Text>
+                <Text style={styles.rowHint}>
+                  {active
+                    ? tx('Inatumika sasa')
+                    : waiting
+                      ? tx('Imehifadhiwa — fungua app upya ionekane')
+                      : tx('Gusa kuichagua')}
+                </Text>
+              </View>
+              <Ionicons
+                name={active ? 'radio-button-on' : 'radio-button-off'}
+                size={18}
+                color={active ? colors.primary : colors.subtle}
+              />
+            </Pressable>
+          );
+        })}
+      </View>
 
       <Text style={styles.groupTitle}>{t('settings.language')}</Text>
       <View style={styles.group}>
@@ -184,7 +229,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  code: { fontSize: 12, fontFamily: font.bold, color: colors.primary },
+  code: { fontSize: fs(12), fontFamily: font.bold, color: colors.primary },
+  sample: { fontFamily: font.bold, color: colors.primary },
   swatch: {
     width: 36,
     height: 36,
@@ -193,7 +239,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rowText: { flex: 1 },
-  rowLabel: { ...type.bodyStrong, fontSize: 15, color: colors.text },
+  rowLabel: { ...type.bodyStrong, fontSize: fs(15), color: colors.text },
   rowHint: { ...type.tiny, color: colors.muted, marginTop: 1 },
 
   note: {

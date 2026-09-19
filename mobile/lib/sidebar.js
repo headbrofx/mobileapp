@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LANGUAGES, tx, useI18n } from './i18n';
 import { useSession } from './session';
-import { colors, font, spacing } from './theme';
+import { colors, font, fs, spacing } from './theme';
 
 // The sidebar menu.
 //
@@ -226,10 +226,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { fontFamily: font.bold, fontSize: 15, color: colors.primary },
+  avatarText: { fontFamily: font.bold, fontSize: fs(15), color: colors.primary },
   headerText: { flex: 1 },
-  name: { fontSize: 16, fontFamily: font.bold, color: colors.text },
-  phone: { fontSize: 13, color: colors.muted, marginTop: 1 },
+  name: { fontSize: fs(16), fontFamily: font.bold, color: colors.text },
+  phone: { fontSize: fs(13), color: colors.muted, marginTop: 1 },
 
   item: {
     flexDirection: 'row',
@@ -239,14 +239,14 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 4,
   },
   itemPressed: { backgroundColor: colors.primaryLight },
-  itemText: { flex: 1, fontSize: 15, color: colors.text },
+  itemText: { flex: 1, fontSize: fs(15), color: colors.text },
   itemBadge: {
     backgroundColor: colors.primary,
     borderRadius: 999,
     paddingHorizontal: 7,
     paddingVertical: 2,
   },
-  itemBadgeText: { color: colors.onPrimary, fontSize: 9, fontFamily: font.bold, letterSpacing: 0.4 },
+  itemBadgeText: { color: colors.onPrimary, fontSize: fs(9), fontFamily: font.bold, letterSpacing: 0.4 },
 
   languageRow: {
     flexDirection: 'row',
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
-  languageLabel: { flex: 1, fontSize: 14, color: colors.muted },
+  languageLabel: { flex: 1, fontSize: fs(14), color: colors.muted },
   languageChoices: { flexDirection: 'row', gap: 6 },
   languageChip: {
     paddingHorizontal: 10,
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   languageChipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
-  languageChipText: { fontSize: 11, fontFamily: font.bold, color: colors.muted },
+  languageChipText: { fontSize: fs(11), fontFamily: font.bold, color: colors.muted },
   languageChipTextOn: { color: colors.onPrimary },
 
   signOut: {
@@ -279,6 +279,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
-  signOutText: { fontSize: 15, fontFamily: font.semibold, color: colors.danger },
+  signOutText: { fontSize: fs(15), fontFamily: font.semibold, color: colors.danger },
 });
 

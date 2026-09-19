@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { services as servicesApi } from '../../lib/api';
 import { Card, ErrorBox } from '../../lib/ui';
-import { colors, font, radius, shadow, spacing } from '../../lib/theme';
+import { colors, font, fs, radius, shadow, spacing } from '../../lib/theme';
 import { serviceColour, serviceIcon, serviceImage } from '../../lib/services-meta';
 import { tx, useI18n } from '../../lib/i18n';
 
@@ -136,11 +136,11 @@ const styles = StyleSheet.create({
   },
   thumbFallback: { alignItems: 'center', justifyContent: 'center' },
   rowText: { flex: 1 },
-  name: { fontSize: 15, fontFamily: font.bold, color: colors.text },
-  muted: { fontSize: 13, color: colors.muted, marginTop: 2, lineHeight: 18 },
+  name: { fontSize: fs(15), fontFamily: font.bold, color: colors.text },
+  muted: { fontSize: fs(13), color: colors.muted, marginTop: 2, lineHeight: fs(18) },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
-  price: { fontSize: 12, fontFamily: font.bold, color: colors.primary },
-  duration: { fontSize: 12, color: colors.subtle },
+  price: { fontSize: fs(12), fontFamily: font.bold, color: colors.primary },
+  duration: { fontSize: fs(12), color: colors.subtle },
 
   note: {
     flexDirection: 'row',
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primaryLight,
     marginTop: spacing.sm,
   },
-  noteTitle: { fontSize: 14, fontFamily: font.bold, color: colors.text },
+  noteTitle: { fontSize: fs(14), fontFamily: font.bold, color: colors.text },
 
   askButton: {
     flexDirection: 'row',
@@ -163,5 +163,5 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
     marginTop: spacing.xs,
   },
-  askText: { color: colors.primary, fontFamily: font.bold, fontSize: 15 },
+  askText: { color: colors.primary, fontFamily: font.bold, fontSize: fs(15) },
 });

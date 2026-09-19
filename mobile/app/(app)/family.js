@@ -12,7 +12,7 @@ import {
 import { useFocusEffect } from 'expo-router';
 import { familyMembers as familyApi } from '../../lib/api';
 import { Button, Card, ErrorBox, Field } from '../../lib/ui';
-import { colors, font, radius, spacing } from '../../lib/theme';
+import { colors, font, fs, radius, spacing } from '../../lib/theme';
 import { tx, useI18n } from '../../lib/i18n';
 
 // The people this account cares for.
@@ -220,13 +220,13 @@ function Chip({ label, selected, onPress }) {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { flexGrow: 1, padding: spacing.md, paddingBottom: spacing.xl },
-  cardTitle: { fontSize: 16, fontFamily: font.semibold, color: colors.text },
-  muted: { fontSize: 14, color: colors.muted, marginTop: 2 },
+  cardTitle: { fontSize: fs(16), fontFamily: font.semibold, color: colors.text },
+  muted: { fontSize: fs(14), color: colors.muted, marginTop: 2 },
 
   addWrap: { marginTop: spacing.md },
   form: { marginTop: spacing.md, paddingTop: spacing.md },
-  formTitle: { fontSize: 17, fontFamily: font.bold, color: colors.text, marginBottom: spacing.md },
-  label: { fontSize: 14, fontFamily: font.semibold, color: colors.text, marginBottom: spacing.xs },
+  formTitle: { fontSize: fs(17), fontFamily: font.bold, color: colors.text, marginBottom: spacing.md },
+  label: { fontSize: fs(14), fontFamily: font.semibold, color: colors.text, marginBottom: spacing.xs },
 
   chips: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: spacing.md, marginRight: -spacing.xs },
   chip: {
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   chipSelected: { borderColor: colors.primary, borderWidth: 2, backgroundColor: colors.cream },
-  chipText: { fontSize: 14, color: colors.text },
+  chipText: { fontSize: fs(14), color: colors.text },
   chipTextSelected: { color: colors.primary, fontFamily: font.semibold },
 
   cancel: { marginTop: spacing.xs },

@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSession } from '../../../lib/session';
 import { LANGUAGES, tx, useI18n } from '../../../lib/i18n';
 import { MenuButton } from '../../../lib/ui';
-import { colors, font, radius, shadow, spacing, type } from '../../../lib/theme';
+import { colors, font, fs, radius, shadow, spacing, type } from '../../../lib/theme';
 
 // The account tab.
 //
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  initials: { fontSize: 22, fontFamily: font.bold, color: colors.onPrimary },
+  initials: { fontSize: fs(22), fontFamily: font.bold, color: colors.onPrimary },
   heroText: { flex: 1 },
   name: { ...type.title, color: colors.onPrimary },
   phone: { ...type.small, color: 'rgba(255,255,255,0.85)', marginTop: 1 },
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     marginTop: spacing.xs,
   },
-  roleText: { ...type.tiny, fontSize: 10, color: colors.onPrimary },
+  roleText: { ...type.tiny, fontSize: fs(10), color: colors.onPrimary },
 
   shortcuts: {
     flexDirection: 'row',
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rowText: { flex: 1 },
-  rowLabel: { ...type.bodyStrong, fontSize: 15, color: colors.text },
+  rowLabel: { ...type.bodyStrong, fontSize: fs(15), color: colors.text },
   rowHint: { ...type.tiny, color: colors.muted, marginTop: 1 },
 
   chips: { flexDirection: 'row', gap: 6 },
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   chipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
-  chipText: { fontSize: 11, fontFamily: font.bold, color: colors.muted },
+  chipText: { fontSize: fs(11), fontFamily: font.bold, color: colors.muted },
   chipTextOn: { color: colors.onPrimary },
 
   signOut: {
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
-  signOutText: { color: colors.danger, fontSize: 15, fontFamily: font.semibold },
+  signOutText: { color: colors.danger, fontSize: fs(15), fontFamily: font.semibold },
 
   footer: {
     ...type.tiny,

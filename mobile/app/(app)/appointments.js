@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { bookings as bookingsApi } from '../../lib/api';
 import { Card, ErrorBox } from '../../lib/ui';
-import { colors, font, radius, shadow, spacing, type } from '../../lib/theme';
+import { colors, font, fs, radius, shadow, spacing, type } from '../../lib/theme';
 import { serviceColour, serviceIcon } from '../../lib/services-meta';
 import { tx, useI18n } from '../../lib/i18n';
 
@@ -468,7 +468,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { color: colors.onPrimary, fontFamily: font.bold, fontSize: 13 },
+  avatarText: { color: colors.onPrimary, fontFamily: font.bold, fontSize: fs(13) },
 
   actions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
   actionPrimary: {
@@ -513,7 +513,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   badgeMuted: { backgroundColor: colors.bg },
-  badgeText: { ...type.tiny, fontSize: 10, fontFamily: font.bold, color: colors.primary },
+  badgeText: { ...type.tiny, fontSize: fs(10), fontFamily: font.bold, color: colors.primary },
   badgeTextMuted: { color: colors.muted },
 
   // Across the screen, as the design draws it, with the date under
@@ -537,12 +537,12 @@ const styles = StyleSheet.create({
   dotDone: { backgroundColor: colors.primary, borderColor: colors.primary },
   stageLabel: {
     ...type.tiny,
-    fontSize: 10,
-    lineHeight: 13,
+    fontSize: fs(10),
+    lineHeight: fs(13),
     color: colors.subtle,
     marginTop: 6,
     textAlign: 'center',
   },
   stageLabelDone: { color: colors.text, fontFamily: font.bold },
-  stageDate: { ...type.tiny, fontSize: 9, color: colors.subtle, marginTop: 2 },
+  stageDate: { ...type.tiny, fontSize: fs(9), color: colors.subtle, marginTop: 2 },
 });

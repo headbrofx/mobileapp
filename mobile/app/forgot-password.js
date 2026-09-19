@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { auth } from '../lib/api';
 import { ErrorBox } from '../lib/ui';
 import { BrandFooter, BrandHeader, GradientButton, IconField } from '../lib/auth-ui';
-import { colors, font, radius, spacing } from '../lib/theme';
+import { colors, font, fs, radius, spacing } from '../lib/theme';
 import { tx, useI18n } from '../lib/i18n';
 
 // The design puts "Forgot password?" on the sign-in screen, so here is
@@ -107,11 +107,11 @@ const styles = StyleSheet.create({
   content: { flexGrow: 1, padding: spacing.lg, paddingTop: spacing.xl, paddingBottom: spacing.lg },
   pressed: { opacity: 0.75 },
 
-  title: { fontSize: 24, fontFamily: font.extrabold, color: colors.text, marginTop: spacing.lg },
-  subtitle: { fontSize: 14, color: colors.muted, marginTop: 3, marginBottom: spacing.lg, lineHeight: 19 },
+  title: { fontSize: fs(24), fontFamily: font.extrabold, color: colors.text, marginTop: spacing.lg },
+  subtitle: { fontSize: fs(14), color: colors.muted, marginTop: 3, marginBottom: spacing.lg, lineHeight: fs(19) },
 
   back: { alignItems: 'center', paddingVertical: spacing.md },
-  link: { color: colors.primary, fontFamily: font.bold, fontSize: 13 },
+  link: { color: colors.primary, fontFamily: font.bold, fontSize: fs(13) },
 
   sent: { alignItems: 'center', paddingVertical: spacing.md },
   sentIcon: {
@@ -123,12 +123,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.md,
   },
-  sentTitle: { fontSize: 18, fontFamily: font.extrabold, color: colors.text },
+  sentTitle: { fontSize: fs(18), fontFamily: font.extrabold, color: colors.text },
   sentText: {
-    fontSize: 14,
+    fontSize: fs(14),
     color: colors.muted,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: fs(20),
     marginTop: spacing.xs,
     marginBottom: spacing.lg,
     backgroundColor: colors.primaryLight,

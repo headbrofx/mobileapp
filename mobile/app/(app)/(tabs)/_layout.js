@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, dark, font } from '../../../lib/theme';
+import { colors, dark, font, fs } from '../../../lib/theme';
 import { useI18n } from '../../../lib/i18n';
 
 // Bottom tabs: the five things somebody opens the app to do.
@@ -33,7 +33,7 @@ export default function TabsLayout() {
         // Five labels where there were four. Without the font locked and
         // a slightly tighter size, "Afya AI" wraps to two lines on a
         // 360-wide phone and pushes the whole bar out of line.
-        tabBarLabelStyle: { fontSize: 10.5, fontFamily: font.semibold },
+        tabBarLabelStyle: { fontSize: fs(10.5), fontFamily: font.semibold },
         tabBarAllowFontScaling: false,
         tabBarItemStyle: { paddingHorizontal: 2 },
       }}

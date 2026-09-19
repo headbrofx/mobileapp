@@ -22,7 +22,7 @@ import { tx, useI18n } from '../../../lib/i18n';
 import { useSession } from '../../../lib/session';
 import { ErrorBox, MenuButton } from '../../../lib/ui';
 import { Wordmark } from '../../../lib/brand';
-import { colors, font, radius, scale, shadow, spacing, type } from '../../../lib/theme';
+import { colors, font, fs, radius, scale, shadow, spacing, textScale, type } from '../../../lib/theme';
 import {
   serviceColour,
   serviceIcon,
@@ -91,16 +91,21 @@ export default function Home() {
   // icon and the name both get room, and the third row is paid for out
   // of the picture above rather than out of the fold.
   const tileWidth = (width - spacing.md * 2 - spacing.sm) / 2;
-  const tileHeight = Math.round(Math.min(Math.max(height * 0.145, 104), 156));
-  // Half the tile, so the plate grows and shrinks with it.
-  const plate = Math.round(tileHeight * 0.52);
+  const tileHeight = Math.round(Math.min(Math.max(height * 0.125, 92), 132));
+  // Just under half the tile. At 52% the plate crowded the name and the
+  // tile read as an icon with a caption; this leaves the two in
+  // proportion.
+  const plate = Math.round(tileHeight * 0.46);
 
   // Everything above the grid that is not the picture: the top bar, the
   // greeting, the tagline, the button hanging off the hero and the
   // section heading. Measured, not guessed, and scaled with the width
   // because the type and the spacing are. BREATH is the slack that
   // covers a greeting long enough to wrap onto a second line.
-  const ABOVE_GRID = scale(240);
+  // Scales with the reader's text size as well as the width, because
+  // everything it stands for — the greeting, the tagline, the heading —
+  // is type.
+  const ABOVE_GRID = Math.round(scale(240) * textScale);
   const TAB_BAR = 62;
   const BREATH = 16;
   const HERO_MIN = 110;
@@ -466,7 +471,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   brandText: { flex: 1 },
-  brandTag: { ...type.tiny, fontSize: 10, color: colors.muted, marginTop: 1 },
+  brandTag: { ...type.tiny, fontSize: fs(10), color: colors.muted, marginTop: 1 },
   bellBadge: {
     position: 'absolute',
     top: -4,
@@ -479,7 +484,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  bellCount: { color: '#FFFFFF', fontSize: 10, fontFamily: font.bold },
+  bellCount: { color: '#FFFFFF', fontSize: fs(10), fontFamily: font.bold },
 
   greeting: { ...type.title, fontFamily: font.extrabold, fontSize: type.display.fontSize - 5, color: colors.text },
   tagline: { ...type.body, color: colors.muted, marginTop: 2 },
@@ -537,8 +542,8 @@ const styles = StyleSheet.create({
   },
   tileText: {
     ...type.tiny,
-    fontSize: 12,
-    lineHeight: 15,
+    fontSize: fs(12),
+    lineHeight: fs(15),
     fontFamily: font.bold,
     color: '#FFFFFF',
     textAlign: 'center',
@@ -556,7 +561,7 @@ const styles = StyleSheet.create({
   featuredImage: { width: 76, height: 76, borderRadius: radius.md },
   featuredFallback: { alignItems: 'center', justifyContent: 'center' },
   featuredText: { flex: 1 },
-  featuredLabel: { ...type.tiny, fontSize: 9, color: colors.muted, letterSpacing: 0.8 },
+  featuredLabel: { ...type.tiny, fontSize: fs(9), color: colors.muted, letterSpacing: 0.8 },
   featuredTitle: { ...type.bodyStrong, fontFamily: font.bold, color: colors.text, marginTop: 1 },
   featuredBody: { ...type.small, color: colors.muted, marginTop: 1 },
   featuredArrow: {
@@ -594,7 +599,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
   },
-  badgeText: { ...type.tiny, fontSize: 10, fontFamily: font.bold, color: colors.primary },
+  badgeText: { ...type.tiny, fontSize: fs(10), fontFamily: font.bold, color: colors.primary },
 
   rowText: { flex: 1 },
   tipCard: {
@@ -616,7 +621,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tipLabel: { ...type.tiny, fontSize: 9, color: colors.brandOrange, letterSpacing: 0.6 },
+  tipLabel: { ...type.tiny, fontSize: fs(9), color: colors.brandOrange, letterSpacing: 0.6 },
   tipTitle: { ...type.bodyStrong, color: colors.text, marginTop: 1 },
 
   quickRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
@@ -641,5 +646,5 @@ const styles = StyleSheet.create({
   },
   quickText: { flex: 1 },
   quickTitle: { ...type.label, color: colors.text },
-  quickHint: { ...type.tiny, fontSize: 10, color: colors.muted, marginTop: 1 },
+  quickHint: { ...type.tiny, fontSize: fs(10), color: colors.muted, marginTop: 1 },
 });
