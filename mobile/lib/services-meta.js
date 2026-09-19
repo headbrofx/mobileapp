@@ -57,6 +57,39 @@ const IMAGES = {
   'Medication Administration': require('../assets/services/medication-administration.jpg'),
 };
 
+// The raised icons, one per service.
+//
+// Made by scripts/make-brand-art.py from the same Ionicon the flat map
+// above names, put through the treatment the wordmark gets: extruded,
+// lit from the top left, glossed. The owner asked for 3-D icons on the
+// tiles and these are them.
+//
+// They are not illustrations. The design that prompted this has a nurse
+// character and a pill bottle drawn by hand; that is artwork this
+// project does not own, and inventing it is not mine to do. If it ever
+// arrives, the PNGs drop into assets/icons3d/ under these same names
+// and nothing else changes.
+//
+// Static require() paths again: the bundler resolves them at build
+// time, so a path built from a variable resolves to nothing.
+const ICONS_3D = {
+  'Home Nursing': require('../assets/icons3d/home-nursing.png'),
+  'Elderly Care': require('../assets/icons3d/elderly-care.png'),
+  Physiotherapy: require('../assets/icons3d/physiotherapy.png'),
+  'Wound Care': require('../assets/icons3d/wound-care.png'),
+  'Postnatal Care': require('../assets/icons3d/postnatal-care.png'),
+  'Health Education': require('../assets/icons3d/health-education.png'),
+  'Follow-up Visit': require('../assets/icons3d/follow-up-visit.png'),
+  'Medication Administration': require('../assets/icons3d/medication-administration.png'),
+};
+
+// A service the catalogue gains before this map knows about it returns
+// null, and the screen falls back to the flat icon in its colour —
+// which is why that path stays.
+export function serviceIcon3d(name) {
+  return ICONS_3D[name] ?? null;
+}
+
 export function serviceImage(name) {
   return IMAGES[name] ?? null;
 }

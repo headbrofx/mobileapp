@@ -23,7 +23,12 @@ import { useSession } from '../../../lib/session';
 import { ErrorBox, MenuButton } from '../../../lib/ui';
 import { Wordmark } from '../../../lib/brand';
 import { colors, font, radius, scale, shadow, spacing, type } from '../../../lib/theme';
-import { serviceColour, serviceIcon, serviceImage } from '../../../lib/services-meta';
+import {
+  serviceColour,
+  serviceIcon,
+  serviceIcon3d,
+  serviceImage,
+} from '../../../lib/services-meta';
 
 // The home screen, element for element from the design.
 //
@@ -86,7 +91,9 @@ export default function Home() {
   // icon and the name both get room, and the third row is paid for out
   // of the picture above rather than out of the fold.
   const tileWidth = (width - spacing.md * 2 - spacing.sm) / 2;
-  const tileHeight = Math.round(Math.min(Math.max(height * 0.1, 62), 96));
+  const tileHeight = Math.round(Math.min(Math.max(height * 0.145, 104), 156));
+  // Half the tile, so the plate grows and shrinks with it.
+  const plate = Math.round(tileHeight * 0.52);
 
   // Everything above the grid that is not the picture: the top bar, the
   // greeting, the tagline, the button hanging off the hero and the
@@ -96,9 +103,23 @@ export default function Home() {
   const ABOVE_GRID = scale(240);
   const TAB_BAR = 62;
   const BREATH = 16;
-  const gridHeight = tileHeight * 3 + spacing.sm * 2;
+  const HERO_MIN = 110;
+
+  // How many rows fit, rather than a number decided here.
+  //
+  // Tiles this size cannot give a 640-tall Android three rows, a
+  // photograph, a greeting and a section heading above the fold — the
+  // arithmetic does not allow it, and the honest answer is two rows
+  // there and three on a normal phone. Four services with "Zote" beside
+  // the heading beats six where the last two are under the tab bar,
+  // because nobody scrolls for what they cannot see is there.
+  const rowSpace = height - TAB_BAR - ABOVE_GRID - BREATH - HERO_MIN;
+  const rows = rowSpace >= tileHeight * 3 + spacing.sm * 2 ? 3 : 2;
+  const shown = rows * 2;
+
+  const gridHeight = tileHeight * rows + spacing.sm * (rows - 1);
   const room = height - TAB_BAR - ABOVE_GRID - gridHeight - BREATH;
-  const heroHeight = Math.round(Math.min(Math.max(room, 120), 300));
+  const heroHeight = Math.round(Math.min(Math.max(room, HERO_MIN), 300));
 
   const [services, setServices] = useState([]);
   const [visits, setVisits] = useState([]);
@@ -232,7 +253,7 @@ export default function Home() {
         <SectionHeader title={t('home.ourServices')} label={t('common.all')} onPress={() => router.push('/services')} />
 
         <View style={styles.grid}>
-          {services.slice(0, 6).map((service) => (
+          {services.slice(0, shown).map((service) => (
             <Pressable
               key={service.id}
               onPress={() => router.push('/book')}
@@ -245,8 +266,26 @@ export default function Home() {
                   { height: tileHeight, backgroundColor: serviceColour(service.name) },
                 ]}
               >
-                <View style={styles.tileIcon}>
-                  <Ionicons name={serviceIcon(service.name)} size={21} color="#FFFFFF" />
+                {/* The raised icon sits on a white plate, as the
+                    design has it — the colour of the tile behind it is
+                    what the plate is there to hold it off. A service
+                    without artwork keeps its flat icon on the same
+                    plate, so the row never breaks. */}
+                <View style={[styles.tilePlate, { width: plate, height: plate }]}>
+                  {serviceIcon3d(service.name) ? (
+                    <Image
+                      source={serviceIcon3d(service.name)}
+                      style={{ width: plate - 18, height: plate - 18 }}
+                      resizeMode="contain"
+                      accessible={false}
+                    />
+                  ) : (
+                    <Ionicons
+                      name={serviceIcon(service.name)}
+                      size={plate - 26}
+                      color={serviceColour(service.name)}
+                    />
+                  )}
                 </View>
                 <Text style={styles.tileText} numberOfLines={2}>
                   {service.name}
@@ -483,19 +522,27 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   tile: {
     borderRadius: radius.lg,
-    padding: spacing.sm,
-    justifyContent: 'space-between',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xs,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
     ...shadow.card,
   },
-  tileIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: radius.sm,
-    backgroundColor: 'rgba(255,255,255,0.22)',
+  tilePlate: {
+    borderRadius: radius.md,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tileText: { ...type.tiny, fontSize: 12, lineHeight: 15, fontFamily: font.bold, color: '#FFFFFF' },
+  tileText: {
+    ...type.tiny,
+    fontSize: 12,
+    lineHeight: 15,
+    fontFamily: font.bold,
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
 
   featured: {
     flexDirection: 'row',

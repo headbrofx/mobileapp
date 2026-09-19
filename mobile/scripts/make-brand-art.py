@@ -213,3 +213,61 @@ single_art.resize((w, int(single_art.height * (w / single_art.width))), Image.LA
 )
 
 print('icons rebuilt')
+
+
+# --- The service icons, raised the same way -------------------------
+#
+# The owner asked for 3-D icons on the tiles. Illustrated ones — a nurse
+# character, a pill bottle — are drawings this project does not own, so
+# these are the app's own Ionicons put through exactly the treatment the
+# lettering gets: extruded, lit from the top left, glossed. They are
+# genuinely dimensional rather than a flat glyph with a shadow, and they
+# stay consistent with the wordmark because they are made by the same
+# four passes.
+#
+# Each is drawn in its service's colour, the one services-meta.js keys
+# by name, so a service is the same colour here as everywhere else.
+#
+# If illustrated artwork ever arrives, drop the PNGs into
+# assets/icons3d/ under these same names and nothing else has to change.
+
+import io
+import json
+
+IONICONS = 'node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf'
+GLYPHS = json.load(
+    io.open(
+        'node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/glyphmaps/Ionicons.json',
+        encoding='utf-8',
+    )
+)
+
+SERVICES = [
+    ('home-nursing', 'medkit', (59, 130, 246)),
+    ('elderly-care', 'people', (14, 155, 119)),
+    ('physiotherapy', 'body', (245, 158, 11)),
+    ('wound-care', 'bandage', (239, 68, 68)),
+    ('postnatal-care', 'heart', (236, 72, 153)),
+    ('health-education', 'school', (14, 165, 233)),
+    ('follow-up-visit', 'repeat', (139, 92, 246)),
+    ('medication-administration', 'medical', (20, 184, 166)),
+]
+
+os.makedirs('assets/icons3d', exist_ok=True)
+
+ICON_SIZE = 300
+icon_font = ImageFont.truetype(IONICONS, ICON_SIZE)
+probe = ImageDraw.Draw(Image.new('RGBA', (8, 8)))
+
+for slug, name, colour in SERVICES:
+    char = chr(GLYPHS[name])
+    depth = max(4, round(ICON_SIZE * 0.055))
+    box = probe.textbbox((0, 0), char, font=icon_font)
+    pad = 40
+    size = (box[2] - box[0] + pad * 2 + depth, box[3] - box[1] + pad * 2 + depth)
+    canvas = Image.new('RGBA', size, (0, 0, 0, 0))
+    raised(canvas, char, icon_font, (pad - box[0], pad - box[1]), colour, depth)
+    canvas.crop(canvas.getchannel('A').getbbox()).resize((256, 256), Image.LANCZOS).save(
+        f'assets/icons3d/{slug}.png'
+    )
+    print('icon', slug)
