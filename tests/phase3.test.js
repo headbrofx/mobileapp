@@ -7,12 +7,13 @@ const { sequelize, User, Symptom } = require('../src/models');
 const suffix = Date.now().toString().slice(-6);
 const clientPhone = `0796${suffix}`;
 const otherClientPhone = `0797${suffix}`;
+const intruderPhone = `0798${suffix}`;
 
 let accessToken;
 let selfFamilyMemberId;
 
 afterAll(async () => {
-  await User.destroy({ where: { phone: [clientPhone, otherClientPhone] } });
+  await User.destroy({ where: { phone: [clientPhone, otherClientPhone, intruderPhone] } });
   await sequelize.close();
 });
 
@@ -91,6 +92,40 @@ describe('Phase 3 — Health profile', () => {
     expect(update.status).toBe(200);
     expect(update.body.data.healthProfile.conditions).toContain('Hypertension');
     expect(update.body.data.healthProfile.bloodType).toBe('O+');
+  });
+
+  // The sign-up flow sends PATCH with part of the profile. Only PUT was
+  // mounted, so the last step of registration failed with "Route not
+  // found" for every new account. This is that bug.
+  it('accepts PATCH, and leaves the fields it was not sent alone', async () => {
+    const patched = await request(app)
+      .patch(`/api/family-members/${selfFamilyMemberId}/health-profile`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ conditions: ['Asthma'] });
+
+    expect(patched.status).toBe(200);
+    expect(patched.body.data.healthProfile.conditions).toEqual(['Asthma']);
+    // Untouched by a request that never mentioned them.
+    expect(patched.body.data.healthProfile.allergies).toContain('Penicillin');
+    expect(patched.body.data.healthProfile.bloodType).toBe('O+');
+  });
+
+  // A health profile is the most private thing in the database, so the
+  // new verb gets the same ownership check as the old one, proved
+  // rather than assumed.
+  it("will not let one client patch another client's health profile", async () => {
+    const intruder = await request(app).post('/api/auth/register').send({
+      name: 'Intruder Client',
+      phone: intruderPhone,
+      password: 'TestPass123',
+    });
+
+    const res = await request(app)
+      .patch(`/api/family-members/${selfFamilyMemberId}/health-profile`)
+      .set('Authorization', `Bearer ${intruder.body.data.tokens.accessToken}`)
+      .send({ conditions: ['Nothing'] });
+
+    expect(res.status).toBe(403);
   });
 });
 

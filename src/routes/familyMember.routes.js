@@ -53,7 +53,25 @@ router.patch(
 );
 
 // --- Health profile ---
+//
+// PATCH and PUT both land on the same handler, and PATCH is the honest
+// one: healthProfile.service only assigns the fields that arrive, so a
+// request carrying conditions leaves allergies and blood group exactly
+// as they were. That is a merge, which is what PATCH means. It was
+// mounted as PUT alone, so the sign-up flow — which sends a partial
+// profile and has always sent PATCH — failed on "Route not found" at
+// the last step, for everybody, since the day it was written.
+//
+// PUT stays because a caller already uses it and removing a working
+// route to tidy a verb is not worth breaking anything for.
 router.get('/:familyMemberId/health-profile', authenticate, loadOwnedFamilyMember, healthProfileController.get);
+router.patch(
+  '/:familyMemberId/health-profile',
+  authenticate,
+  loadOwnedFamilyMember,
+  validate(updateHealthProfileSchema),
+  healthProfileController.update
+);
 router.put(
   '/:familyMemberId/health-profile',
   authenticate,

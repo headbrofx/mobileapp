@@ -65,7 +65,13 @@ module.exports = {
 
   // --- Health record ---
   'GET /api/family-members/:familyMemberId/health-profile': { tag: 'Health', summary: 'Health profile' },
-  'PUT /api/family-members/:familyMemberId/health-profile': { tag: 'Health', summary: 'Replace the health profile' },
+  'PATCH /api/family-members/:familyMemberId/health-profile': {
+    tag: 'Health',
+    summary: 'Update the health profile',
+    description:
+      'Merges the fields that are sent. Anything left out keeps its current value, so a caller can save one part of the profile without knowing the rest.',
+  },
+  'PUT /api/family-members/:familyMemberId/health-profile': { tag: 'Health', summary: 'Update the health profile (alias of PATCH)' },
   'POST /api/family-members/:familyMemberId/vitals': { tag: 'Health', summary: 'Record a vital sign' },
   'GET /api/family-members/:familyMemberId/vitals': { tag: 'Health', summary: 'List vitals' },
   'GET /api/family-members/:familyMemberId/vitals/:vitalId': { tag: 'Health', summary: 'One vitals entry' },
