@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<!--
+  The page the web build is served inside.
+
+  This file exists because of what the app looked like in its first
+  second. There was no web manifest, so a phone that had added the app
+  to its home screen fell back to the 64-pixel favicon, stretched it to
+  two hundred and something, and showed that — a blurred logo on a
+  white card — for as long as the bundle took to download.
+
+  Four things fix it, and none of them is a bigger picture:
+
+    1. A manifest with real 192 and 512 icons, and a maskable one, so
+       nothing is ever scaled up from 64 pixels again.
+    2. The background set on html and body, so the very first paint,
+       before a line of JavaScript has run, is already the brand cream
+       rather than a white flash.
+    3. The name drawn as text inside the root element. React replaces
+       it the moment it mounts. It costs no download, it cannot be
+       blurry because it is not a picture, and it is the same two-tone
+       name the app itself draws a second later.
+    4. A theme colour, so the browser chrome matches instead of sitting
+       white above a cream page.
+
+  The typeface here is the system one on purpose: Jakarta has not
+  loaded at this point, and waiting for it would put the blank screen
+  back.
+
+  Expo uses this as the template and injects the bundle script itself,
+  which is why there is no <script> tag to maintain.
+-->
+<html lang="sw">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Afya Nyumbani</title>
+
+    <meta name="description" content="Huduma bora ya afya, ukiwa nyumbani kwako." />
+    <meta name="theme-color" content="#C44200" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Afya Nyumbani" />
+
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" sizes="196x196" href="/favicon-196.png" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+
+    <style id="expo-reset">
+      /* Expo's own reset: full height, and no body scrolling behind a
+         <ScrollView>. The background is the addition. */
+      html,
+      body {
+        height: 100%;
+        background-color: #efe8e0;
+      }
+      body {
+        overflow: hidden;
+        margin: 0;
+      }
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+
+      #afya-splash {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      #afya-splash .name {
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: -0.6px;
+      }
+      #afya-splash .a {
+        color: #fd6000;
+      }
+      #afya-splash .n {
+        color: #0d408f;
+      }
+      #afya-splash .tag {
+        font-size: 13px;
+        color: #76685f;
+      }
+      #afya-splash .bar {
+        width: 92px;
+        height: 3px;
+        border-radius: 2px;
+        background: rgba(196, 66, 0, 0.18);
+        overflow: hidden;
+      }
+      #afya-splash .bar i {
+        display: block;
+        width: 40%;
+        height: 100%;
+        border-radius: 2px;
+        background: #c44200;
+        animation: afya-slide 1.1s ease-in-out infinite;
+      }
+      @keyframes afya-slide {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(250%);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>Washa JavaScript ili kutumia app hii.</noscript>
+
+    <div id="root">
+      <div id="afya-splash">
+        <div class="name"><span class="a">Afya</span> <span class="n">Nyumbani</span></div>
+        <div class="tag">Huduma ya afya mlangoni kwako</div>
+        <div class="bar"><i></i></div>
+      </div>
+    </div>
+  </body>
+</html>
