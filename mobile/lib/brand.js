@@ -3,16 +3,16 @@ import { colors, font } from './theme';
 
 // The name, set as text rather than as a picture.
 //
-// It used to be assets/wordmark.png. That file is cropped: the tops of
-// the A, f, t and y in "Afya" are cut flat against the top edge of the
+// It used to be assets/wordmark.png. That file was cropped: the tops of
+// the A, f, t and y in "Afya" were cut flat against the edge of the
 // canvas, and no amount of layout fixes that, because the pixels are
-// not in the file. Padding the box only moves the cut; 'contain' cannot
-// restore what was never exported.
+// not in the file.
 //
-// So the name is typed now, in the app's own Jakarta ExtraBold, in the
-// logo's two colours. Nothing can clip it, it stays sharp at every
-// density, it costs no download, and it reads at sizes where the raised
-// 3-D lettering in the artwork turned to mud.
+// The raised 3-D lettering is back where it belongs — on the app icon
+// and the launch screen, rebuilt from this same typeface at a size
+// where the depth reads. Here it stays typed, because this draws the
+// name at 21 points in a header, and extruded letters at 21 points are
+// mud. Same two colours, same shapes; the depth is what is dropped.
 //
 // The house-and-stethoscope mark is not here. It was beside the name on
 // the sign-in screens and at the top of Home, and the owner asked for it

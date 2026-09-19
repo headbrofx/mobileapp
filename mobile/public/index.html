@@ -15,10 +15,12 @@
     2. The background set on html and body, so the very first paint,
        before a line of JavaScript has run, is already the brand cream
        rather than a white flash.
-    3. The name drawn as text inside the root element. React replaces
-       it the moment it mounts. It costs no download, it cannot be
-       blurry because it is not a picture, and it is the same two-tone
-       name the app itself draws a second later.
+    3. The name, in the raised lettering the business uses, inside the
+       root element. React replaces it the moment it mounts. It is a
+       520-pixel image drawn at 260, so it is a 2x asset and cannot go
+       soft the way the old 64-pixel favicon did — that was the whole
+       complaint, and the fix is the right resolution rather than a
+       bigger file.
     4. A theme colour, so the browser chrome matches instead of sitting
        white above a cream page.
 
@@ -73,16 +75,11 @@
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         -webkit-font-smoothing: antialiased;
       }
-      #afya-splash .name {
-        font-size: 30px;
-        font-weight: 800;
-        letter-spacing: -0.6px;
-      }
-      #afya-splash .a {
-        color: #fd6000;
-      }
-      #afya-splash .n {
-        color: #0d408f;
+      #afya-splash img {
+        width: 260px;
+        max-width: 72vw;
+        height: auto;
+        display: block;
       }
       #afya-splash .tag {
         font-size: 13px;
@@ -119,7 +116,7 @@
 
     <div id="root">
       <div id="afya-splash">
-        <div class="name"><span class="a">Afya</span> <span class="n">Nyumbani</span></div>
+        <img src="/wordmark-3d.png" alt="Afya Nyumbani" width="520" height="79" />
         <div class="tag">Huduma ya afya mlangoni kwako</div>
         <div class="bar"><i></i></div>
       </div>
