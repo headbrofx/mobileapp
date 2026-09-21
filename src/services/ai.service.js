@@ -47,11 +47,18 @@ async function ask({ user, question, familyMemberId = null, req = null }) {
   let answer;
   let outcome;
   let sourceIds = [];
+  let sections = null;
+  let references = [];
+  let confidence = 'NONE';
+  let matchRank = null;
 
   if (flags.isRedFlag) {
     // An emergency is never answered from the knowledge base. We do not
     // explain what the symptom might mean, we do not offer alternatives,
     // and we do not soften it — we say go now.
+    //
+    // It also gets no sections, no sources and no confidence. Those are
+    // furniture for an explanation, and this is not one.
     answer = flags.guidance;
     outcome = 'RED_FLAG';
   } else {
@@ -62,13 +69,27 @@ async function ask({ user, question, familyMemberId = null, req = null }) {
       answer = matches[0].content;
       outcome = 'ANSWERED';
       sourceIds = matches.map((match) => match.id);
+
+      // The six-part shape, when a reviewer has written one. An entry
+      // without sections is served as the paragraph it has always been
+      // rather than chopped into headings at request time.
+      sections = matches[0].sections ?? null;
+      references = matches.map(knowledge.toReference);
+
+      const scored = knowledge.scoreConfidence(matches);
+      confidence = scored.confidence;
+      matchRank = scored.rank;
     } else {
       answer = NO_ANSWER;
       outcome = 'NO_ANSWER';
     }
   }
 
-  const needsReview = flags.isRedFlag || Math.random() < REVIEW_SAMPLE_RATE;
+  // A weak match goes to review every time, not one in twenty. A
+  // confident wrong answer is the failure mode that matters here, and
+  // LOW is the engine saying it is not sure.
+  const needsReview =
+    flags.isRedFlag || confidence === 'LOW' || Math.random() < REVIEW_SAMPLE_RATE;
 
   const interaction = await AiInteraction.create({
     userId: user.id,
@@ -79,6 +100,8 @@ async function ask({ user, question, familyMemberId = null, req = null }) {
     redFlag: flags.isRedFlag,
     redFlagCategories: flags.categories,
     sourceIds,
+    confidence,
+    matchRank,
     needsReview,
   });
 
@@ -96,10 +119,20 @@ async function ask({ user, question, familyMemberId = null, req = null }) {
   return {
     id: interaction.id,
     answer,
+    // Null unless a reviewer wrote the structure. The app renders the
+    // paragraph when this is absent rather than faking headings.
+    sections,
     outcome,
     redFlag: flags.isRedFlag,
     redFlagCategories: flags.categories,
+    // Titles, sources and review dates — enough for a reader to judge
+    // where this came from. Ids alone told them nothing.
+    references,
     sources: sourceIds,
+    // Returned so the app can add a caution when the match was weak.
+    // Never shown as a number: a percentage beside a health answer
+    // reads as "probably true" when it measures word overlap.
+    confidence,
     needsReview,
   };
 }

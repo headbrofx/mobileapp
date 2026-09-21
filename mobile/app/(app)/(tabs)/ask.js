@@ -348,13 +348,33 @@ function Message({ message }) {
     );
   }
 
+  const sections = data.sections ?? null;
+
   return (
     <View style={styles.aiRow}>
       <Avatar />
-      <View style={[styles.bubble, styles.aiBubble]}>
+      <View style={[styles.bubble, styles.aiBubble, sections && styles.aiBubbleWide]}>
+        {/* The opening line, always. When sections exist this is the
+            summary above them; when they do not, it is the answer. */}
         <Text style={styles.aiText}>{data.answer}</Text>
 
-        {data.outcome === 'ANSWERED' ? (
+        {sections ? <Sections sections={sections} /> : null}
+
+        {/* A weak match says so in a sentence, not as a percentage. A
+            number beside a health answer reads as "probably true" when
+            what it measures is word overlap. */}
+        {data.confidence === 'LOW' ? (
+          <View style={styles.caution}>
+            <Ionicons name="alert-circle-outline" size={13} color={dark.accent} />
+            <Text style={styles.cautionText}>
+              {tx('Jibu hili halilingani vizuri na swali lako. Kama halikujibu, muulize muuguzi.')}
+            </Text>
+          </View>
+        ) : null}
+
+        {data.references?.length ? <References items={data.references} /> : null}
+
+        {data.outcome === 'ANSWERED' && !data.references?.length ? (
           <View style={styles.source}>
             <Ionicons name="shield-checkmark-outline" size={13} color={dark.accent} />
             <Text style={styles.sourceText}>
@@ -372,6 +392,88 @@ function Message({ message }) {
           </View>
         ) : null}
       </View>
+    </View>
+  );
+}
+
+// --- The six-part answer ----------------------------------------------
+//
+// Written by whoever reviewed the entry, not assembled here. This
+// component decides the order and the look, and the look matters:
+// vetted clinical text is set apart from the conversational line above
+// it, so a reader can see which part of the bubble somebody qualified
+// actually signed.
+//
+// "When it is urgent" carries the danger colour. It is the one section
+// that is about leaving the app.
+
+const SECTION_ORDER = [
+  {
+    key: 'whatMayBeHappening',
+    label: 'Kinachoweza kuwa kinatokea',
+    icon: 'information-circle-outline',
+  },
+  { key: 'whatToMonitor', label: 'Cha kufuatilia', icon: 'eye-outline' },
+  { key: 'selfCare', label: 'Unachoweza kufanya', icon: 'leaf-outline' },
+  { key: 'whenToSeekAdvice', label: 'Lini kuona mtaalamu', icon: 'medkit-outline' },
+  { key: 'whenUrgent', label: 'Lini ni dharura', icon: 'warning-outline', urgent: true },
+];
+
+function Sections({ sections }) {
+  const present = SECTION_ORDER.filter((s) => sections[s.key]);
+  if (present.length === 0) return null;
+
+  return (
+    <View style={styles.sections}>
+      {present.map((section) => (
+        <View key={section.key} style={[styles.section, section.urgent && styles.sectionUrgent]}>
+          <View style={styles.sectionHead}>
+            <Ionicons
+              name={section.icon}
+              size={13}
+              color={section.urgent ? dark.danger : dark.accent}
+            />
+            <Text style={[styles.sectionLabel, section.urgent && styles.sectionLabelUrgent]}>
+              {tx(section.label)}
+            </Text>
+          </View>
+          <Text style={[styles.sectionBody, section.urgent && styles.sectionBodyUrgent]}>
+            {sections[section.key]}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+// --- Where it came from -----------------------------------------------
+//
+// Titles, sources and the date a professional signed them off. A reader
+// who cannot see where an answer came from has no way to weigh it, and
+// "verified" with nothing behind it is a claim rather than a fact.
+
+function References({ items }) {
+  return (
+    <View style={styles.refs}>
+      <Text style={styles.refsHead}>{tx('Chanzo')}</Text>
+      {items.map((ref) => (
+        <View key={ref.id} style={styles.ref}>
+          <Ionicons
+            name={ref.reviewed ? 'shield-checkmark' : 'shield-outline'}
+            size={12}
+            color={ref.reviewed ? dark.accent : dark.subtle}
+          />
+          <View style={styles.refText}>
+            <Text style={styles.refTitle}>{ref.title}</Text>
+            {ref.source ? <Text style={styles.refSource}>{ref.source}</Text> : null}
+            {ref.reviewedAt ? (
+              <Text style={styles.refMeta}>
+                {tx('Ilipitiwa')} {String(ref.reviewedAt).slice(0, 10)} · v{ref.contentVersion}
+              </Text>
+            ) : null}
+          </View>
+        </View>
+      ))}
     </View>
   );
 }
@@ -542,7 +644,59 @@ const styles = StyleSheet.create({
     borderColor: dark.border,
     flexShrink: 1,
   },
+  aiBubbleWide: { maxWidth: '96%' },
   aiText: { ...type.body, color: dark.text, lineHeight: scale(22) },
+
+  sections: { marginTop: spacing.sm, gap: spacing.xs },
+  section: {
+    borderLeftWidth: 2,
+    borderLeftColor: dark.accentLine,
+    paddingLeft: spacing.sm,
+    paddingVertical: 2,
+  },
+  sectionUrgent: { borderLeftColor: dark.dangerBorder },
+  sectionHead: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  sectionLabel: {
+    fontSize: fs(10),
+    fontFamily: font.extrabold,
+    letterSpacing: 0.5,
+    color: dark.accent,
+    textTransform: 'uppercase',
+  },
+  sectionLabelUrgent: { color: dark.danger },
+  sectionBody: { ...type.small, color: dark.text, lineHeight: scale(19), marginTop: 2 },
+  sectionBodyUrgent: { color: dark.danger },
+
+  caution: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 5,
+    marginTop: spacing.sm,
+    backgroundColor: dark.accentSoft,
+    borderRadius: radius.sm,
+    padding: spacing.xs,
+  },
+  cautionText: { ...type.tiny, color: dark.text, flex: 1, lineHeight: scale(15) },
+
+  refs: {
+    marginTop: spacing.sm,
+    paddingTop: spacing.xs,
+    borderTopWidth: 1,
+    borderTopColor: dark.border,
+    gap: spacing.xs,
+  },
+  refsHead: {
+    fontSize: fs(9),
+    fontFamily: font.extrabold,
+    letterSpacing: 0.8,
+    color: dark.subtle,
+    textTransform: 'uppercase',
+  },
+  ref: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
+  refText: { flex: 1 },
+  refTitle: { ...type.tiny, fontFamily: font.semibold, color: dark.text },
+  refSource: { ...type.tiny, fontSize: fs(9), color: dark.muted },
+  refMeta: { ...type.tiny, fontSize: fs(9), color: dark.subtle },
   errorText: { ...type.body, color: dark.danger },
 
   source: {

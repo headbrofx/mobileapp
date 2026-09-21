@@ -22,6 +22,17 @@
 // Symptoms still read as Swahili in the source.
 
 export const EN_BY_SW = {
+  // --- Ask Orbit: the structured answer ---
+  'Kinachoweza kuwa kinatokea': 'What may be happening',
+  'Cha kufuatilia': 'What to monitor',
+  'Unachoweza kufanya': 'What you can do',
+  'Lini kuona mtaalamu': 'When to see a professional',
+  'Lini ni dharura': 'When it is urgent',
+  Chanzo: 'Source',
+  Ilipitiwa: 'Reviewed',
+  'Jibu hili halilingani vizuri na swali lako. Kama halikujibu, muulize muuguzi.':
+    'This answer is not a close match for your question. If it did not answer it, ask your nurse.',
+
   // --- Orbit ---
   Faragha: 'Private',
   Habari: 'Hello',

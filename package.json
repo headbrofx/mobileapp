@@ -15,7 +15,8 @@
     "db:seed": "sequelize-cli db:seed:all",
     "test": "jest --runInBand",
     "make-admin": "node scripts/make-admin.js",
-    "content:publish": "node scripts/publish-content.js"
+    "content:publish": "node scripts/publish-content.js",
+    "knowledge:review": "node scripts/review-knowledge.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

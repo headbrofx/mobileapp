@@ -78,7 +78,8 @@ async function search(question, { limit = 3 } = {}) {
   // marketing copy into clinical text for it to prevent.
   const rows = await sequelize.query(
     `
-    SELECT id, title, content, category, language, source,
+    SELECT id, title, content, category, language, source, source_url,
+           sections, content_version, verified_by_professional, verified_at,
            ts_rank(to_tsvector('simple', title || ' ' || content),
                    to_tsquery('simple', :tsquery)) AS rank
     FROM knowledge_items
@@ -93,6 +94,53 @@ async function search(question, { limit = 3 } = {}) {
   );
 
   return rows;
+}
+
+// How well the served entry actually matched, in three words.
+//
+// Two things decide it, and both come out of retrieval rather than out
+// of an opinion. The rank is how strongly the entry matched at all. The
+// margin is how far ahead of the runner-up it was — a question that
+// matches three entries almost equally has not found *the* answer, it
+// has found a shelf, and serving the top of that shelf with confidence
+// is how somebody gets the wrong page stated firmly.
+//
+// The thresholds sit on the measurements already recorded in MIN_RANK's
+// comment: real matches score 0.041 to 0.087, brushes score 0.020.
+//
+// This is not shown to the user as a number. A percentage next to a
+// health answer invites somebody to read 70% as "probably true", when
+// what it measures is word overlap. LOW is surfaced as a sentence
+// suggesting they ask a nurse; HIGH and MEDIUM are surfaced as nothing
+// at all, which is the honest amount.
+function scoreConfidence(matches) {
+  if (matches.length === 0) return { confidence: 'NONE', rank: null };
+
+  const rank = Number(matches[0].rank) || 0;
+  const runnerUp = matches.length > 1 ? Number(matches[1].rank) || 0 : 0;
+  const margin = rank - runnerUp;
+
+  if (rank >= 0.06 && margin >= 0.015) return { confidence: 'HIGH', rank };
+  if (rank >= 0.04) return { confidence: 'MEDIUM', rank };
+  return { confidence: 'LOW', rank };
+}
+
+// What the app is allowed to show about where an answer came from.
+//
+// Deliberately a whitelist rather than the row: a knowledge item also
+// carries who wrote it and an internal review note, and neither belongs
+// in a client response.
+function toReference(match) {
+  return {
+    id: match.id,
+    title: match.title,
+    category: match.category,
+    source: match.source ?? null,
+    sourceUrl: match.source_url ?? null,
+    contentVersion: match.content_version ?? 1,
+    reviewedAt: match.verified_at ?? null,
+    reviewed: Boolean(match.verified_by_professional),
+  };
 }
 
 async function create({ title, content, category, language, source, createdBy }) {
@@ -117,4 +165,14 @@ async function list({ category = null, includeUnverified = false } = {}) {
   return includeUnverified ? items : items.filter((item) => item.isRetrievable);
 }
 
-module.exports = { search, create, verify, list, buildQuery, STOPWORDS, MIN_RANK };
+module.exports = {
+  search,
+  create,
+  verify,
+  list,
+  buildQuery,
+  scoreConfidence,
+  toReference,
+  STOPWORDS,
+  MIN_RANK,
+};

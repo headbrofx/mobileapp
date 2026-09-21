@@ -64,6 +64,12 @@ module.exports = {
   'PATCH /api/family-members/:familyMemberId': { tag: 'Family members', summary: 'Update a family member' },
 
   // --- Health record ---
+  'POST /api/ai/ask': {
+    tag: 'AI',
+    summary: 'Ask a health question',
+    description:
+      'Rules run before retrieval and have no dependencies, so an emergency warning cannot fail because something else was slow. A non-emergency answer is a reviewed knowledge entry returned word for word - there is no model in this path, so nothing can be invented. Returns sections when a reviewer wrote the six-part structure, references naming where the answer came from and when it was signed off, and confidence (HIGH/MEDIUM/LOW/NONE) derived from the match rank and its margin over the runner-up. A LOW match goes to the review queue every time rather than being sampled.',
+  },
   // --- Orbit ---
   'POST /api/family-members/:familyMemberId/orbit/checkins': {
     tag: 'Orbit',

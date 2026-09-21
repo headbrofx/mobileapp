@@ -30,6 +30,15 @@ module.exports = (sequelize, DataTypes) => {
         field: 'red_flag_categories',
       },
       sourceIds: { type: DataTypes.JSONB, allowNull: false, defaultValue: [], field: 'source_ids' },
+      // How closely the served entry matched the question. Kept with
+      // the interaction so a month of these can show whether the
+      // retrieval floor is set right.
+      confidence: {
+        type: DataTypes.ENUM('HIGH', 'MEDIUM', 'LOW', 'NONE'),
+        allowNull: false,
+        defaultValue: 'NONE',
+      },
+      matchRank: { type: DataTypes.FLOAT, allowNull: true, field: 'match_rank' },
       reviewStatus: {
         type: DataTypes.ENUM('PENDING', 'REVIEWED_OK', 'FLAGGED_INCORRECT'),
         allowNull: false,
