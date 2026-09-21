@@ -121,6 +121,58 @@ const RULES = [
       'Afya Nyumbani will have a nurse contact you.',
     ].join('\n'),
   },
+  {
+    category: 'MZIO',
+    label: 'Mzio mkali / Severe allergic reaction',
+    patterns: [
+      'mzio mkali', 'alaji kali', 'mdomo umevimba', 'ulimi umevimba',
+      'uso umevimba ghafla', 'koo linabana', 'koo limebana',
+      'vipele mwili mzima', 'shindwa kumeza ghafla',
+      'anaphylaxis', 'anaphylactic', 'allergic reaction',
+      'throat closing', 'throat is closing', 'tongue swelling',
+      'lips swelling', 'face swelling', 'hives all over',
+    ],
+  },
+  {
+    category: 'MIMBA_NJE',
+    label: 'Dalili za mimba nje ya kizazi / Possible ectopic pregnancy',
+    patterns: ['mimba nje ya kizazi', 'ectopic'],
+    // Shoulder pain on its own is usually a muscle. Shoulder pain with
+    // abdominal pain or bleeding is the classic ectopic presentation,
+    // and the pair is what this has to catch. Flagging every sore
+    // shoulder as an emergency would teach people to scroll past the
+    // warning, which costs more than it saves.
+    allOf: [
+      ['bega', 'shoulder'],
+      ['tumbo', 'damu', 'abdomen', 'abdominal', 'belly', 'bleeding'],
+    ],
+  },
+  {
+    category: 'PRESHA_YA_MIMBA',
+    label: 'Dalili za presha ya ujauzito / Pre-eclampsia signs',
+    patterns: [
+      'kifafa cha mimba', 'presha ya mimba', 'kuona vimulimuli',
+      'pre eclampsia', 'preeclampsia', 'eclampsia',
+    ],
+    // A headache is common; a headache with vision trouble is not.
+    // Same reasoning as the rule above.
+    allOf: [
+      ['kichwa', 'headache'],
+      ['kutoona', 'sioni vizuri', 'macho', 'ukungu', 'vision', 'blurred', 'flashing'],
+    ],
+  },
+  {
+    category: 'BAADA_YA_KUJIFUNGUA',
+    label: 'Dalili za hatari baada ya kujifungua / Postnatal danger signs',
+    patterns: [
+      'homa baada ya kujifungua', 'damu nyingi baada ya kujifungua',
+      'harufu mbaya baada ya kujifungua', 'uchafu wenye harufu mbaya',
+      'kidonda cha upasuaji kimetoa usaha',
+      'fever after delivery', 'fever after giving birth',
+      'heavy bleeding after birth', 'heavy bleeding after delivery',
+      'foul smelling discharge', 'bad smelling discharge',
+    ],
+  },
 ];
 
 const EMERGENCY_GUIDANCE = [
@@ -149,9 +201,23 @@ function detect(text) {
   const matched = [];
 
   for (const rule of RULES) {
-    const hit = rule.patterns.find((pattern) => haystack.includes(pattern));
+    const hit = (rule.patterns ?? []).find((pattern) => haystack.includes(pattern));
     if (hit) {
       matched.push({ category: rule.category, label: rule.label, matched: hit });
+      continue;
+    }
+
+    // A rule can also fire on a combination rather than a phrase: every
+    // group in allOf has to contribute a word. Some things are only an
+    // emergency together — shoulder pain with abdominal pain, a
+    // headache with vision trouble — and flagging either half on its
+    // own would fire on a large share of everything the app is ever
+    // sent, which is how a warning stops being read.
+    if (rule.allOf) {
+      const parts = rule.allOf.map((group) => group.find((word) => haystack.includes(word)));
+      if (parts.every(Boolean)) {
+        matched.push({ category: rule.category, label: rule.label, matched: parts.join(' + ') });
+      }
     }
   }
 
