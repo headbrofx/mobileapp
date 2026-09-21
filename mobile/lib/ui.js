@@ -8,8 +8,9 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSidebar } from './sidebar';
-import { colors, font, radius, shadow, spacing, type } from './theme';
+import { colors, font, fs, radius, shadow, spacing, type } from './theme';
 import { tx } from './i18n';
+import { servicePrice } from './services-meta';
 
 // Small shared pieces, so five screens do not each style a button
 // slightly differently.
@@ -82,9 +83,52 @@ export function Card({ children, style }) {
 // Neither opened anything on web, and nor did the drawer's own header
 // toggle: the panel stayed parked off-screen and no error was thrown.
 // The sidebar is now this app's own Modal, so pressing this is a state
+// A service's price, or the fact that there is nothing to pay.
+//
+// Free is a badge, where a price is a line of text. That asymmetry is
+// the point: free is the one thing on a service row a client should
+// catch without reading, and setting it in the same weight as
+// "Kuanzia TZS 30,000" hides it in plain sight.
+//
+// It is deliberately not the success green. That green means finished
+// and nothing else, in every theme — see theme.js. So the badge is the
+// theme's own primary, dark enough on its tint to clear AA in all
+// three: 7.6:1 green, 6.9:1 orange, 6.9:1 blue.
+//
+// A service with no price recorded renders nothing at all, which is
+// what it did before and still the honest answer — we do not know.
+export function PriceTag({ service, colour = colors.primary, size = 12 }) {
+  const price = servicePrice(service);
+  if (!price) return null;
+
+  if (price.free) {
+    return (
+      <View style={styles.freeTag}>
+        <Ionicons name="gift" size={fs(size)} color={colors.primaryDark} />
+        <Text style={[styles.freeTagText, { fontSize: fs(size) }]}>{price.text}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <Text style={[styles.priceTagText, { color: colour, fontSize: fs(size) }]}>{price.text}</Text>
+  );
+}
+
+// Opens the sidebar.
+//
+// The tab screens are drawn with headerShown: false so they can have
+// the design's own headers, which left the menu with no button anywhere
+// and everything in it — Afya AI, symptoms, family, medicines, invoices
+// — effectively invisible.
+//
+// Two earlier attempts went through react-navigation's Drawer, one
+// hand-rolled and one using the library's own DrawerToggleButton.
+// Neither opened anything on web, and nor did the drawer's own header
+// toggle: the panel stayed parked off-screen and no error was thrown.
+// The sidebar is now this app's own Modal, so pressing this is a state
 // change it controls rather than an action dispatched into a navigator
 // that quietly drops it.
-
 export function MenuButton({ tint = colors.text }) {
   const { openSidebar } = useSidebar();
 
@@ -170,6 +214,19 @@ const styles = StyleSheet.create({
   screenHeaderText: { flex: 1 },
   screenTitle: { ...type.title, color: colors.text },
   screenSubtitle: { ...type.small, color: colors.muted, marginTop: 2 },
+
+  freeTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-start',
+    backgroundColor: colors.primaryLight,
+    borderRadius: radius.sm,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+  },
+  freeTagText: { fontFamily: font.extrabold, color: colors.primaryDark, letterSpacing: 0.3 },
+  priceTagText: { fontFamily: font.bold },
 
   card: {
     backgroundColor: colors.surface,

@@ -222,6 +222,7 @@ export const EN_BY_SW = {
   Bei: 'Price',
   Muda: 'Duration',
   Kuanzia: 'From',
+  Bure: 'Free',
   Dakika: 'Minutes',
   'Inatuma…': 'Sending…',
   'Thibitisha ombi': 'Confirm request',

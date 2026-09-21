@@ -12,7 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { bookings, familyMembers, services as servicesApi } from '../../../lib/api';
-import { Card, ErrorBox, Field, MenuButton } from '../../../lib/ui';
+import { Card, ErrorBox, Field, MenuButton, PriceTag } from '../../../lib/ui';
 import { colors, font, fs, radius, scale, shadow, spacing, type } from '../../../lib/theme';
 import { serviceColour, serviceIcon, serviceImage } from '../../../lib/services-meta';
 import { tx, useI18n } from '../../../lib/i18n';
@@ -55,7 +55,6 @@ function toScheduledAt({ hoursAhead, hour }) {
   return date;
 }
 
-const tzs = (amount) => `TZS ${Number(amount).toLocaleString('en-US')}`;
 
 export default function Book() {
   // Subscribes this screen to the chosen language. The tx() calls
@@ -126,13 +125,18 @@ export default function Book() {
 
   // Sorted, not filtered: nothing is ever hidden from the catalogue,
   // because a service somebody cannot see is a service they cannot buy.
+  // Smallest first — and a free service really is the cheapest, so zero
+  // sorts where zero belongs. What must not sort at zero is a service
+  // with nothing recorded: that is unknown, not cheap, and it goes to
+  // the end rather than jumping the queue ahead of the free one.
+  const unknownLast = (value) => (value ?? Number.POSITIVE_INFINITY);
   const sorted =
     sort === 'none'
       ? catalogue
       : [...catalogue].sort((a, b) =>
           sort === 'price'
-            ? (a.basePriceTzs ?? 0) - (b.basePriceTzs ?? 0)
-            : (a.durationMinutes ?? 0) - (b.durationMinutes ?? 0)
+            ? unknownLast(a.basePriceTzs) - unknownLast(b.basePriceTzs)
+            : unknownLast(a.durationMinutes) - unknownLast(b.durationMinutes)
         );
 
   const canContinue = [
@@ -301,9 +305,7 @@ export default function Book() {
                           {service.description}
                         </Text>
                       ) : null}
-                      {service?.basePriceTzs ? (
-                        <Text style={styles.summaryPrice}>{tx('Kuanzia')} {tzs(service.basePriceTzs)}</Text>
-                      ) : null}
+                      <PriceTag service={service} size={13} />
                     </View>
                   </View>
 
@@ -510,11 +512,7 @@ function ServiceRow({ service, selected, onPress }) {
         <Text style={styles.serviceName} numberOfLines={1}>
           {service.name}
         </Text>
-        {service.basePriceTzs ? (
-          <Text style={[styles.rowPrice, { color: colour }]}>
-            {tx('Kuanzia')} {tzs(service.basePriceTzs)}
-          </Text>
-        ) : null}
+        <PriceTag service={service} colour={colour} />
         {service.durationMinutes ? (
           <View style={styles.durationRow}>
             <Ionicons name="time-outline" size={11} color={colors.muted} />
@@ -781,7 +779,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  rowPrice: { ...type.tiny, fontSize: fs(12), fontFamily: font.bold, marginTop: 2 },
   durationRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 },
   duration: { fontSize: fs(10), color: colors.muted },
   // The photograph sits between the words and the arrow, as the design
@@ -796,7 +793,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rowText: { flex: 1 },
-  summaryPrice: { ...type.tiny, fontFamily: font.bold, color: colors.primary, marginTop: 3 },
 
   statusCard: {
     flexDirection: 'row',

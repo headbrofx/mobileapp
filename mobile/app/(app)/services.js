@@ -3,7 +3,7 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { services as servicesApi } from '../../lib/api';
-import { Card, ErrorBox } from '../../lib/ui';
+import { Card, ErrorBox, PriceTag } from '../../lib/ui';
 import { colors, font, fs, radius, shadow, spacing } from '../../lib/theme';
 import { serviceColour, serviceIcon, serviceImage } from '../../lib/services-meta';
 import { tx, useI18n } from '../../lib/i18n';
@@ -17,7 +17,6 @@ import { tx, useI18n } from '../../lib/i18n';
 // deliberate either way rather than broken.
 
 
-const tzs = (amount) => `TZS ${Number(amount).toLocaleString('en-US')}`;
 
 export default function Services() {
   // Subscribes this screen to the chosen language. The tx() calls
@@ -75,9 +74,7 @@ export default function Services() {
                 </Text>
               ) : null}
               <View style={styles.metaRow}>
-                {service.basePriceTzs ? (
-                  <Text style={styles.price}>{tx('Kuanzia')} {tzs(service.basePriceTzs)}</Text>
-                ) : null}
+                <PriceTag service={service} />
                 {service.durationMinutes ? (
                   <Text style={styles.duration}>· {tx('Dakika')} {service.durationMinutes}</Text>
                 ) : null}
@@ -139,7 +136,6 @@ const styles = StyleSheet.create({
   name: { fontSize: fs(15), fontFamily: font.bold, color: colors.text },
   muted: { fontSize: fs(13), color: colors.muted, marginTop: 2, lineHeight: fs(18) },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
-  price: { fontSize: fs(12), fontFamily: font.bold, color: colors.primary },
   duration: { fontSize: fs(12), color: colors.subtle },
 
   note: {

@@ -1,4 +1,5 @@
 import { colors } from './theme';
+import { tx } from './i18n';
 
 // One icon and one colour per service, for the whole app.
 //
@@ -107,6 +108,29 @@ export const serviceColour = (name) => serviceMeta(name).colour;
 // colour itself. Kept here so the two never drift apart.
 export function serviceTint(name) {
   return `${serviceColour(name)}1A`;
+}
+
+// What a service costs, as one line of text.
+//
+// This exists because three screens wrote `service.basePriceTzs ? ... :
+// null`, and zero is falsy. A service the business gives away would
+// have rendered with no price at all — indistinguishable from one whose
+// price nobody has filled in yet, and read by a client as an oversight
+// rather than an offer.
+//
+// So the three states are kept apart deliberately:
+//   null / undefined -> no price is known, say nothing
+//   0                -> free, and say so plainly
+//   anything else     -> "from", because a visit's real cost depends on
+//                        what it turns out to involve
+export function servicePrice(service) {
+  const price = service?.basePriceTzs;
+  if (price === null || price === undefined) return null;
+  if (Number(price) === 0) return { free: true, text: tx('Bure') };
+  return {
+    free: false,
+    text: `${tx('Kuanzia')} TZS ${Number(price).toLocaleString('en-US')}`,
+  };
 }
 
 export { colors };
