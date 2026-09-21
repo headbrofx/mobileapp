@@ -443,7 +443,22 @@ const ROWS = [...ITEMS, ...FACTS];
 
 module.exports = {
   async up(queryInterface) {
-    await queryInterface.bulkInsert('knowledge_items', ROWS);
+    // Idempotent by title, the same way the first Orbit seeder is.
+    // This one runs against production by hand rather than on deploy,
+    // and a hand-run command is exactly the kind that gets run twice.
+    const titles = ROWS.map((r) => r.title);
+    const existing = await queryInterface.sequelize.query(
+      'SELECT title FROM knowledge_items WHERE title IN (:titles)',
+      {
+        replacements: { titles },
+        type: queryInterface.sequelize.QueryTypes.SELECT,
+      }
+    );
+    const have = new Set(existing.map((row) => row.title));
+    const fresh = ROWS.filter((r) => !have.has(r.title));
+    if (fresh.length === 0) return;
+
+    await queryInterface.bulkInsert('knowledge_items', fresh);
   },
 
   async down(queryInterface) {

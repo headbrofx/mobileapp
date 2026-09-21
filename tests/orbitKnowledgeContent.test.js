@@ -16,14 +16,31 @@ const seeder = require('../src/seeders/20260921000002-orbit-knowledge-expanded')
 // can, and the review gate is what makes them read it. What these can
 // do is catch the four failure modes the brief names by name.
 
-function rowsOf(seed) {
+// The seeder is idempotent, so up() asks the database which titles it
+// already has before inserting. Here there is no database: the stub
+// answers "none of them", which is the case these assertions are about
+// — a first run, inserting everything.
+async function rowsOf(seed) {
   let captured = [];
-  seed.up({ bulkInsert: (_table, rows) => { captured = rows; } });
+  await seed.up({
+    bulkInsert: (_table, rows) => {
+      captured = rows;
+    },
+    sequelize: {
+      QueryTypes: { SELECT: 'SELECT' },
+      query: async () => [],
+    },
+  });
   return captured;
 }
 
-const rows = rowsOf(seeder);
-const clinical = rows.filter((r) => r.category === 'HEALTH_EDUCATION');
+let rows = [];
+let clinical = [];
+
+beforeAll(async () => {
+  rows = await rowsOf(seeder);
+  clinical = rows.filter((r) => r.category === 'HEALTH_EDUCATION');
+});
 const sectionsOf = (row) => JSON.parse(row.sections);
 const allText = (row) => Object.values(sectionsOf(row)).join(' ') + ' ' + row.content;
 
