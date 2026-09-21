@@ -1,10 +1,10 @@
 import { createContext, useContext, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { usePathname, useRouter } from 'expo-router';
 import { LANGUAGES, tx, useI18n } from './i18n';
 import { showsOrbit, useSession } from './session';
-import { colors, font, fs, spacing } from './theme';
+import { colors, font, fs, radius, spacing } from './theme';
 
 // The sidebar menu.
 //
@@ -21,23 +21,44 @@ import { colors, font, fs, spacing } from './theme';
 
 const SidebarContext = createContext(null);
 
+// A colour per destination, and the filled icon rather than the
+// outline one.
+//
+// Thirteen identical green glyphs down a list is a wall of text with
+// decoration — nothing to aim at, and every row costing a read. The
+// tile is what the eye actually lands on, so it carries the hue and
+// the glyph sits inside it.
+//
+// The hues are not decorative-random: they group the app. Green is
+// yours (home, your visits, your medicines), blue is scheduling and
+// records, teal is clinical, amber is anything that interrupts you,
+// violet is you as a person, grey is machinery.
+const TINTS = {
+  green: '#0E9B77',
+  blue: '#3B82F6',
+  teal: '#14B8A6',
+  amber: '#F59E0B',
+  violet: '#8B5CF6',
+  slate: '#6B7280',
+};
+
 const ITEMS = [
-  { icon: 'home-outline', key: 'nav.home', href: '/home' },
+  { icon: 'home', key: 'nav.home', href: '/home', tint: TINTS.green },
   // Orbit sits third, under the two things somebody opens the app to
   // do. It is the reason a lot of people will keep the app installed
   // rather than delete it after one visit, and it was buried ninth.
-  { icon: 'calendar-number-outline', key: 'nav.orbit', href: '/cycles', badge: 'nav.new' },
-  { icon: 'grid-outline', key: 'nav.services', href: '/services' },
-  { icon: 'calendar-outline', key: 'nav.bookVisit', href: '/book' },
-  { icon: 'list-outline', key: 'nav.myVisits', href: '/appointments' },
-  { icon: 'chatbubble-ellipses-outline', key: 'nav.ai', href: '/ask' },
-  { icon: 'notifications-outline', key: 'nav.notifications', href: '/notifications' },
-  { icon: 'pulse-outline', key: 'nav.symptoms', href: '/symptoms' },
-  { icon: 'people-outline', key: 'nav.family', href: '/family' },
-  { icon: 'medical-outline', key: 'nav.medications', href: '/medications' },
-  { icon: 'receipt-outline', key: 'nav.invoices', href: '/invoices' },
-  { icon: 'person-outline', key: 'nav.profile', href: '/profile' },
-  { icon: 'settings-outline', key: 'nav.settings', href: '/settings' },
+  { icon: 'calendar-number', key: 'nav.orbit', href: '/cycles', badge: 'nav.new', tint: TINTS.blue },
+  { icon: 'heart-circle', key: 'nav.services', href: '/services', tint: TINTS.teal },
+  { icon: 'calendar', key: 'nav.bookVisit', href: '/book', tint: TINTS.blue },
+  { icon: 'list', key: 'nav.myVisits', href: '/appointments', tint: TINTS.green },
+  { icon: 'chatbubble-ellipses', key: 'nav.ai', href: '/ask', tint: TINTS.blue },
+  { icon: 'notifications', key: 'nav.notifications', href: '/notifications', tint: TINTS.amber },
+  { icon: 'pulse', key: 'nav.symptoms', href: '/symptoms', tint: TINTS.teal },
+  { icon: 'people', key: 'nav.family', href: '/family', tint: TINTS.blue },
+  { icon: 'medical', key: 'nav.medications', href: '/medications', tint: TINTS.green },
+  { icon: 'receipt', key: 'nav.invoices', href: '/invoices', tint: TINTS.blue },
+  { icon: 'person', key: 'nav.profile', href: '/profile', tint: TINTS.violet },
+  { icon: 'settings', key: 'nav.settings', href: '/settings', tint: TINTS.slate },
 ];
 
 export function SidebarProvider({ children }) {
@@ -80,6 +101,7 @@ function Sidebar() {
   const router = useRouter();
   const { user, self, signOut } = useSession();
   const { t, language, setLanguage } = useI18n();
+  const pathname = usePathname();
 
   // The menu drops Orbit for the same reason the tab bar does. Leaving
   // it here would make hiding the tab pointless — the menu is one tap
@@ -118,22 +140,51 @@ function Sidebar() {
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-          {items.map((item) => (
-            <Pressable
-              key={item.href}
-              onPress={() => go(item.href)}
-              accessibilityRole="button"
-              style={({ pressed }) => [styles.item, pressed && styles.itemPressed]}
-            >
-              <Ionicons name={item.icon} size={20} color={colors.primary} />
-              <Text style={styles.itemText}>{t(item.key)}</Text>
-              {item.badge ? (
-                <View style={styles.itemBadge}>
-                  <Text style={styles.itemBadgeText}>{t(item.badge)}</Text>
+          {items.map((item) => {
+            const active = pathname === item.href;
+            return (
+              <Pressable
+                key={item.href}
+                onPress={() => go(item.href)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}
+                style={({ pressed }) => [
+                  styles.item,
+                  active && styles.itemActive,
+                  pressed && styles.itemPressed,
+                ]}
+              >
+                {/* Filled tile where you are, pale tile where you are
+                    not. The hue is the same either way, so the row
+                    reads as the same destination in two states rather
+                    than as two different things. */}
+                <View
+                  style={[
+                    styles.itemIcon,
+                    { backgroundColor: active ? item.tint : `${item.tint}1F` },
+                  ]}
+                >
+                  <Ionicons name={item.icon} size={19} color={active ? '#FFFFFF' : item.tint} />
                 </View>
-              ) : null}
-            </Pressable>
-          ))}
+
+                <Text style={[styles.itemText, active && styles.itemTextActive]} numberOfLines={1}>
+                  {t(item.key)}
+                </Text>
+
+                {item.badge ? (
+                  <View style={styles.itemBadge}>
+                    <Text style={styles.itemBadgeText}>{t(item.badge)}</Text>
+                  </View>
+                ) : null}
+
+                <Ionicons
+                  name="chevron-forward"
+                  size={16}
+                  color={active ? colors.primary : colors.subtle}
+                />
+              </Pressable>
+            );
+          })}
         </ScrollView>
 
         <View style={styles.languageRow}>
@@ -240,11 +291,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 4,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: 7,
+    marginHorizontal: spacing.xs + 2,
+    borderRadius: radius.md,
   },
-  itemPressed: { backgroundColor: colors.primaryLight },
-  itemText: { flex: 1, fontSize: fs(15), color: colors.text },
+  // The row you are on is a filled pill, not a tint on the icon alone.
+  // Inset from the panel edge so it reads as a selected row rather
+  // than as a band across the whole drawer.
+  itemActive: { backgroundColor: colors.primaryLight },
+  itemPressed: { backgroundColor: colors.hairline },
+  itemIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: radius.sm + 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  itemText: { flex: 1, fontSize: fs(15), fontFamily: font.semibold, color: colors.text },
+  itemTextActive: { color: colors.primaryDark, fontFamily: font.bold },
   itemBadge: {
     backgroundColor: colors.primary,
     borderRadius: 999,

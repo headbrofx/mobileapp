@@ -1,8 +1,35 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, dark, font, fs } from '../../../lib/theme';
 import { useI18n } from '../../../lib/i18n';
 import { showsOrbit, useSession } from '../../../lib/session';
+
+// The bar was a flat 62 tall with 8 of bottom padding, and on any
+// phone with a gesture bar or a home indicator the icons were cut off
+// along the bottom edge.
+//
+// The cause is that giving tabBarStyle an explicit height replaces the
+// one react-navigation would have computed, and the one it would have
+// computed is the only one that knew about the inset. So the inset is
+// added back here: a fixed drawing area, plus whatever the system
+// reserves underneath it, and the content padded down by the same
+// amount so it sits in the bar rather than under the indicator.
+//
+// BAR is the drawing area — icon, label and the air around them. It
+// stays fixed, so the bar looks identical on a phone with an inset and
+// one without; only the reserved strip below it changes.
+const BAR = 66;
+
+function bar(inset) {
+  return {
+    backgroundColor: colors.surface,
+    borderTopColor: colors.border,
+    height: BAR + inset,
+    paddingBottom: 6 + inset,
+    paddingTop: 6,
+  };
+}
 
 // Bottom tabs: the five things somebody opens the app to do.
 //
@@ -18,6 +45,7 @@ import { showsOrbit, useSession } from '../../../lib/session';
 export default function TabsLayout() {
   const { t } = useI18n();
   const { self } = useSession();
+  const insets = useSafeAreaInsets();
 
   // Orbit is a women's health module, so the bar is five items for the
   // people it is for and four for everybody else. href: null takes the
@@ -31,19 +59,26 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.subtle,
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-          height: 62,
-          paddingBottom: 8,
-          paddingTop: 6,
-        },
+        tabBarStyle: bar(insets.bottom),
         // Five labels where there were four. Without the font locked and
         // a slightly tighter size, "Afya AI" wraps to two lines on a
         // 360-wide phone and pushes the whole bar out of line.
-        tabBarLabelStyle: { fontSize: fs(10.5), fontFamily: font.semibold },
+        // lineHeight is not decoration here. Without it the label's box
+        // is whatever height react-navigation has left over, which
+        // measured 6px against an 11px font — and the box clips, so
+        // every label in the bar was sliced through the middle. An
+        // explicit line box is the only thing that makes the text's
+        // own height the thing that decides.
+        tabBarLabelStyle: {
+          fontSize: fs(10.5),
+          lineHeight: fs(14),
+          fontFamily: font.semibold,
+          margin: 0,
+          padding: 0,
+        },
         tabBarAllowFontScaling: false,
-        tabBarItemStyle: { paddingHorizontal: 2 },
+        tabBarItemStyle: { paddingHorizontal: 2, paddingVertical: 0 },
+        tabBarIconStyle: { marginTop: 2, marginBottom: 0 },
       }}
     >
       <Tabs.Screen
@@ -85,11 +120,9 @@ export default function TabsLayout() {
           // light strip across the foot of a dark screen reads as a
           // seam, and this is the one screen with its own surface.
           tabBarStyle: {
+            ...bar(insets.bottom),
             backgroundColor: dark.bgDeep,
             borderTopColor: dark.border,
-            height: 62,
-            paddingBottom: 8,
-            paddingTop: 6,
           },
           tabBarActiveTintColor: dark.accent,
           tabBarInactiveTintColor: dark.subtle,

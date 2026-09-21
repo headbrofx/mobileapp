@@ -9,6 +9,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -75,6 +76,7 @@ export default function Home() {
   const { user } = useSession();
   const { t, language } = useI18n();
   const { width, height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   // The service tiles come first, and the picture takes what is left.
   //
   // This used to be the other way round — the hero took a fixed share of
@@ -113,7 +115,11 @@ export default function Home() {
   // everything it stands for — the greeting, the tagline, the heading —
   // is type.
   const ABOVE_GRID = Math.round(scale(240) * textScale);
-  const TAB_BAR = 62;
+  // Must match the tab bar in (tabs)/_layout.js, inset and all —
+  // useWindowDimensions reports the whole screen, including the strip
+  // the system reserves at the bottom, so leaving the inset out here
+  // hands the grid room that the bar is standing on.
+  const TAB_BAR = 66 + insets.bottom;
   const BREATH = 16;
   const HERO_MIN = 110;
 
