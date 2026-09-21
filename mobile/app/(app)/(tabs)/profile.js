@@ -3,9 +3,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { familyMembers } from '../../../lib/api';
 import { useSession } from '../../../lib/session';
 import { LANGUAGES, tx, useI18n } from '../../../lib/i18n';
-import { MenuButton } from '../../../lib/ui';
+import { GenderChips, MenuButton } from '../../../lib/ui';
 import { colors, font, fs, radius, shadow, spacing, type } from '../../../lib/theme';
 
 // The account tab.
@@ -37,7 +38,7 @@ const SHORTCUTS = [
 export default function Profile() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { user, signOut } = useSession();
+  const { user, self, refresh, signOut } = useSession();
   const { t, language, setLanguage } = useI18n();
 
   const initials = (user?.name ?? '?')
@@ -181,6 +182,32 @@ export default function Profile() {
             ))}
           </View>
         </View>
+
+        {/* Gender lives here because it is the answer both Orbit and
+            the sign-up form ask for, and this is where somebody comes
+            looking when the app is showing them the wrong thing. The
+            chips sit under the label rather than beside it: three
+            words do not fit on the right of a row at 360 wide. */}
+        <View style={[styles.row, styles.rowStacked]}>
+          <View style={styles.rowHead}>
+            <View style={styles.rowIcon}>
+              <Ionicons name="person-circle-outline" size={19} color={colors.primary} />
+            </View>
+            <View style={styles.rowText}>
+              <Text style={styles.rowLabel}>{tx('Jinsia')}</Text>
+              <Text style={styles.rowHint}>{tx('Huamua kama Orbit inaonekana')}</Text>
+            </View>
+          </View>
+          <GenderChips
+            value={self?.gender ?? null}
+            clearable={false}
+            onChange={async (gender) => {
+              if (!gender || !self) return;
+              await familyMembers.update(self.id, { gender });
+              await refresh();
+            }}
+          />
+        </View>
       </View>
 
       <Pressable
@@ -199,6 +226,8 @@ export default function Profile() {
 
 const styles = StyleSheet.create({
   content: { flexGrow: 1, paddingBottom: spacing.xl },
+  rowStacked: { flexDirection: 'column', alignItems: 'stretch', gap: spacing.sm },
+  rowHead: { flexDirection: 'row', alignItems: 'center' },
   pressed: { opacity: 0.75 },
 
   hero: {

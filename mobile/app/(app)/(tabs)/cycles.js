@@ -10,8 +10,8 @@ import {
   familyMembers,
   orbit as orbitApi,
 } from '../../../lib/api';
-import { ErrorBox, MenuButton } from '../../../lib/ui';
-import { useSession } from '../../../lib/session';
+import { ErrorBox, GenderChips, MenuButton } from '../../../lib/ui';
+import { showsOrbit, useSession } from '../../../lib/session';
 import { tx, useI18n } from '../../../lib/i18n';
 import {
   CycleRing,
@@ -99,11 +99,70 @@ function dayOfCycle(lastStart) {
   return diff > 0 ? diff : null;
 }
 
+// Shown once, to anyone whose gender was never recorded — which is
+// everybody who registered before the sign-up form began asking.
+//
+// It asks the real question with the real three answers, rather than
+// "is this for you?" with a yes and a no. A yes/no would have to write
+// a gender it never actually asked for, and that value is used by more
+// than this screen.
+function AskGender({ onPick }) {
+  const [saving, setSaving] = useState(false);
+
+  return (
+    <OrbitCard>
+      <SectionTitle title={tx('Kabla hujaanza')} />
+      <Text style={styles.askBody}>
+        {tx('Orbit ni sehemu ya afya ya mwanamke. Tuambie jinsia yako ili tukuonyeshe sehemu inayokuhusu.')}
+      </Text>
+      <View style={styles.askChips}>
+        <GenderChips
+          value={null}
+          clearable={false}
+          onChange={async (gender) => {
+            if (!gender || saving) return;
+            setSaving(true);
+            try {
+              await onPick(gender);
+            } finally {
+              setSaving(false);
+            }
+          }}
+        />
+      </View>
+      <Text style={styles.askFoot}>
+        {tx('Unaweza kuibadilisha wakati wowote kwenye wasifu wako.')}
+      </Text>
+    </OrbitCard>
+  );
+}
+
+// Reached only by someone who had the address but not the module —
+// a deep link, or a tab that was open when the answer changed.
+//
+// It says what this is and points at the way back. It does not say
+// "denied": nothing here was taken from them, and the profile is one
+// tap away if the answer on file is simply wrong.
+function NotForYou({ onLeave }) {
+  return (
+    <View style={[styles.screen, styles.notForYou]}>
+      <Ionicons name="flower-outline" size={40} color={orbit.plum} />
+      <Text style={styles.notForYouTitle}>{tx('Orbit ni kwa afya ya mwanamke')}</Text>
+      <Text style={styles.notForYouBody}>
+        {tx('Sehemu hii haipo kwenye akaunti yako. Kama jinsia iliyohifadhiwa si sahihi, ibadilishe kwenye wasifu wako.')}
+      </Text>
+      <Pressable onPress={onLeave} style={styles.notForYouButton}>
+        <Text style={styles.notForYouButtonText}>{tx('Rudi mwanzo')}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 export default function OrbitHome() {
   useI18n();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { user } = useSession();
+  const { user, self, refresh } = useSession();
 
   const [insights, setInsights] = useState(null);
   const [patterns, setPatterns] = useState(null);
@@ -159,6 +218,15 @@ export default function OrbitHome() {
   const phase = phaseFor(day, length);
   const firstName = user?.name?.split(' ')[0];
 
+  // The tab and the menu entry are already gone for anyone Orbit is
+  // not for. This is the third door: a deep link, a bookmarked URL on
+  // web, or a back-button return to a screen that was open when the
+  // answer changed. None of those pass through a navigator that could
+  // have hidden it.
+  if (!showsOrbit(self)) {
+    return <NotForYou onLeave={() => router.replace('/home')} />;
+  }
+
   return (
     <View style={styles.screen}>
       <ScrollView
@@ -193,6 +261,18 @@ export default function OrbitHome() {
         </View>
 
         <ErrorBox error={error} />
+
+        {self && self.gender == null ? (
+          <AskGender
+            onPick={async (gender) => {
+              await familyMembers.update(self.id, { gender });
+              // Refresh rather than set locally: this answer decides
+              // the tab bar and the menu as well, and they read the
+              // session, not this screen.
+              await refresh();
+            }}
+          />
+        ) : null}
 
         <CycleCard
           insights={insights}
@@ -556,6 +636,37 @@ const styles = StyleSheet.create({
   content: { padding: spacing.md, paddingBottom: spacing.xl, gap: spacing.md },
   pressed: { opacity: 0.85 },
   rowText: { flex: 1 },
+
+  askBody: { ...type.small, color: orbit.inkSoft, lineHeight: scale(19), marginTop: 2 },
+  askChips: { marginTop: spacing.sm },
+  askFoot: { fontSize: fs(11), color: orbit.inkFaint, marginTop: spacing.sm },
+
+  notForYou: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.xl,
+    gap: spacing.sm,
+  },
+  notForYouTitle: {
+    fontSize: fs(18),
+    fontFamily: font.extrabold,
+    color: orbit.ink,
+    textAlign: 'center',
+  },
+  notForYouBody: {
+    ...type.small,
+    color: orbit.inkSoft,
+    textAlign: 'center',
+    lineHeight: scale(20),
+  },
+  notForYouButton: {
+    marginTop: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: 11,
+    borderRadius: radius.pill,
+    backgroundColor: orbit.plum,
+  },
+  notForYouButtonText: { fontSize: fs(14), fontFamily: font.semibold, color: '#FFFFFF' },
 
   header: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   headerText: { flex: 1 },

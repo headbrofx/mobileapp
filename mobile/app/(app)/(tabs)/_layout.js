@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, dark, font, fs } from '../../../lib/theme';
 import { useI18n } from '../../../lib/i18n';
+import { showsOrbit, useSession } from '../../../lib/session';
 
 // Bottom tabs: the five things somebody opens the app to do.
 //
@@ -16,6 +17,13 @@ import { useI18n } from '../../../lib/i18n';
 // menu, so the bar stops at five instead of becoming a second menu.
 export default function TabsLayout() {
   const { t } = useI18n();
+  const { self } = useSession();
+
+  // Orbit is a women's health module, so the bar is five items for the
+  // people it is for and four for everybody else. href: null takes the
+  // tab out of the bar without unregistering the route — the screen
+  // stays addressable, and guards itself.
+  const orbit = showsOrbit(self);
 
   return (
     <Tabs
@@ -51,6 +59,7 @@ export default function TabsLayout() {
         name="cycles"
         options={{
           title: t('nav.orbit'),
+          href: orbit ? undefined : null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="calendar-number-outline" size={size} color={color} />
           ),

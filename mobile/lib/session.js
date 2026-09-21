@@ -12,16 +12,36 @@ const SessionContext = createContext(null);
 
 export function SessionProvider({ children }) {
   const [user, setUser] = useState(null);
+  // The signed-in client's own patient record. Orbit is offered on the
+  // gender recorded here, so the tab bar reads it — which is why it
+  // lives in context rather than being fetched per screen. A screen
+  // that fetched it would render the bar first and change it after.
+  const [self, setSelf] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const signOutLocally = useCallback(async () => {
     await clearTokens();
     setUser(null);
+    setSelf(null);
+  }, []);
+
+  // Ask the API who this is, and adopt both halves of the answer.
+  //
+  // Sign-in and registration go through here too, rather than taking
+  // the user off their own response: those responses carry no self,
+  // and a tab bar that appears without Orbit and grows it a moment
+  // later is worse than one extra request at sign-in.
+  const refresh = useCallback(async () => {
+    const data = await auth.me();
+    setUser(data?.user ?? null);
+    setSelf(data?.self ?? null);
+    return data;
   }, []);
 
   useEffect(() => {
     setSessionLostHandler(() => {
       setUser(null);
+      setSelf(null);
     });
   }, []);
 
@@ -36,7 +56,10 @@ export function SessionProvider({ children }) {
         const token = await getAccessToken();
         if (!token) return;
         const data = await auth.me();
-        if (!cancelled) setUser(data?.user ?? null);
+        if (!cancelled) {
+          setUser(data?.user ?? null);
+          setSelf(data?.self ?? null);
+        }
       } catch {
         await clearTokens();
       } finally {
@@ -49,23 +72,35 @@ export function SessionProvider({ children }) {
     };
   }, []);
 
-  const signIn = useCallback(async (identifier, password, { remember = true } = {}) => {
-    const data = await auth.login(identifier, password);
-    await saveTokens(data.tokens, { remember });
-    setUser(data.user);
-  }, []);
+  const signIn = useCallback(
+    async (identifier, password, { remember = true } = {}) => {
+      const data = await auth.login(identifier, password);
+      await saveTokens(data.tokens, { remember });
+      setUser(data.user);
+      await refresh();
+    },
+    [refresh]
+  );
 
-  const signInWithGoogle = useCallback(async (idToken, phone) => {
-    const data = await auth.google(idToken, phone);
-    await saveTokens(data.tokens);
-    setUser(data.user);
-  }, []);
+  const signInWithGoogle = useCallback(
+    async (idToken, phone) => {
+      const data = await auth.google(idToken, phone);
+      await saveTokens(data.tokens);
+      setUser(data.user);
+      await refresh();
+    },
+    [refresh]
+  );
 
-  const register = useCallback(async (payload) => {
-    const data = await auth.register(payload);
-    await saveTokens(data.tokens);
-    setUser(data.user);
-  }, []);
+  const register = useCallback(
+    async (payload) => {
+      const data = await auth.register(payload);
+      await saveTokens(data.tokens);
+      setUser(data.user);
+      await refresh();
+    },
+    [refresh]
+  );
 
   const signOut = useCallback(async () => {
     try {
@@ -79,11 +114,30 @@ export function SessionProvider({ children }) {
   }, [signOutLocally]);
 
   const value = useMemo(
-    () => ({ user, loading, signIn, signInWithGoogle, register, signOut }),
-    [user, loading, signIn, signInWithGoogle, register, signOut]
+    () => ({ user, self, loading, refresh, signIn, signInWithGoogle, register, signOut }),
+    [user, self, loading, refresh, signIn, signInWithGoogle, register, signOut]
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
+}
+
+// Who Orbit is for.
+//
+// One rule in one place, because three things ask it: the tab bar, the
+// menu, and the screen itself — the screen because neither of the
+// other two guards a deep link or a back-button return.
+//
+// FEMALE sees it. MALE and OTHER do not.
+//
+// Unknown is the case worth explaining. Registration never asked until
+// today, so every account that already exists has no gender recorded.
+// Reading unknown as "no" would take Orbit away from every woman
+// currently using it, without a word. So unknown still sees it, and
+// the screen opens by asking — one tap, and the answer settles the tab
+// from then on.
+export function showsOrbit(self) {
+  const gender = self?.gender ?? null;
+  return gender === 'FEMALE' || gender === null;
 }
 
 export function useSession() {

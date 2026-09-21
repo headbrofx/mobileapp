@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LANGUAGES, tx, useI18n } from './i18n';
-import { useSession } from './session';
+import { showsOrbit, useSession } from './session';
 import { colors, font, fs, spacing } from './theme';
 
 // The sidebar menu.
@@ -78,8 +78,13 @@ function initials(name) {
 function Sidebar() {
   const { closeSidebar } = useSidebar();
   const router = useRouter();
-  const { user, signOut } = useSession();
+  const { user, self, signOut } = useSession();
   const { t, language, setLanguage } = useI18n();
+
+  // The menu drops Orbit for the same reason the tab bar does. Leaving
+  // it here would make hiding the tab pointless — the menu is one tap
+  // from every screen in the app.
+  const items = ITEMS.filter((item) => item.key !== 'nav.orbit' || showsOrbit(self));
 
   function go(href) {
     closeSidebar();
@@ -113,7 +118,7 @@ function Sidebar() {
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-          {ITEMS.map((item) => (
+          {items.map((item) => (
             <Pressable
               key={item.href}
               onPress={() => go(item.href)}

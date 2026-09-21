@@ -116,7 +116,11 @@ async function confirmVerification(req, res, next) {
 
 async function me(req, res, next) {
   try {
-    return success(res, { message: 'Current user', data: { user: req.user.toSafeJSON() } });
+    const self = await authService.selfMember(req.user);
+    return success(res, {
+      message: 'Current user',
+      data: { user: req.user.toSafeJSON(), self },
+    });
   } catch (err) {
     next(err);
   }

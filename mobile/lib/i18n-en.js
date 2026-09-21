@@ -223,6 +223,16 @@ export const EN_BY_SW = {
   Muda: 'Duration',
   Kuanzia: 'From',
   Bure: 'Free',
+  Jinsia: 'Gender',
+  'Huamua kama Orbit inaonekana': 'Decides whether Orbit is shown',
+  'Kabla hujaanza': 'Before you begin',
+  'Orbit ni sehemu ya afya ya mwanamke. Tuambie jinsia yako ili tukuonyeshe sehemu inayokuhusu.':
+    "Orbit is a women's health section. Tell us your gender so we can show you the right part of the app.",
+  'Unaweza kuibadilisha wakati wowote kwenye wasifu wako.': 'You can change this any time in your profile.',
+  'Orbit ni kwa afya ya mwanamke': "Orbit is for women's health",
+  'Sehemu hii haipo kwenye akaunti yako. Kama jinsia iliyohifadhiwa si sahihi, ibadilishe kwenye wasifu wako.':
+    'This section is not on your account. If the gender on file is wrong, change it in your profile.',
+  'Rudi mwanzo': 'Back to home',
   Dakika: 'Minutes',
   'Inatuma…': 'Sending…',
   'Thibitisha ombi': 'Confirm request',

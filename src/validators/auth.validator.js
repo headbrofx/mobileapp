@@ -14,6 +14,11 @@ const registerSchema = z.object({
   specialty: z
     .enum(['NURSE', 'PHYSIOTHERAPIST', 'CAREGIVER', 'GENERAL_PRACTITIONER', 'OPERATIONS', 'OTHER'])
     .optional(), // only used when role === 'STAFF'
+  // Optional, and recorded on the client's own SELF family member
+  // rather than on the user. It stays optional because signing up must
+  // not be blocked on it; what it decides is whether Orbit is offered,
+  // and that can be answered later from the profile instead.
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
 });
 
 const loginSchema = z.object({

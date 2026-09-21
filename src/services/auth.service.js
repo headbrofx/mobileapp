@@ -45,7 +45,7 @@ async function sendVerificationCode(user, channel) {
   return config.isProduction ? null : code;
 }
 
-async function register({ name, phone, email, password, role, specialty }, req) {
+async function register({ name, phone, email, password, role, specialty, gender }, req) {
   const existing = await User.findOne({
     where: { [Op.or]: [{ phone }, ...(email ? [{ email }] : [])] },
   });
@@ -81,6 +81,13 @@ async function register({ name, phone, email, password, role, specialty }, req) 
       name: user.name,
       relationship: 'SELF',
       isPrimaryAccountHolder: true,
+      // Optional, and asked once at sign-up rather than inferred.
+      // Orbit is a women's health module and is shown on that basis,
+      // so the answer has to come from the person themselves — there
+      // is nothing in a Tanzanian name that reliably gives it, and
+      // guessing it wrong either hides the module from a woman or
+      // shows it to somebody who did not ask for it.
+      gender: gender ?? null,
     });
   }
 
@@ -388,8 +395,33 @@ async function confirmVerification(req, { channel, code }) {
   return { user: req.user.toSafeJSON() };
 }
 
+// The caller's own patient record — the SELF family member created at
+// registration.
+//
+// This is on /auth/me rather than behind its own request because the
+// app needs it before it can draw the tab bar: Orbit is offered on the
+// strength of the gender recorded here, and a bar that renders first
+// and gains a tab a moment later is worse than one that waits.
+//
+// Staff and admins have no client profile, and get null.
+async function selfMember(user) {
+  if (user.role !== 'CLIENT') return null;
+
+  const clientProfile = await ClientProfile.findOne({ where: { userId: user.id } });
+  if (!clientProfile) return null;
+
+  const member = await FamilyMember.findOne({
+    where: { clientProfileId: clientProfile.id, isPrimaryAccountHolder: true },
+    order: [['createdAt', 'ASC']],
+  });
+  if (!member) return null;
+
+  return { id: member.id, name: member.name, gender: member.gender ?? null };
+}
+
 module.exports = {
   register,
+  selfMember,
   login,
   googleSignIn,
   refresh,

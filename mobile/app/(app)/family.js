@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { familyMembers as familyApi } from '../../lib/api';
-import { Button, Card, ErrorBox, Field } from '../../lib/ui';
+import { Button, Card, ErrorBox, Field, GenderChips } from '../../lib/ui';
 import { colors, font, fs, radius, spacing } from '../../lib/theme';
 import { tx, useI18n } from '../../lib/i18n';
 
@@ -31,12 +31,6 @@ const RELATIONSHIPS = [
   { value: 'SIBLING', label: 'Ndugu' },
   { value: 'GRANDPARENT', label: 'Babu/Bibi' },
   { value: 'OTHER', label: 'Mwingine' },
-];
-
-const GENDERS = [
-  { value: 'FEMALE', label: 'Mke' },
-  { value: 'MALE', label: 'Mume' },
-  { value: 'OTHER', label: 'Nyingine' },
 ];
 
 const LABEL = Object.fromEntries(RELATIONSHIPS.map((r) => [r.value, r.label]));
@@ -161,16 +155,7 @@ export default function Family() {
             </View>
 
             <Text style={styles.label}>{tx('Jinsia (hiari)')}</Text>
-            <View style={styles.chips}>
-              {GENDERS.map((option) => (
-                <Chip
-                  key={option.value}
-                  label={tx(option.label)}
-                  selected={gender === option.value}
-                  onPress={() => setGender(gender === option.value ? null : option.value)}
-                />
-              ))}
-            </View>
+            <GenderChips value={gender} onChange={setGender} />
 
             <Field
               label={tx('Tarehe ya kuzaliwa (hiari)')}

@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSession } from '../lib/session';
 import { clientProfile, familyMembers, healthProfile, BASE_URL } from '../lib/api';
-import { ErrorBox } from '../lib/ui';
+import { ErrorBox, GenderChips } from '../lib/ui';
 import { BrandFooter, BrandHeader, CheckBox, GradientButton, IconField, Stepper } from '../lib/auth-ui';
 import { colors, font, fs, radius, spacing } from '../lib/theme';
 import { tx, useI18n } from '../lib/i18n';
@@ -56,6 +56,7 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [agreed, setAgreed] = useState(false);
+  const [gender, setGender] = useState(null);
 
   // Step 2
   const [address, setAddress] = useState('');
@@ -83,6 +84,7 @@ export default function Register() {
         phone: phone.replace(/\s/g, ''),
         email: email.trim() || undefined,
         password,
+        gender: gender ?? undefined,
       });
       setStep(1);
     } catch (err) {
@@ -202,6 +204,15 @@ export default function Register() {
               autoCapitalize="none"
               error={confirm.length > 0 && !passwordsMatch ? 'Manenosiri hayafanani' : null}
             />
+
+            {/* Asked here, once, because it decides which app this
+                person gets — Orbit is a women's health module and is
+                offered on this answer. Optional: an account must not
+                depend on it, and the profile can settle it later. */}
+            <View style={styles.genderBlock}>
+              <Text style={styles.genderLabel}>{tx('Jinsia (hiari)')}</Text>
+              <GenderChips value={gender} onChange={setGender} />
+            </View>
 
             <View style={styles.agreeRow}>
               <CheckBox checked={agreed} onToggle={() => setAgreed((on) => !on)}>
@@ -358,6 +369,8 @@ const styles = StyleSheet.create({
   title: { fontSize: fs(26), fontFamily: font.extrabold, color: colors.text, marginTop: spacing.lg },
   subtitle: { fontSize: fs(14), color: colors.muted, marginTop: 3, marginBottom: spacing.lg, lineHeight: fs(19) },
 
+  genderBlock: { gap: 8, marginTop: 4 },
+  genderLabel: { fontSize: fs(13), fontFamily: font.semibold, color: colors.text },
   agreeRow: { marginBottom: spacing.lg },
   agreeText: { fontSize: fs(13), color: colors.muted, lineHeight: fs(19) },
   link: { color: colors.primary, fontFamily: font.bold, fontSize: fs(13) },

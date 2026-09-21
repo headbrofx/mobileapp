@@ -83,6 +83,48 @@ export function Card({ children, style }) {
 // Neither opened anything on web, and nor did the drawer's own header
 // toggle: the panel stayed parked off-screen and no error was thrown.
 // The sidebar is now this app's own Modal, so pressing this is a state
+// Gender, in the three values the database actually stores.
+//
+// The labels used to be Mke and Mume, which are wife and husband —
+// relationship words standing in for gender words. That was always
+// wrong and is now load-bearing, because this answer decides whether
+// Orbit is offered. Mwanamke and Mwanaume are the words for it.
+export const GENDERS = [
+  { value: 'FEMALE', label: 'Mwanamke' },
+  { value: 'MALE', label: 'Mwanaume' },
+  { value: 'OTHER', label: 'Nyingine' },
+];
+
+// Presentational on purpose: it reports a choice and nothing else.
+// Where that choice is saved differs by screen — registration holds it
+// in form state, the profile and Orbit each PATCH it — and a component
+// that saved it itself would have to know which.
+//
+// Passing the selected value again clears it, so an optional field
+// stays optional after a mis-tap.
+export function GenderChips({ value, onChange, clearable = true }) {
+  return (
+    <View style={styles.genderChips}>
+      {GENDERS.map((option) => {
+        const selected = value === option.value;
+        return (
+          <Pressable
+            key={option.value}
+            onPress={() => onChange(selected && clearable ? null : option.value)}
+            accessibilityRole="radio"
+            accessibilityState={{ selected }}
+            style={[styles.genderChip, selected && styles.genderChipSelected]}
+          >
+            <Text style={[styles.genderChipText, selected && styles.genderChipTextSelected]}>
+              {tx(option.label)}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 // A service's price, or the fact that there is nothing to pay.
 //
 // Free is a badge, where a price is a line of text. That asymmetry is
@@ -214,6 +256,19 @@ const styles = StyleSheet.create({
   screenHeaderText: { flex: 1 },
   screenTitle: { ...type.title, color: colors.text },
   screenSubtitle: { ...type.small, color: colors.muted, marginTop: 2 },
+
+  genderChips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
+  genderChip: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 9,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  genderChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
+  genderChipText: { fontSize: fs(13), fontFamily: font.semibold, color: colors.muted },
+  genderChipTextSelected: { color: colors.onPrimary },
 
   freeTag: {
     flexDirection: 'row',
