@@ -1,7 +1,7 @@
 'use strict';
 
 const { Op } = require('sequelize');
-const { Booking, ClientProfile, Staff, FamilyMember, Service } = require('../models');
+const { Booking, ClientProfile, Staff, FamilyMember, Service, User } = require('../models');
 const AppError = require('../utils/appError');
 const { logAudit } = require('./audit.service');
 const { assertTransition } = require('./bookingStateMachine.service');
@@ -70,7 +70,62 @@ async function create(user, data) {
     metadata: { serviceId: service.id, familyMemberId: familyMember.id },
   });
 
+  await notifyDesk(booking, service, familyMember, user);
+
   return findDetailed(booking.id);
+}
+
+// Tell the business an order has arrived.
+//
+// Until now nothing did. Every other step of a booking notified the
+// client — assigned, accepted, on the way — but the step where a
+// stranger asks for a nurse to come to their house notified nobody at
+// all. The row was written with status REQUESTED and sat there until
+// somebody happened to look, and there is no screen that looks.
+//
+// So this is the floor, not the finished thing: every admin now gets a
+// notification the moment an order lands, carrying enough to act on
+// without opening anything else — who, what, when and where.
+//
+// It writes in-app notifications because that is the only channel this
+// system has; notification.service pushes nothing. A phone that rings
+// is a separate piece of work and needs a gateway.
+async function notifyDesk(booking, service, familyMember, orderedBy) {
+  const admins = await User.findAll({
+    where: { role: 'ADMIN', status: 'ACTIVE' },
+    attributes: ['id'],
+  });
+  if (admins.length === 0) return;
+
+  const when = booking.scheduledAt.toLocaleString('sw-TZ', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  await Promise.all(
+    admins.map((admin) =>
+      notify({
+        userId: admin.id,
+        type: 'BOOKING',
+        title: `Ombi jipya: ${service.name}`,
+        message: `${familyMember.name} — ${when} — ${booking.locationAddress}`,
+        // The id travels with it so whatever reads these can open the
+        // booking directly rather than searching for it.
+        data: {
+          bookingId: booking.id,
+          serviceId: service.id,
+          serviceName: service.name,
+          patientName: familyMember.name,
+          orderedByUserId: orderedBy.id,
+          scheduledAt: booking.scheduledAt,
+          locationAddress: booking.locationAddress,
+          status: booking.status,
+        },
+      })
+    )
+  );
 }
 
 async function list(user, query = {}) {
