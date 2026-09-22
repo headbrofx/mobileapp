@@ -7,6 +7,8 @@ const { logAudit } = require('./audit.service');
 const { assertTransition } = require('./bookingStateMachine.service');
 const { suggestStaffForBooking } = require('./staffMatch.service');
 const { notify } = require('./notification.service');
+const erpBridge = require('./erpBridge.service');
+const logger = require('../config/logger');
 const { DETAIL_INCLUDE } = require('../middleware/bookingAccess');
 
 async function findDetailed(id) {
@@ -71,6 +73,16 @@ async function create(user, data) {
   });
 
   await notifyDesk(booking, service, familyMember, user);
+
+  // Into the business's own management software, if it is wired up.
+  //
+  // Not awaited. The ERP is a separate deployment on a separate host,
+  // and a client who has just asked for a nurse should not be left
+  // watching a spinner while we talk to another server that may be
+  // cold, slow or down. It logs and audits its own outcome.
+  erpBridge
+    .sendBooking({ booking, service, familyMember, client: user })
+    .catch((err) => logger.error('ERP bridge threw', { bookingId: booking.id, message: err.message }));
 
   return findDetailed(booking.id);
 }
