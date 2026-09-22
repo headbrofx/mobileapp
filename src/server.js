@@ -21,6 +21,24 @@ function start() {
   // and reports the real connection state.
   const server = app.listen(config.port, () => {
     logger.info(`Afya Nyumbani API listening on port ${config.port} [${config.env}]`);
+
+    // Say out loud whether the bridge to the business's management
+    // software is wired up.
+    //
+    // This exists because working that out took four rounds of
+    // guessing. When it is unconfigured the bridge does nothing and
+    // says nothing — deliberately, so that shipping it before the far
+    // end existed changed nothing — but the cost of that silence is
+    // that "orders are not arriving" and "the bridge is switched off"
+    // look identical from outside. One line at boot tells them apart,
+    // and names the variable that is missing rather than making
+    // somebody diff two dashboards.
+    const missing = ['ERP_BOOKINGS_URL', 'ERP_API_KEY'].filter((key) => !process.env[key]);
+    if (missing.length === 0) {
+      logger.info(`ERP bridge: on — posting bookings to ${process.env.ERP_BOOKINGS_URL}`);
+    } else {
+      logger.warn(`ERP bridge: off — ${missing.join(' and ')} not set`);
+    }
   });
 
   sequelize
