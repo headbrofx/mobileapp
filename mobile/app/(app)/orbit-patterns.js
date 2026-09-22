@@ -6,7 +6,7 @@ import { familyMembers, orbit as orbitApi } from '../../lib/api';
 import { ErrorBox } from '../../lib/ui';
 import { tx, useI18n } from '../../lib/i18n';
 import { NotYet, OrbitCard, SectionTitle, StatusPill, orbit } from '../../lib/orbit-ui';
-import { font, fs, radius, scale, spacing, type } from '../../lib/theme';
+import { colors, font, fs, radius, scale, spacing, type } from '../../lib/theme';
 
 // My Body Patterns.
 //
@@ -272,12 +272,12 @@ const styles = StyleSheet.create({
   directionText: { ...type.tiny, fontSize: fs(9), color: orbit.inkSoft },
 
   notable: {
-    backgroundColor: '#FBF0E4',
+    backgroundColor: colors.cautionBg,
     borderRadius: radius.pill,
     paddingHorizontal: 9,
     paddingVertical: 3,
   },
-  notableText: { fontSize: fs(9), fontFamily: font.bold, color: '#8A5A16', letterSpacing: 0.4 },
+  notableText: { fontSize: fs(9), fontFamily: font.bold, color: colors.caution, letterSpacing: 0.4 },
 
   count: { ...type.bodyStrong, color: orbit.plum },
 

@@ -167,7 +167,7 @@ export default function Ask() {
             >
               <View style={[styles.sendHalo, !canSend && styles.sendHaloOff]}>
                 <LinearGradient
-                  colors={canSend ? ['#4E97FF', dark.glow] : ['#243350', '#1B2740']}
+                  colors={canSend ? [dark.glowLift, dark.glow] : ['#243350', '#1B2740']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.send}
@@ -266,7 +266,7 @@ function Orb() {
       <View style={[styles.ring, styles.ring3]} />
       <View style={[styles.ring, styles.ring2]} />
       <LinearGradient
-        colors={['#3E8BFF', '#1B4FD0', '#0A1F52']}
+        colors={[dark.glowLift, dark.glowMid, dark.glowDeep]}
         start={{ x: 0.2, y: 0 }}
         end={{ x: 0.8, y: 1 }}
         style={styles.orb}
@@ -304,7 +304,7 @@ function Message({ message }) {
     return (
       <View style={styles.userRow}>
         <LinearGradient
-          colors={['#3E8BFF', dark.glow]}
+          colors={[dark.glowLift, dark.glow]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={[styles.bubble, styles.userBubble]}

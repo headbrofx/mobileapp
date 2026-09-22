@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, font, fs, radius, scale, shadow, spacing, type } from './theme';
+import { accentAt, colors, font, fs, radius, scale, shadow, spacing, type } from './theme';
 
 // Orbit's own surface.
 //
@@ -18,30 +18,42 @@ import { colors, font, fs, radius, scale, shadow, spacing, type } from './theme'
 // also happens to be the hardest palette to read outdoors.
 
 export const orbit = {
+  // Neutral ink, so the reading surface is the same temperature as the
+  // rest of the app.
   ink: '#241B2F',
   inkSoft: '#5E5470',
   inkFaint: '#9A91A8',
 
-  plum: '#5B2E6E',
-  plumDeep: '#3A1C47',
-  plumSoft: '#F4EEF7',
-  plumLine: '#E3D7EA',
+  // These were a plum chosen for Orbit alone — a fourth colour system
+  // in an app that already had three. Orbit is a module inside Afya
+  // Nyumbani, not a second app, and it now says so in colour as well
+  // as in layout: the accent is the active theme's, so Orbit is green
+  // on the green theme and blue on the blue one.
+  //
+  // The names stay `plum` because every screen references them and a
+  // rename would be churn for nothing. They are simply not plum any
+  // more unless the theme is.
+  plum: colors.primary,
+  plumDeep: colors.primaryDark,
+  plumSoft: colors.primaryLight,
+  plumLine: colors.border,
 
-  rose: '#C2567E',
-  roseSoft: '#FBEFF3',
+  rose: accentAt(4),
+  roseSoft: colors.primaryLight,
 
-  // Phase colours for the ring. Four steps, low saturation, distinct in
-  // lightness as well as hue so the ring still reads in greyscale and
-  // for anyone who does not separate these hues.
+  // Four steps for the ring. They were four unrelated hues; they are
+  // four steps of the theme's family now, still separated in lightness
+  // as well as hue so the ring reads in greyscale and for anyone who
+  // does not distinguish these hues.
   phase: {
-    MENSTRUAL: '#C2567E',
-    FOLLICULAR: '#7A5AA8',
-    OVULATORY: '#3E8E8A',
-    LUTEAL: '#8A6A3E',
+    MENSTRUAL: accentAt(0),
+    FOLLICULAR: accentAt(2),
+    OVULATORY: accentAt(3),
+    LUTEAL: accentAt(5),
   },
 
-  surface: '#FFFFFF',
-  page: '#FAF7FB',
+  surface: colors.surface,
+  page: colors.bg,
 };
 
 // --- The cycle ring ---------------------------------------------------
@@ -143,8 +155,8 @@ export function SectionTitle({ children, right }) {
 // days yet", and it is styled as neutral rather than as a warning.
 
 const STATUS_TONE = {
-  STABLE: { bg: '#E8F3EE', fg: '#1F6B4F' },
-  CHANGING: { bg: '#FBF0E4', fg: '#8A5A16' },
+  STABLE: { bg: colors.successBg, fg: colors.success },
+  CHANGING: { bg: colors.cautionBg, fg: colors.caution },
   MONITORING: { bg: orbit.plumSoft, fg: orbit.inkSoft },
 };
 

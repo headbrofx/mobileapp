@@ -730,14 +730,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dayLogged: { backgroundColor: '#EC4899' },
+  dayLogged: { backgroundColor: colors.primary },
   // Outlined, never filled: this day is arithmetic, not a record.
-  dayPredicted: { borderWidth: 1.5, borderColor: '#EC4899', borderStyle: 'dashed' },
+  dayPredicted: { borderWidth: 1.5, borderColor: colors.primary, borderStyle: 'dashed' },
   dayToday: { borderWidth: 2, borderColor: colors.primary },
   dayText: { fontSize: fs(13), color: colors.text },
   dayTextLogged: { color: '#FFFFFF', fontFamily: font.bold },
-  dayTextPredicted: { color: '#EC4899', fontFamily: font.semibold },
-  startDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: '#EC4899', marginTop: 2 },
+  dayTextPredicted: { color: colors.primary, fontFamily: font.semibold },
+  startDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: colors.primary, marginTop: 2 },
 
   legend: {
     flexDirection: 'row',

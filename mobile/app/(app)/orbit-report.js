@@ -6,7 +6,7 @@ import { familyMembers, orbit as orbitApi } from '../../lib/api';
 import { ErrorBox } from '../../lib/ui';
 import { tx, useI18n } from '../../lib/i18n';
 import { NotYet, OrbitCard, SectionTitle, orbit } from '../../lib/orbit-ui';
-import { font, fs, radius, scale, spacing, type } from '../../lib/theme';
+import { colors, font, fs, radius, scale, spacing, type } from '../../lib/theme';
 
 // The monthly report.
 //
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   barFill: { height: 6, borderRadius: 3, backgroundColor: orbit.plum },
-  caution: { ...type.tiny, color: '#8A5A16', marginTop: spacing.xs, lineHeight: scale(15) },
+  caution: { ...type.tiny, color: colors.caution, marginTop: spacing.xs, lineHeight: scale(15) },
 
   list: { paddingVertical: spacing.xs },
   row: {

@@ -21,7 +21,7 @@ import {
   StatusPill,
   orbit,
 } from '../../../lib/orbit-ui';
-import { font, fs, radius, scale, spacing, type } from '../../../lib/theme';
+import { colors, font, fs, radius, scale, spacing, type } from '../../../lib/theme';
 
 // Orbit — the women's health module's home.
 //
@@ -518,7 +518,7 @@ function CheckInCard({ streak, onPress }) {
           <Ionicons
             name={done ? 'checkmark' : 'add'}
             size={20}
-            color={done ? '#1F6B4F' : orbit.rose}
+            color={done ? colors.success : orbit.rose}
           />
         </View>
         <View style={styles.rowText}>
@@ -750,7 +750,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  checkinIconDone: { backgroundColor: '#E8F3EE' },
+  checkinIconDone: { backgroundColor: colors.successBg },
   checkinTitle: { fontSize: fs(15), fontFamily: font.bold, color: orbit.ink },
   checkinBody: { ...type.tiny, color: orbit.inkSoft, marginTop: 1 },
   streak: { alignItems: 'center' },

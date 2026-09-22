@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { bookings as bookingsApi } from '../../lib/api';
 import { Card, ErrorBox } from '../../lib/ui';
-import { colors, font, fs, radius, shadow, spacing, type } from '../../lib/theme';
+import { accentAt, colors, font, fs, radius, shadow, spacing, type } from '../../lib/theme';
 import { serviceColour, serviceIcon } from '../../lib/services-meta';
 import { tx, useI18n } from '../../lib/i18n';
 
@@ -257,7 +257,7 @@ function UpcomingCard({ visit, busy, onSupport, onCancel }) {
 
       <DetailRow
         icon="person"
-        tint="#3B82F6"
+        tint={accentAt(2)}
         title={visit.patient?.name ?? 'Mgonjwa'}
         sub="Anayepata huduma"
       />
@@ -286,7 +286,7 @@ function UpcomingCard({ visit, busy, onSupport, onCancel }) {
 
       <DetailRow
         icon="location"
-        tint="#F59E0B"
+        tint={accentAt(3)}
         title={visit.locationAddress}
         sub="Mahali pa ziara"
       />

@@ -23,7 +23,7 @@ import { tx, useI18n } from '../../../lib/i18n';
 import { useSession } from '../../../lib/session';
 import { ErrorBox, MenuButton } from '../../../lib/ui';
 import { Wordmark } from '../../../lib/brand';
-import { colors, font, fs, radius, scale, shadow, spacing, textScale, type } from '../../../lib/theme';
+import { accentAt, colors, font, fs, radius, scale, shadow, spacing, textScale, type } from '../../../lib/theme';
 import {
   serviceColour,
   serviceIcon,
@@ -413,7 +413,7 @@ export default function Home() {
         <View style={styles.quickRow}>
           <QuickCard
             icon="calendar-outline"
-            tint="#3B82F6"
+            tint={accentAt(2)}
             title={t('home.myVisits')}
             hint={t('home.myVisitsHint')}
             onPress={() => router.push('/appointments')}
@@ -614,10 +614,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: '#FFF6EE',
+    // Was a hardcoded orange wash, which stayed orange on the green
+    // and blue themes — the daily tip was the one card on Home that
+    // belonged to a different app.
+    backgroundColor: colors.primaryLight,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: '#FFE6D2',
+    borderColor: colors.border,
     padding: spacing.sm + 2,
     marginTop: spacing.md,
   },
@@ -625,11 +628,11 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#FFEBDA',
+    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tipLabel: { ...type.tiny, fontSize: fs(9), color: colors.brandOrange, letterSpacing: 0.6 },
+  tipLabel: { ...type.tiny, fontSize: fs(9), color: colors.primaryDark, letterSpacing: 0.6 },
   tipTitle: { ...type.bodyStrong, color: colors.text, marginTop: 1 },
 
   quickRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },

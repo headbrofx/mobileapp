@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { usePathname, useRouter } from 'expo-router';
 import { LANGUAGES, tx, useI18n } from './i18n';
 import { showsOrbit, useSession } from './session';
-import { colors, font, fs, radius, spacing } from './theme';
+import { accentAt, colors, font, fs, radius, spacing } from './theme';
 
 // The sidebar menu.
 //
@@ -24,41 +24,36 @@ const SidebarContext = createContext(null);
 // A colour per destination, and the filled icon rather than the
 // outline one.
 //
-// Thirteen identical green glyphs down a list is a wall of text with
+// Thirteen identical glyphs down a list is a wall of text with
 // decoration — nothing to aim at, and every row costing a read. The
-// tile is what the eye actually lands on, so it carries the hue and
-// the glyph sits inside it.
+// tile is what the eye lands on, so it carries the colour.
 //
-// The hues are not decorative-random: they group the app. Green is
-// yours (home, your visits, your medicines), blue is scheduling and
-// records, teal is clinical, amber is anything that interrupts you,
-// violet is you as a person, grey is machinery.
-const TINTS = {
-  green: '#0E9B77',
-  blue: '#3B82F6',
-  teal: '#14B8A6',
-  amber: '#F59E0B',
-  violet: '#8B5CF6',
-  slate: '#6B7280',
-};
+// These used to be six hand-picked hues that ignored the theme
+// entirely, which meant the menu looked the same whichever theme was
+// chosen and matched none of them. They are steps of the theme's own
+// family now (see colour.js), so the menu is recognisably the same app
+// as the screen behind it, in all three themes.
+//
+// The grouping is unchanged and still deliberate: the ramp is indexed
+// by role, not by position, so related destinations stay related.
 
 const ITEMS = [
-  { icon: 'home', key: 'nav.home', href: '/home', tint: TINTS.green },
+  { icon: 'home', key: 'nav.home', href: '/home', tint: accentAt(0) },
   // Orbit sits third, under the two things somebody opens the app to
   // do. It is the reason a lot of people will keep the app installed
   // rather than delete it after one visit, and it was buried ninth.
-  { icon: 'calendar-number', key: 'nav.orbit', href: '/cycles', badge: 'nav.new', tint: TINTS.blue },
-  { icon: 'heart-circle', key: 'nav.services', href: '/services', tint: TINTS.teal },
-  { icon: 'calendar', key: 'nav.bookVisit', href: '/book', tint: TINTS.blue },
-  { icon: 'list', key: 'nav.myVisits', href: '/appointments', tint: TINTS.green },
-  { icon: 'chatbubble-ellipses', key: 'nav.ai', href: '/ask', tint: TINTS.blue },
-  { icon: 'notifications', key: 'nav.notifications', href: '/notifications', tint: TINTS.amber },
-  { icon: 'pulse', key: 'nav.symptoms', href: '/symptoms', tint: TINTS.teal },
-  { icon: 'people', key: 'nav.family', href: '/family', tint: TINTS.blue },
-  { icon: 'medical', key: 'nav.medications', href: '/medications', tint: TINTS.green },
-  { icon: 'receipt', key: 'nav.invoices', href: '/invoices', tint: TINTS.blue },
-  { icon: 'person', key: 'nav.profile', href: '/profile', tint: TINTS.violet },
-  { icon: 'settings', key: 'nav.settings', href: '/settings', tint: TINTS.slate },
+  { icon: 'calendar-number', key: 'nav.orbit', href: '/cycles', badge: 'nav.new', tint: accentAt(2) },
+  { icon: 'heart-circle', key: 'nav.services', href: '/services', tint: accentAt(1) },
+  { icon: 'calendar', key: 'nav.bookVisit', href: '/book', tint: accentAt(2) },
+  { icon: 'list', key: 'nav.myVisits', href: '/appointments', tint: accentAt(0) },
+  { icon: 'chatbubble-ellipses', key: 'nav.ai', href: '/ask', tint: accentAt(2) },
+  { icon: 'notifications', key: 'nav.notifications', href: '/notifications', tint: accentAt(3) },
+  { icon: 'pulse', key: 'nav.symptoms', href: '/symptoms', tint: accentAt(1) },
+  { icon: 'people', key: 'nav.family', href: '/family', tint: accentAt(2) },
+  { icon: 'medical', key: 'nav.medications', href: '/medications', tint: accentAt(0) },
+  { icon: 'receipt', key: 'nav.invoices', href: '/invoices', tint: accentAt(2) },
+  { icon: 'person', key: 'nav.profile', href: '/profile', tint: accentAt(4) },
+  { icon: 'settings', key: 'nav.settings', href: '/settings', tint: accentAt(5) },
 ];
 
 export function SidebarProvider({ children }) {

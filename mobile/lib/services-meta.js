@@ -1,4 +1,4 @@
-import { colors } from './theme';
+import { accentAt, accents, colors } from './theme';
 import { tx } from './i18n';
 
 // One icon and one colour per service, for the whole app.
@@ -16,21 +16,32 @@ import { tx } from './i18n';
 // Colours are the design's. Icons are the nearest Ionicon to what the
 // design draws — it uses a custom set this app does not ship.
 
+// Icons are the design's. Colours are no longer: they were eight hues
+// picked by hand, which ignored the theme completely — so the
+// catalogue looked identical whichever theme was chosen, and matched
+// none of them.
+//
+// Each service now takes a step of the theme's own family, by a fixed
+// index so a service keeps its place when the theme changes. One of
+// the old hues was #EF4444 on Wound Care, which is red — the colour
+// this app reserves for "go to hospital". A wound dressing is not an
+// emergency, and it should never have been wearing that.
 const META = {
-  'Home Nursing': { icon: 'medkit', colour: '#3B82F6' },
-  'Elderly Care': { icon: 'people', colour: '#0E9B77' },
-  Physiotherapy: { icon: 'body', colour: '#F59E0B' },
-  'Wound Care': { icon: 'bandage', colour: '#EF4444' },
-  'Postnatal Care': { icon: 'heart', colour: '#EC4899' },
-  'Health Education': { icon: 'school', colour: '#0EA5E9' },
-  'Follow-up Visit': { icon: 'repeat', colour: '#8B5CF6' },
-  'Medication Administration': { icon: 'medical', colour: '#14B8A6' },
+  'Home Nursing': { icon: 'medkit', step: 0 },
+  'Elderly Care': { icon: 'people', step: 1 },
+  Physiotherapy: { icon: 'body', step: 2 },
+  'Wound Care': { icon: 'bandage', step: 3 },
+  'Postnatal Care': { icon: 'heart', step: 4 },
+  'Health Education': { icon: 'school', step: 5 },
+  'Follow-up Visit': { icon: 'repeat', step: 2 },
+  'Medication Administration': { icon: 'medical', step: 1 },
 };
 
 // A service the catalogue gains before this map knows about it still
 // gets a stable colour rather than a grey hole: the name itself picks
 // one, so it does not change between screens or between launches.
-const FALLBACK = ['#3B82F6', '#0E9B77', '#F59E0B', '#8B5CF6', '#0EA5E9', '#EC4899'];
+// Same family, so a service the map has never heard of still looks
+// like it belongs here.
 
 function hash(text = '') {
   let total = 0;
@@ -97,8 +108,8 @@ export function serviceImage(name) {
 
 export function serviceMeta(name) {
   const known = META[name];
-  if (known) return known;
-  return { icon: 'ellipse', colour: FALLBACK[hash(name) % FALLBACK.length] };
+  if (known) return { icon: known.icon, colour: accentAt(known.step) };
+  return { icon: 'ellipse', colour: accentAt(hash(name) % accents.length) };
 }
 
 export const serviceIcon = (name) => serviceMeta(name).icon;

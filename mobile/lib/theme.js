@@ -1,5 +1,6 @@
 import { Dimensions, Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
+import { onDarkFor, rampFor, wash } from './colour';
 
 // The palette — three of them, and the one in use is chosen in Settings.
 //
@@ -188,6 +189,13 @@ export const colors = {
   // Green in every theme: finished, and nothing else.
   success: '#0E7A5F',
   successBg: '#E6F2EE',
+
+  // Amber in every theme: worth a second look, but not an emergency.
+  // The third and last reserved state. It was living as a loose
+  // #8A5A16 in four separate files, which is how a meaning drifts —
+  // one of them changes and nobody notices the other three did not.
+  caution: '#8A5A16',
+  cautionBg: '#FBF0E4',
 };
 
 // Saving is the easy half. The hard half is that the styles already
@@ -210,17 +218,52 @@ export async function saveTextSize(name) {
 // --- The dark screen -------------------------------------------------
 //
 // Afya AI is drawn on navy rather than on the page colour, at the
-// owner's request, and its palette does not follow the theme picker.
+// owner's request. The surface stays; the hue no longer does.
 //
-// That is deliberate. The three themes decide what the app's furniture
-// looks like; this screen is built from the two colours the business
-// already owns — the blue and the orange in its own logo — so it reads
-// as the same company whichever theme is on, instead of turning green
-// or blue-on-blue and losing the contrast the design depends on.
+// It used to be argued the other way here — that this screen should
+// keep the logo's own orange and blue whatever theme was chosen, so it
+// read as the same company. In practice it read as a different app:
+// pick the green theme and one screen in five glowed orange. The owner
+// called it what it was.
 //
-// The accent is a lighter cut of the logo orange. #FD6000 on this navy
-// reads at 5.9:1; the deeper #C44200 the light themes use would drop to
-// 3.2:1, which is under the floor for text.
+// So the navy, the glass and the greys are fixed — they are the
+// surface, not a colour choice — and everything that sits on them is
+// the active theme's own hue, lifted for legibility. A light theme's
+// primary is dark on purpose: #C44200 on this navy reads 3.2:1, under
+// the floor for text, so the accents here are solved to 7:1 and better
+// rather than picked. See colour.js.
+//
+// --- One family of colours, from the theme's own hue -----------------
+//
+// The app had four independent colour systems: this palette, a fixed
+// orange accent for Afya AI, a plum for Orbit, and six unrelated hues
+// in the menu. Switching the theme moved one of the four; the other
+// three stayed put, which is how one app ends up looking like three
+// stitched together.
+//
+// Everything now derives from the active primary. The maths lives in
+// colour.js, pure and measurable — see the note there on why the ramp
+// solves for contrast instead of picking a lightness.
+
+const RAMP = rampFor(palette.primary, 6);
+const DARK_ACCENTS = onDarkFor(palette.primary);
+
+// Accent n of the family, for a light surface. Wraps, so a caller with
+// more items than steps keeps getting family members.
+export const accentAt = (index, count = RAMP.length) => RAMP[index % RAMP.length] ?? RAMP[0];
+export const accents = RAMP;
+
+export const onDark = DARK_ACCENTS.accent;
+export const onDarkAlt = DARK_ACCENTS.alt;
+
+export { wash };
+
+// rgba() from a hex, for the translucent fills on the dark surface.
+function alpha(hex, a) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
+
 export const dark = {
   bg: '#050B18',
   bgDeep: '#02060F',
@@ -236,13 +279,25 @@ export const dark = {
   // it is the ten-point line saying this is not a doctor.
   subtle: '#74839B',
 
-  accent: '#FF8A3D',
-  accentSoft: 'rgba(255,138,61,0.16)',
-  accentLine: 'rgba(255,138,61,0.45)',
+  // Afya AI keeps its own dark surface — it is the one screen with a
+  // reason to — but it no longer keeps its own hue. These were a fixed
+  // orange and a fixed blue, so on the green or blue theme this one
+  // screen stayed orange and belonged to a different app. They are the
+  // active theme's colour now, lifted to 7:1 and 8.5:1 against the
+  // navy, because a light theme's primary is dark on purpose and would
+  // be dark on dark here.
+  accent: onDark,
+  accentSoft: alpha(onDark, 0.16),
+  accentLine: alpha(onDark, 0.45),
 
-  glow: '#2E7BFF',
-  glowSoft: 'rgba(46,123,255,0.22)',
-  glowFaint: 'rgba(46,123,255,0.10)',
+  glow: onDarkAlt,
+  glowSoft: alpha(onDarkAlt, 0.22),
+  glowFaint: alpha(onDarkAlt, 0.1),
+
+  // Gradient steps, light to dark, for the orb and the two buttons.
+  glowLift: DARK_ACCENTS.lift,
+  glowMid: DARK_ACCENTS.mid,
+  glowDeep: DARK_ACCENTS.deep,
 
   // Still the one colour that means go to hospital. Lifted off the
   // light-theme red because a dark screen swallows it.
