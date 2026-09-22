@@ -126,13 +126,20 @@ export function rampFor(primary, count = 6, washAlpha = 0.12) {
   const sat = Math.min(0.9, Math.max(0.4, base.s));
 
   return Array.from({ length: count }, (_, index) => {
-    // Fanned asymmetrically, -8 to +40 degrees, rather than evenly
+    // Fanned asymmetrically, -5 to +23 degrees, rather than evenly
     // either side. An even fan on the orange theme put the first step
     // at hue 354 — pure red, which in this app means one thing only
     // and must not turn up behind a menu icon. Leaning the fan
     // "upward" in hue keeps every step clear of red in all three
-    // themes while still spreading them apart.
-    const spread = count > 1 ? (index / span) * 48 - 8 : 0;
+    // themes.
+    //
+    // The arc was 48 degrees and is now 28, because the owner asked
+    // for the app to read as one thing. At 48 the orange theme's last
+    // step landed on hue 60 — olive — which is still technically the
+    // same family and still looked like a different app had leaked in.
+    // 28 degrees keeps every step recognisably the theme's own colour
+    // while leaving enough separation to tell two menu rows apart.
+    const spread = count > 1 ? (index / span) * 28 - 5 : 0;
     const target = 4.8 + (index / span) * 2.4;
     return atContrastOverOwnWash(base.h + spread, sat, target, washAlpha);
   });
@@ -168,7 +175,10 @@ function atContrastOverOwnWash(hue, sat, target, alpha) {
 export function onDarkFor(primary) {
   const base = hexToHsl(primary);
   const sat = Math.min(0.92, base.s + 0.1);
-  const altHue = base.h + 24;
+  // +14 rather than +24, for the same reason the arc narrowed: the
+  // second accent should read as a lighter cut of the first, not as a
+  // second colour.
+  const altHue = base.h + 14;
 
   return {
     accent: atContrast(base.h, sat, 7, DARK_SURFACE, { lighter: true }),

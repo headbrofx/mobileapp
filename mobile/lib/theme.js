@@ -57,18 +57,24 @@ const PALETTES = {
   },
   orange: {
     label: 'Chungwa',
-    swatch: '#C44200',
-    bg: '#F7F5F3',
+    // Terracotta rather than the fire orange this started as. The
+    // owner asked for the harshness taken out, and harshness here was
+    // saturation: #C44200 is fully saturated, which on a phone in
+    // daylight is a colour that shouts. This is the same hue at 62%,
+    // solved to 5.20:1 on white so nothing became harder to read —
+    // the rule above still holds.
+    swatch: '#AA5528',
+    bg: '#F8F6F5',
     surface: '#FFFFFF',
-    surfaceAlt: '#FDFBFA',
-    border: '#ECE6E1',
-    hairline: '#F5F0EC',
+    surfaceAlt: '#FCFBFA',
+    border: '#EEE8E5',
+    hairline: '#F5F2F0',
     text: '#1A120D',
     muted: '#76685F',
     subtle: '#A89B92',
-    primary: '#C44200',
-    primaryDark: '#933000',
-    primaryLight: '#FDEDE3',
+    primary: '#AA5528',
+    primaryDark: '#763C1C',
+    primaryLight: '#F7EFEB',
     onPrimary: '#FFFFFF',
     // Darker than the other two on purpose — see rule 2 above.
     danger: '#8A1008',
