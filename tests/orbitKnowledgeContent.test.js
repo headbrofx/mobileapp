@@ -1,6 +1,16 @@
 'use strict';
 
-const seeder = require('../src/seeders/20260921000002-orbit-knowledge-expanded');
+// Every clinical seeder, not one of them.
+//
+// The rules below are about what this app is allowed to say to a woman
+// about her body. They do not become optional because the sentence
+// lives in a different file, so the test loads all of them and a new
+// seeder added here inherits the whole checklist.
+const SEEDERS = [
+  require('../src/seeders/20260921000001-orbit-knowledge'),
+  require('../src/seeders/20260921000002-orbit-knowledge-expanded'),
+  require('../src/seeders/20260923000001-orbit-knowledge-more'),
+];
 
 // The house rules from the owner's clinical brief, enforced against the
 // text itself.
@@ -38,7 +48,8 @@ let rows = [];
 let clinical = [];
 
 beforeAll(async () => {
-  rows = await rowsOf(seeder);
+  rows = [];
+  for (const seeder of SEEDERS) rows.push(...(await rowsOf(seeder)));
   clinical = rows.filter((r) => r.category === 'HEALTH_EDUCATION');
 });
 const sectionsOf = (row) => JSON.parse(row.sections);
@@ -131,6 +142,25 @@ describe('What the brief forbids', () => {
       expect(text).not.toContain('siku salama');
       expect(text).not.toContain('safe days');
     }
+  });
+
+  it('never chooses a contraceptive method for the reader', () => {
+    // The brief is explicit: the right method depends on health,
+    // medications, breastfeeding and plans, none of which a screen
+    // knows. An entry may explain the options and must not pick one.
+    for (const row of clinical) {
+      const text = allText(row).toLowerCase();
+      expect(text).not.toContain('tumia vidonge');
+      expect(text).not.toContain('njia bora ni');
+      expect(text).not.toContain('nakushauri utumie');
+    }
+  });
+
+  it('never dismisses bleeding after menopause', () => {
+    const row = clinical.find((r) => r.title.toLowerCase().includes('kukoma hedhi'));
+    if (!row) return;
+    // The one thing about menopause that must never be softened.
+    expect(allText(row)).toContain('Kutokwa damu baada ya hedhi kukoma');
   });
 
   it('does not guarantee or cure anything', () => {

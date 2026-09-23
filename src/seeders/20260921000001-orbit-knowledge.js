@@ -61,7 +61,7 @@ const ITEMS = [
       whenToSeekAdvice:
         'Zungumza na mtaalamu wa afya ikiwa maumivu yanakuzuia kwenda kazini au shuleni, yamezidi kuliko ilivyokuwa kawaida yako, au hayapungui na dawa za kawaida.',
       whenUrgent:
-        'Tafuta huduma haraka ikiwa una maumivu makali ya ghafla, homa kali, kutokwa damu nyingi isiyo ya kawaida, au unazimia.',
+        'Nenda kituo cha afya kilicho karibu ikiwa una maumivu makali ya ghafla, homa kali, kutokwa damu nyingi isiyo ya kawaida, au unazimia. Hii ni dharura — usisubiri hedhi iishe.',
     },
     source: 'NHS — Period pain; WHO — Sexual and reproductive health',
     sourceUrl: 'https://www.nhs.uk/conditions/period-pain/',
@@ -81,7 +81,7 @@ const ITEMS = [
       whenToSeekAdvice:
         'Ona mtaalamu ikiwa hedhi imechelewa zaidi ya wiki sita, imekosekana mizunguko mitatu mfululizo, au mzunguko wako umebadilika sana bila sababu unayoijua.',
       whenUrgent:
-        'Tafuta huduma haraka ikiwa una maumivu makali ya tumbo la chini, kizunguzungu kikali, au kutokwa damu nyingi — hasa ikiwa kipimo cha ujauzito kilikuwa chanya.',
+        'Nenda hospitali sasa hivi ikiwa una maumivu makali ya tumbo la chini, kizunguzungu kikali, au kutokwa damu nyingi — hasa ikiwa kipimo cha ujauzito kilikuwa chanya. Hizo zinaweza kuwa dalili za dharura.',
     },
     source: 'NHS — Stopped or missed periods; ACOG — Abnormal uterine bleeding',
     sourceUrl: 'https://www.nhs.uk/conditions/stopped-or-missed-periods/',
@@ -101,7 +101,7 @@ const ITEMS = [
       whenToSeekAdvice:
         'Zungumza na mtaalamu ikiwa hisia zako zinaathiri kazi, masomo au mahusiano yako, au zinaendelea baada ya hedhi kuanza.',
       whenUrgent:
-        'Tafuta msaada mara moja ikiwa una mawazo ya kujidhuru au kujiua. Hiyo si kitu cha kusubiri hedhi ijayo.',
+        'Ikiwa una mawazo ya kujidhuru au kujiua, mwambie mtu unayemwamini sasa hivi, au nenda kituo cha afya kilicho karibu. Hiyo ni dharura na si kitu cha kusubiri hedhi ijayo.',
     },
     source: 'NHS — PMS; ACOG — Premenstrual syndrome',
     sourceUrl: 'https://www.nhs.uk/conditions/pre-menstrual-syndrome/',
@@ -121,7 +121,7 @@ const ITEMS = [
       whenToSeekAdvice:
         'Ona mtaalamu ikiwa unahisi uchovu mkubwa usio wa kawaida, unaona rangi ya ngozi imebadilika, au unapata kizunguzungu mara kwa mara — vinaweza kuwa vinahitaji kipimo cha damu.',
       whenUrgent:
-        'Tafuta huduma haraka ikiwa unazimia, unashindwa kupumua vizuri, au moyo unapiga kwa kasi isiyo ya kawaida.',
+        'Nenda kituo cha afya kilicho karibu ikiwa unazimia, unashindwa kupumua vizuri, au moyo unapiga kwa kasi isiyo ya kawaida. Hiyo ni dharura.',
     },
     source: 'WHO — Anaemia; NHS — Iron in your diet',
     sourceUrl: 'https://www.who.int/health-topics/anaemia',
