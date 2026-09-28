@@ -30,9 +30,17 @@ export function setSessionLostHandler(handler) {
 // phone is actually asking for. Ticking it is the default, and the
 // refresh token is what lets the app reopen without a login.
 export async function saveTokens({ accessToken, refreshToken }, { remember = true } = {}) {
+  // The access token stays with the tab whatever happens. It lasts
+  // fifteen minutes, so persisting it buys nothing and costs a
+  // credential sitting on disk.
   await setItem(ACCESS_KEY, accessToken);
+
   if (remember && refreshToken) {
-    await setItem(REFRESH_KEY, refreshToken);
+    // This is the one that outlives the tab, and the only reason the
+    // app can reopen without a login. It is also the one that can be
+    // revoked from the server, which is what makes it the right thing
+    // to persist rather than the access token.
+    await setItem(REFRESH_KEY, refreshToken, { persist: true });
   } else {
     await deleteItem(REFRESH_KEY);
   }
@@ -81,7 +89,40 @@ async function parse(response) {
   return body?.data ?? null;
 }
 
-async function refreshSession() {
+// Exported because the session provider needs it at launch, not only
+// when a request comes back 401. On web the access token dies with the
+// tab while the refresh token may not, and without this the app would
+// find no access token, stop, and show a login screen to somebody who
+// had asked to be remembered.
+//
+// One refresh at a time, shared by everybody who asks.
+//
+// Refresh tokens are single-use: the server rotates them, so the first
+// request with a given token gets a new pair and the second gets a
+// 401. That turns any two refreshes in flight together into a race
+// with a guaranteed loser — and this app starts them together all the
+// time. The Orbit dashboard fires four requests in one Promise.all;
+// when the access token expires all four come back 401 at once, all
+// four refresh with the same token, three of them lose, and each loser
+// used to call clearTokens() and sign her out. React also mounts the
+// session provider twice in development, which races the same way at
+// launch.
+//
+// So the first caller starts the refresh and everyone else who arrives
+// before it finishes is handed the same promise. One request, one
+// rotation, nobody loses.
+let refreshInFlight = null;
+
+export function refreshSession() {
+  if (!refreshInFlight) {
+    refreshInFlight = refreshOnce().finally(() => {
+      refreshInFlight = null;
+    });
+  }
+  return refreshInFlight;
+}
+
+async function refreshOnce() {
   const refreshToken = await getItem(REFRESH_KEY);
   if (!refreshToken) return false;
 
@@ -91,7 +132,17 @@ async function refreshSession() {
     body: JSON.stringify({ refreshToken }),
   });
 
-  if (!response.ok) return false;
+  if (!response.ok) {
+    // The server has refused this token — expired, or revoked from
+    // another device. Keeping it would mean every launch tries it
+    // again and fails again, for as long as the browser keeps the
+    // disk. Only an explicit refusal clears it; a 5xx is the server
+    // having a bad moment, not a verdict on the token.
+    if (response.status === 401 || response.status === 403) {
+      await deleteItem(REFRESH_KEY);
+    }
+    return false;
+  }
 
   const body = await response.json();
   const tokens = body?.data?.tokens;

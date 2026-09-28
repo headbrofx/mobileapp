@@ -178,6 +178,16 @@ export default function Login() {
             </Pressable>
           </View>
 
+          {/* Said because it is true and because phones get shared.
+              Somebody signing in on a friend's handset should be able
+              to see, before they tick it, what ticking it leaves
+              behind. */}
+          <Text style={styles.rememberHint}>
+            {remember
+              ? tx('Utabaki umeingia kwenye kifaa hiki hadi utoke.')
+              : tx('Utatoka mara tu utakapofunga app. Ni salama zaidi kwenye simu ya mtu mwingine.')}
+          </Text>
+
           <GradientButton
             title={tx('Ingia')}
             onPress={submit}
@@ -276,9 +286,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: spacing.lg,
+    marginBottom: 6,
   },
   rememberText: { ...type.small, color: colors.muted },
+  rememberHint: { ...type.tiny, color: colors.subtle, marginBottom: spacing.lg },
   link: { ...type.label, color: colors.primary },
   linkRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
 

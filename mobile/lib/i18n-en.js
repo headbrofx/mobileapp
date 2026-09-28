@@ -223,6 +223,9 @@ export const EN_BY_SW = {
   Muda: 'Duration',
   Kuanzia: 'From',
   Bure: 'Free',
+  'Utabaki umeingia kwenye kifaa hiki hadi utoke.': 'You will stay signed in on this device until you sign out.',
+  'Utatoka mara tu utakapofunga app. Ni salama zaidi kwenye simu ya mtu mwingine.':
+    "You will be signed out as soon as you close the app. Safer on someone else's phone.",
   Jinsia: 'Gender',
   'Huamua kama Orbit inaonekana': 'Decides whether Orbit is shown',
   'Kabla hujaanza': 'Before you begin',

@@ -1,5 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { auth, clearTokens, getAccessToken, saveTokens, setSessionLostHandler } from './api';
+import {
+  auth,
+  clearTokens,
+  getAccessToken,
+  refreshSession,
+  saveTokens,
+  setSessionLostHandler,
+} from './api';
 
 // Who is signed in, for the whole app.
 //
@@ -53,15 +60,42 @@ export function SessionProvider({ children }) {
 
     (async () => {
       try {
-        const token = await getAccessToken();
-        if (!token) return;
+        let token = await getAccessToken();
+
+        // No access token is not the same as no session.
+        //
+        // On web the access token lives in the tab and is gone when the
+        // tab closes, while the refresh token — if she ticked
+        // "Nikumbuke" — is on disk and still good. Stopping here was
+        // what made that tick do nothing: the app would find no access
+        // token, give up, and show a login screen to somebody who had
+        // asked not to be asked.
+        if (!token) {
+          const restored = await refreshSession();
+          if (!restored) return;
+          token = await getAccessToken();
+          if (!token) return;
+        }
+
         const data = await auth.me();
         if (!cancelled) {
           setUser(data?.user ?? null);
           setSelf(data?.self ?? null);
         }
-      } catch {
-        await clearTokens();
+      } catch (err) {
+        // Forget her only when the server said no.
+        //
+        // This used to clear tokens on any failure at all, which was
+        // harmless while every token died with the tab anyway. Now the
+        // refresh token is kept on purpose, and clearing it on any
+        // failure would mean "Nikumbuke" forgets somebody every time
+        // she opens the app offline — or every time the free-tier
+        // server is still waking up, which answers 520 for the first
+        // few seconds more often than not. A timeout is not a verdict
+        // on who she is. A 401 or 403 is.
+        if (err?.status === 401 || err?.status === 403) {
+          await clearTokens();
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }

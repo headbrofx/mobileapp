@@ -22,9 +22,21 @@ import * as SecureStore from 'expo-secure-store';
 
 const isWeb = Platform.OS === 'web';
 
-function webStore() {
-  // Private mode and blocked site data both make this throw or return
-  // null, so every caller has to survive an empty answer.
+// Two web stores, and which one is used is the point.
+//
+// sessionStorage is gone when the tab closes; localStorage is not.
+// Everything defaulted to sessionStorage, which made the web build the
+// safer of the two — and quietly made "Nikumbuke" on the login screen
+// a lie. The box was ticked by default, it passed `remember` all the
+// way down to saveTokens, saveTokens stored the refresh token, and
+// then the tab closed and took it with it. Nothing remembered anybody.
+//
+// So `persist` is now a choice a caller makes, once, for the one value
+// that has any business outliving a tab.
+//
+// Private mode and blocked site data make either of these throw or
+// return null, so every caller still has to survive an empty answer.
+function sessionStore() {
   try {
     return globalThis.sessionStorage ?? null;
   } catch {
@@ -32,22 +44,40 @@ function webStore() {
   }
 }
 
-export async function setItem(key, value) {
+function persistentStore() {
+  try {
+    return globalThis.localStorage ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function setItem(key, value, { persist = false } = {}) {
   if (isWeb) {
     try {
-      webStore()?.setItem(key, value);
+      // Written to one store and removed from the other, so the same
+      // key can never sit in both holding different values — which is
+      // how somebody ends up signed in as who they were last week.
+      const chosen = persist ? persistentStore() : sessionStore();
+      const other = persist ? sessionStore() : persistentStore();
+      chosen?.setItem(key, value);
+      other?.removeItem(key);
     } catch {
       // Nothing to store into. The session lasts as long as the page.
     }
     return;
   }
+  // On a phone SecureStore is already persistent and already the
+  // keychain, so `persist` has nothing to decide.
   await SecureStore.setItemAsync(key, value);
 }
 
 export async function getItem(key) {
   if (isWeb) {
     try {
-      return webStore()?.getItem(key) ?? null;
+      // The tab's own store first: if both somehow hold this key, the
+      // newer session wins over whatever was left on disk.
+      return sessionStore()?.getItem(key) ?? persistentStore()?.getItem(key) ?? null;
     } catch {
       return null;
     }
@@ -58,7 +88,11 @@ export async function getItem(key) {
 export async function deleteItem(key) {
   if (isWeb) {
     try {
-      webStore()?.removeItem(key);
+      // Both, always. Signing out has to mean signing out, and leaving
+      // a copy on disk because it was written by a different code path
+      // is exactly the bug somebody discovers on a shared laptop.
+      sessionStore()?.removeItem(key);
+      persistentStore()?.removeItem(key);
     } catch {
       // Already gone, or never storable.
     }
