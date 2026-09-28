@@ -106,7 +106,7 @@ export default function OrbitPrivacy() {
       <ErrorBox error={error} />
 
       <OrbitCard>
-        <SectionTitle title={tx('Orbit inakumbuka nini')} />
+        <SectionTitle>{tx('Orbit inakumbuka nini')}</SectionTitle>
         {privacy ? (
           <View style={styles.rows}>
             <Held
@@ -127,7 +127,7 @@ export default function OrbitPrivacy() {
 
       {privacy?.notKept?.length ? (
         <OrbitCard>
-          <SectionTitle title={tx('Hatuhifadhi')} />
+          <SectionTitle>{tx('Hatuhifadhi')}</SectionTitle>
           {privacy.notKept.map((line) => (
             <View key={line} style={styles.notKeptRow}>
               <Ionicons name="close-circle" size={15} color={orbit.inkFaint} />
@@ -138,7 +138,7 @@ export default function OrbitPrivacy() {
       ) : null}
 
       <OrbitCard>
-        <SectionTitle title={tx('Chukua nakala yako')} />
+        <SectionTitle>{tx('Chukua nakala yako')}</SectionTitle>
         <Text style={styles.body}>
           {tx('Utapata safu zako zilivyo, si muhtasari wake — kila ulichoandika mwenyewe.')}
         </Text>
@@ -159,7 +159,7 @@ export default function OrbitPrivacy() {
       </OrbitCard>
 
       <OrbitCard>
-        <SectionTitle title={tx('Futa ulichoandika')} />
+        <SectionTitle>{tx('Futa ulichoandika')}</SectionTitle>
         <Text style={styles.body}>
           {tx('Hiki ni chako — uliandika mwenyewe, na unaweza kukiondoa. Hakuna kurudisha baadaye.')}
         </Text>
