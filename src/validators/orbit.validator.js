@@ -45,4 +45,20 @@ const checkinSchema = z.object({
   notes: z.string().max(2000).nullable().optional(),
 });
 
-module.exports = { createCycleSchema, updateCycleSchema, checkinSchema };
+// Deleting is an explicit choice of what to delete, never a default.
+//
+// There is no scope meaning "everything", because everything is not the
+// client's to remove — bookings, visits and invoices are records of a
+// service the business delivered and the privacy policy says they are
+// kept. A schema that quietly accepted "ALL" and then silently spared
+// half of it would be a worse promise than none.
+const forgetOrbitDataSchema = z.object({
+  scope: z.enum(['CHECKINS', 'CYCLES', 'ORBIT']),
+});
+
+module.exports = {
+  createCycleSchema,
+  updateCycleSchema,
+  checkinSchema,
+  forgetOrbitDataSchema,
+};

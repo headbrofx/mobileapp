@@ -3,6 +3,7 @@
 const service = require('../services/orbit.service');
 const checkins = require('../services/orbitCheckin.service');
 const patternsService = require('../services/orbitPatterns.service');
+const privacyService = require('../services/orbitPrivacy.service');
 const { success } = require('../utils/apiResponse');
 
 async function create(req, res, next) {
@@ -125,7 +126,51 @@ async function report(req, res, next) {
   }
 }
 
+// --- Privacy Centre ----------------------------------------------------
+//
+// Three answers to three questions a woman is entitled to ask about a
+// module that knows when she bleeds: what do you have, give me a copy,
+// and forget it.
+
+async function privacySummary(req, res, next) {
+  try {
+    const data = await privacyService.summary(req.familyMember.id);
+    return success(res, { message: 'Orbit privacy summary', data: { privacy: data } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function privacyExport(req, res, next) {
+  try {
+    const data = await privacyService.exportData(req.familyMember.id);
+    // Sent as a download rather than a page. A copy of somebody's
+    // periods is a file they keep, not something to leave open in a
+    // browser tab on a shared phone.
+    const stamp = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Disposition', `attachment; filename="orbit-${stamp}.json"`);
+    return res.type('application/json').send(JSON.stringify(data, null, 2));
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function privacyForget(req, res, next) {
+  try {
+    const removed = await privacyService.forget(req.familyMember.id, req.body.scope, {
+      userId: req.user.id,
+      req,
+    });
+    return success(res, { message: 'Orbit data deleted', data: { removed } });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
+  privacySummary,
+  privacyExport,
+  privacyForget,
   saveCheckin,
   listCheckins,
   todayCheckin,

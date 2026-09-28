@@ -210,6 +210,29 @@ export const orbit = {
       `/api/family-members/${memberId}/orbit/report` +
         (params?.year ? `?year=${params.year}&month=${params.month}` : '')
     ),
+
+  // Privacy Centre.
+  privacy: (memberId) => api.get(`/api/family-members/${memberId}/orbit/privacy`),
+  forget: (memberId, scope) =>
+    api.post(`/api/family-members/${memberId}/orbit/privacy/forget`, { scope }),
+  // The export answers with the rows themselves rather than this API's
+  // usual envelope, and as an attachment. So it cannot go through
+  // send() — that would unwrap a `data` key which is not there — and it
+  // cannot be a plain link either, because a link carries no
+  // Authorization header and the server would refuse it.
+  //
+  // Fetched with the token and handed back as text. What happens to it
+  // next is the screen's business: a file on web, a share sheet on a
+  // phone.
+  async exportRaw(memberId) {
+    const token = await getItem(ACCESS_KEY);
+    const res = await fetch(
+      `${BASE_URL}/api/family-members/${memberId}/orbit/privacy/export`,
+      { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+    );
+    if (!res.ok) throw new Error('Imeshindwa kuchukua nakala');
+    return res.text();
+  },
 };
 
 export const cycles = {

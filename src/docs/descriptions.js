@@ -95,6 +95,19 @@ module.exports = {
     tag: 'Orbit',
     summary: 'Monthly summary for a calendar month',
   },
+  'GET /api/family-members/:familyMemberId/orbit/privacy': {
+    tag: 'Orbit',
+    summary: 'What Orbit holds: counts, date ranges, the fields kept and the ones that are not',
+  },
+  'GET /api/family-members/:familyMemberId/orbit/privacy/export': {
+    tag: 'Orbit',
+    summary: 'A copy of the rows themselves, as a JSON download',
+  },
+  'POST /api/family-members/:familyMemberId/orbit/privacy/forget': {
+    tag: 'Orbit',
+    summary:
+      'Delete self-tracked Orbit data. scope: CHECKINS | CYCLES | ORBIT. Hard delete, in a transaction. Bookings, visits and invoices are never included — they are the business’s records and the privacy policy says they are kept.',
+  },
   'GET /api/family-members/:familyMemberId/health-profile': { tag: 'Health', summary: 'Health profile' },
   'PATCH /api/family-members/:familyMemberId/health-profile': {
     tag: 'Health',

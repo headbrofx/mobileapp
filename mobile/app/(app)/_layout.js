@@ -56,6 +56,7 @@ export default function AppLayout() {
         <Stack.Screen name="orbit-checkin" options={{ title: tx('Uchunguzi wa leo') }} />
         <Stack.Screen name="orbit-patterns" options={{ title: tx('Mwenendo wa mwili wangu') }} />
         <Stack.Screen name="orbit-report" options={{ title: tx('Ripoti ya mwezi') }} />
+        <Stack.Screen name="orbit-privacy" options={{ title: tx('Faragha yangu') }} />
       </Stack>
     </SidebarProvider>
   );

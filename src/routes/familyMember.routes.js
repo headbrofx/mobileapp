@@ -13,6 +13,7 @@ const {
   createCycleSchema,
   updateCycleSchema,
   checkinSchema,
+  forgetOrbitDataSchema,
 } = require('../validators/orbit.validator');
 const {
   updateNutritionProfileSchema,
@@ -195,6 +196,30 @@ router.get(
   authenticate,
   loadOwnedFamilyMember,
   orbitController.report
+);
+
+// Privacy Centre. Every one of these goes through loadOwnedFamilyMember
+// like the rest of Orbit, so a woman can only see, copy or delete her
+// own record — the deletion route especially, where getting ownership
+// wrong would mean erasing somebody else's history.
+router.get(
+  '/:familyMemberId/orbit/privacy',
+  authenticate,
+  loadOwnedFamilyMember,
+  orbitController.privacySummary
+);
+router.get(
+  '/:familyMemberId/orbit/privacy/export',
+  authenticate,
+  loadOwnedFamilyMember,
+  orbitController.privacyExport
+);
+router.post(
+  '/:familyMemberId/orbit/privacy/forget',
+  authenticate,
+  loadOwnedFamilyMember,
+  validate(forgetOrbitDataSchema),
+  orbitController.privacyForget
 );
 
 // --- Nutrition (Phase 10) ---

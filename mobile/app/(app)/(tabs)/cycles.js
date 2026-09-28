@@ -253,11 +253,21 @@ export default function OrbitHome() {
             </Text>
           </View>
           {/* Said on the screen, not buried in a policy page. This is
-              the part of the app somebody may open in public. */}
-          <View style={styles.privacy}>
+              the part of the app somebody may open in public.
+              
+              It opens the Privacy Centre now rather than only
+              reassuring. A padlock that cannot be pressed is a claim;
+              one that leads to the counts, the copy and the delete
+              buttons is the claim with something behind it. */}
+          <Pressable
+            onPress={() => router.push('/orbit-privacy')}
+            accessibilityRole="button"
+            accessibilityLabel={tx('Faragha yangu')}
+            style={({ pressed }) => [styles.privacy, pressed && styles.pressed]}
+          >
             <Ionicons name="lock-closed" size={11} color={orbit.plum} />
             <Text style={styles.privacyText}>{tx('Faragha')}</Text>
-          </View>
+          </Pressable>
         </View>
 
         <ErrorBox error={error} />
