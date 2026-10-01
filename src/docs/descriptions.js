@@ -389,6 +389,110 @@ module.exports = {
   'GET /api/admin/staff': { tag: 'Admin', summary: 'Staff roster with approval state', roles: ['ADMIN'] },
   'GET /api/admin/bookings': { tag: 'Admin', summary: 'All bookings, filterable', roles: ['ADMIN'] },
 
+  // --- Care Mobility ---
+  'PATCH /api/bookings/:bookingId/review': {
+    tag: 'Dispatch',
+    summary: 'Mark a booking as under review',
+    description: 'Tells the client a person has picked it up.',
+    roles: ['ADMIN'],
+  },
+  'PATCH /api/bookings/:bookingId/fail': {
+    tag: 'Dispatch',
+    summary: 'Record that a dispatched visit did not happen',
+    description: 'Distinct from a cancellation, which somebody chose. Reason required.',
+    roles: ['ADMIN'],
+  },
+  'GET /api/care/discover': {
+    tag: 'Care',
+    summary: 'Find care near you',
+    description:
+      'Coverage, services and on-duty counts for an optional ?lat&lng. Coordinates are rounded to about a kilometre and not stored. Never locates an individual nurse.',
+  },
+  'GET /api/care/requests': {
+    tag: 'Care',
+    summary: 'My Care Requests',
+    description: 'Visits and trips for every family member, by ?tab=upcoming|active|completed|cancelled.',
+    roles: ['CLIENT'],
+  },
+  'GET /api/care/requests/:kind/:id': {
+    tag: 'Care',
+    summary: 'Track one visit or trip',
+    description: 'kind is home-visit or transport. Timeline from status history; live position only while on the way; no ETA without a routing provider.',
+  },
+  'GET /api/care/locations': { tag: 'Care', summary: 'Saved places', roles: ['CLIENT'] },
+  'POST /api/care/locations': { tag: 'Care', summary: 'Save a place', roles: ['CLIENT'] },
+  'PATCH /api/care/locations/:id': { tag: 'Care', summary: 'Edit a saved place', roles: ['CLIENT'] },
+  'DELETE /api/care/locations/:id': { tag: 'Care', summary: 'Remove a saved place', roles: ['CLIENT'] },
+  'PATCH /api/care/staff/availability': {
+    tag: 'Care',
+    summary: 'Set my availability',
+    description: 'Status, working hours (East Africa time), away-until, service areas and base location.',
+    roles: ['STAFF'],
+  },
+
+  'POST /api/transport/': {
+    tag: 'Transport',
+    summary: 'Request transport to care',
+    description:
+      'Idempotent with an Idempotency-Key header. Refused with EMERGENCY_DETECTED when the notes read like an emergency: scheduled transport is not an ambulance.',
+    roles: ['CLIENT'],
+  },
+  'GET /api/transport/': { tag: 'Transport', summary: 'Transport requests, scoped to the caller' },
+  'GET /api/transport/:id': { tag: 'Transport', summary: 'One transport request', description: 'Owner, assigned driver or admin. The driver phone is never sent to a client.' },
+  'PATCH /api/transport/:id/accept-quote': { tag: 'Transport', summary: 'Accept the quoted fare', roles: ['CLIENT', 'ADMIN'] },
+  'PATCH /api/transport/:id/decline-quote': { tag: 'Transport', summary: 'Decline the quoted fare', roles: ['CLIENT', 'ADMIN'] },
+  'PATCH /api/transport/:id/cancel': { tag: 'Transport', summary: 'Cancel a trip', roles: ['CLIENT', 'ADMIN'] },
+  'PATCH /api/transport/:id/progress': {
+    tag: 'Transport',
+    summary: 'Move a trip along',
+    description: 'en route, arrived at pickup, in trip, arrived, complete. The assigned staff driver or a dispatcher.',
+    roles: ['STAFF', 'ADMIN'],
+  },
+
+  'GET /api/dispatch/queue': {
+    tag: 'Dispatch',
+    summary: 'Everything waiting on a person',
+    description: '?view=needs_action|in_flight&kind=HOME_VISIT|TRANSPORT. Expires overdue requests first.',
+    roles: ['ADMIN'],
+  },
+  'GET /api/dispatch/integrations': { tag: 'Dispatch', summary: 'Which integrations are connected', roles: ['ADMIN'] },
+  'GET /api/dispatch/analytics': { tag: 'Dispatch', summary: 'Dispatch figures from real rows', roles: ['ADMIN'] },
+  'GET /api/dispatch/bookings/:id': {
+    tag: 'Dispatch',
+    summary: 'A booking with ranked recommendations and their reasons',
+    roles: ['ADMIN'],
+  },
+  'POST /api/dispatch/bookings/:id/assign': {
+    tag: 'Dispatch',
+    summary: 'Confirm an assignment',
+    description: 'Server refuses schedule conflicts and away staff. A reason is required when not choosing the top recommendation.',
+    roles: ['ADMIN'],
+  },
+  'GET /api/dispatch/transport/:id': { tag: 'Dispatch', summary: 'A trip with possible drivers', roles: ['ADMIN'] },
+  'PATCH /api/dispatch/transport/:id/review': { tag: 'Dispatch', summary: 'Mark a trip as under review', roles: ['ADMIN'] },
+  'PATCH /api/dispatch/transport/:id/quote': { tag: 'Dispatch', summary: 'Send the client a fare', roles: ['ADMIN'] },
+  'PATCH /api/dispatch/transport/:id/reject': { tag: 'Dispatch', summary: 'Decline a trip request', roles: ['ADMIN'] },
+  'PATCH /api/dispatch/transport/:id/assign': {
+    tag: 'Dispatch',
+    summary: 'Assign a staff driver or a transport partner',
+    description: 'With a partner adapter configured, can book through its API; otherwise the details are entered by hand.',
+    roles: ['ADMIN'],
+  },
+  'PATCH /api/dispatch/transport/:id/fail': { tag: 'Dispatch', summary: 'Record that a trip did not happen', roles: ['ADMIN'] },
+  'GET /api/dispatch/settings': { tag: 'Dispatch', summary: 'Operational settings', roles: ['ADMIN'] },
+  'PATCH /api/dispatch/settings': { tag: 'Dispatch', summary: 'Change operational settings', roles: ['ADMIN'] },
+  'GET /api/dispatch/zones': { tag: 'Dispatch', summary: 'Service zones', roles: ['ADMIN'] },
+  'POST /api/dispatch/zones': { tag: 'Dispatch', summary: 'Add a service zone', roles: ['ADMIN'] },
+  'PATCH /api/dispatch/zones/:id': { tag: 'Dispatch', summary: 'Edit a service zone', roles: ['ADMIN'] },
+
+  'POST /api/integrations/transport/webhook': {
+    tag: 'Integrations',
+    summary: 'Transport partner callback',
+    description:
+      'HMAC-SHA256 of the raw body under TRANSPORT_WEBHOOK_SECRET in X-Signature. 503 until a secret and a partner adapter are configured.',
+    auth: false,
+  },
+
   // --- Docs ---
   'GET /api/docs.json': { tag: 'Service', summary: 'This OpenAPI document', auth: false },
   'GET /api/docs': { tag: 'Service', summary: 'Browsable API reference', auth: false },

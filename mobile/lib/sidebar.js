@@ -44,7 +44,13 @@ const ITEMS = [
   // rather than delete it after one visit, and it was buried ninth.
   { icon: 'calendar-number', key: 'nav.orbit', href: '/cycles', badge: 'nav.new', tint: accentAt(2) },
   { icon: 'heart-circle', key: 'nav.services', href: '/services', tint: accentAt(1) },
+  { icon: 'search', key: 'nav.findCare', href: '/care', tint: accentAt(1) },
   { icon: 'calendar', key: 'nav.bookVisit', href: '/book', tint: accentAt(2) },
+  { icon: 'car', key: 'nav.transport', href: '/transport', tint: accentAt(3) },
+  // Role-gated: shown only to the role named, and refused by the server
+  // to everyone else whatever the menu shows.
+  { icon: 'briefcase', key: 'nav.staffJobs', href: '/staff-jobs', tint: accentAt(0), role: 'STAFF' },
+  { icon: 'git-network', key: 'nav.dispatch', href: '/dispatch', tint: accentAt(0), role: 'ADMIN' },
   { icon: 'list', key: 'nav.myVisits', href: '/appointments', tint: accentAt(0) },
   { icon: 'chatbubble-ellipses', key: 'nav.ai', href: '/ask', tint: accentAt(2) },
   { icon: 'notifications', key: 'nav.notifications', href: '/notifications', tint: accentAt(3) },
@@ -101,7 +107,9 @@ function Sidebar() {
   // The menu drops Orbit for the same reason the tab bar does. Leaving
   // it here would make hiding the tab pointless — the menu is one tap
   // from every screen in the app.
-  const items = ITEMS.filter((item) => item.key !== 'nav.orbit' || showsOrbit(self));
+  const items = ITEMS.filter(
+    (item) => (item.key !== 'nav.orbit' || showsOrbit(self)) && (!item.role || item.role === user?.role)
+  );
 
   function go(href) {
     closeSidebar();

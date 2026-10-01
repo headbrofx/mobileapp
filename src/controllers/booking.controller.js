@@ -5,8 +5,15 @@ const { success } = require('../utils/apiResponse');
 
 async function create(req, res, next) {
   try {
-    const booking = await service.create(req.user, req.body);
-    return success(res, { statusCode: 201, message: 'Booking requested', data: { booking } });
+    // The key may come as a header (the HTTP convention) or in the body
+    // (easier from some clients); the header wins.
+    const idempotencyKey = req.get('Idempotency-Key') || req.body.idempotencyKey || null;
+    const { booking, replayed } = await service.create(req.user, req.body, { idempotencyKey });
+    return success(res, {
+      statusCode: replayed ? 200 : 201,
+      message: replayed ? 'Booking already requested' : 'Booking requested',
+      data: { booking, replayed },
+    });
   } catch (err) {
     next(err);
   }
@@ -40,7 +47,9 @@ async function suggestedStaff(req, res, next) {
 
 async function assign(req, res, next) {
   try {
-    const booking = await service.assign(req.params.bookingId, req.body.staffId, req.user, req);
+    const booking = await service.assign(req.params.bookingId, req.body.staffId, req.user, req, {
+      overrideReason: req.body.overrideReason || null,
+    });
     return success(res, { message: 'Booking assigned', data: { booking } });
   } catch (err) {
     next(err);
@@ -110,6 +119,24 @@ async function cancel(req, res, next) {
   }
 }
 
+async function review(req, res, next) {
+  try {
+    const booking = await service.review(req.params.bookingId, req.user, req);
+    return success(res, { message: 'Booking under review', data: { booking } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function fail(req, res, next) {
+  try {
+    const booking = await service.fail(req.params.bookingId, req.body.reason, req.user, req);
+    return success(res, { message: 'Booking marked failed', data: { booking } });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function reschedule(req, res, next) {
   try {
     const booking = await service.reschedule(req.params.bookingId, req.body.scheduledAt, req.user, req);
@@ -133,4 +160,6 @@ module.exports = {
   complete,
   cancel,
   reschedule,
+  review,
+  fail,
 };

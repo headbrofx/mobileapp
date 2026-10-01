@@ -16,6 +16,8 @@ const notificationRoutes = require('./notification.routes');
 const contentRoutes = require('./content.routes');
 const billingRoutes = require('./billing.routes');
 const docsRoutes = require('./docs.routes');
+const careRoutes = require('./care.routes');
+const integrationRoutes = require('./integrations.routes');
 
 const router = Router();
 
@@ -34,6 +36,10 @@ router.use('/client-profile', clientProfileRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/content', contentRoutes);
 router.use('/invoices', billingRoutes);
+router.use('/care', careRoutes.care);
+router.use('/transport', careRoutes.transport);
+router.use('/dispatch', careRoutes.dispatch);
+router.use('/integrations', integrationRoutes);
 
 // Phase 6+ will mount: /visits, ...
 

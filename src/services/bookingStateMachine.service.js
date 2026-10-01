@@ -21,19 +21,35 @@ const AppError = require('../utils/appError');
 //                                                                   COMPLETED
 //
 // cancel is allowed from REQUESTED / ASSIGNED / ACCEPTED / ON_THE_WAY.
+//
+// Care Mobility adds three states around that spine:
+//
+//   UNDER_REVIEW  review: a dispatcher has picked up a REQUESTED one.
+//                 Behaves like REQUESTED for everything else.
+//   FAILED        fail: it was meant to happen and did not (no-show,
+//                 breakdown). Set by a dispatcher, with a reason.
+//   EXPIRED       expire: nobody was assigned before its time passed.
+//                 Set by the system sweep, never by hand.
 const ALLOWED_FROM = {
-  assign: ['REQUESTED', 'REJECTED', 'RESCHEDULED'],
+  review: ['REQUESTED'],
+  assign: ['REQUESTED', 'UNDER_REVIEW', 'REJECTED', 'RESCHEDULED'],
   accept: ['ASSIGNED'],
   reject: ['ASSIGNED'],
   onTheWay: ['ACCEPTED'],
   arrive: ['ON_THE_WAY'],
   start: ['ARRIVED'],
   complete: ['IN_PROGRESS'],
-  cancel: ['REQUESTED', 'ASSIGNED', 'ACCEPTED', 'ON_THE_WAY'],
-  reschedule: ['REQUESTED', 'ASSIGNED', 'ACCEPTED'],
+  cancel: ['REQUESTED', 'UNDER_REVIEW', 'RESCHEDULED', 'REJECTED', 'ASSIGNED', 'ACCEPTED', 'ON_THE_WAY'],
+  reschedule: ['REQUESTED', 'UNDER_REVIEW', 'RESCHEDULED', 'ASSIGNED', 'ACCEPTED'],
+  fail: ['ASSIGNED', 'ACCEPTED', 'ON_THE_WAY', 'ARRIVED'],
+  expire: ['REQUESTED', 'UNDER_REVIEW', 'RESCHEDULED', 'REJECTED'],
 };
 
+// Statuses nothing further happens to.
+const TERMINAL = ['COMPLETED', 'CANCELLED', 'FAILED', 'EXPIRED'];
+
 const TARGET_STATUS = {
+  review: 'UNDER_REVIEW',
   assign: 'ASSIGNED',
   accept: 'ACCEPTED',
   reject: 'REJECTED',
@@ -43,6 +59,8 @@ const TARGET_STATUS = {
   complete: 'COMPLETED',
   cancel: 'CANCELLED',
   reschedule: 'RESCHEDULED',
+  fail: 'FAILED',
+  expire: 'EXPIRED',
 };
 
 function assertTransition(booking, action) {
@@ -53,4 +71,4 @@ function assertTransition(booking, action) {
   return TARGET_STATUS[action];
 }
 
-module.exports = { ALLOWED_FROM, TARGET_STATUS, assertTransition };
+module.exports = { ALLOWED_FROM, TARGET_STATUS, TERMINAL, assertTransition };

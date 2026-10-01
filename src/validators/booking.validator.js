@@ -10,10 +10,28 @@ const createBookingSchema = z.object({
   locationLng: z.number().optional(),
   scheduledAt: z.string().datetime(),
   notes: z.string().max(2000).optional(),
+  // House, floor, landmark, how to get in.
+  locationDetails: z
+    .object({
+      house: z.string().max(120).optional(),
+      floor: z.string().max(60).optional(),
+      landmark: z.string().max(200).optional(),
+      contactInstructions: z.string().max(300).optional(),
+    })
+    .strict()
+    .optional(),
+  accessibilityNotes: z.string().max(500).optional(),
+  timeWindow: z.enum(['MORNING', 'AFTERNOON', 'EVENING', 'EXACT']).optional(),
+  idempotencyKey: z.string().min(8).max(80).optional(),
+});
+
+const failSchema = z.object({
+  reason: z.string().min(3).max(500),
 });
 
 const assignSchema = z.object({
   staffId: z.string().uuid(),
+  overrideReason: z.string().min(3).max(500).optional(),
 });
 
 const reasonSchema = z.object({
@@ -34,4 +52,5 @@ module.exports = {
   reasonSchema,
   cancelSchema,
   rescheduleSchema,
+  failSchema,
 };

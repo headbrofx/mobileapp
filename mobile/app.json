@@ -38,7 +38,13 @@
         }
       ],
       "expo-web-browser",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Afya Nyumbani inatumia mahali ulipo ukiomba tu, ili muuguzi au gari likufikie. / Afya Nyumbani uses your location only when you ask, so a nurse or vehicle can reach you."
+        }
+      ]
     ],
     "scheme": "afyanyumbani",
     "extra": {

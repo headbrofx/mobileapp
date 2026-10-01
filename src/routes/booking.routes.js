@@ -16,6 +16,7 @@ const {
   reasonSchema,
   cancelSchema,
   rescheduleSchema,
+  failSchema,
 } = require('../validators/booking.validator');
 const { updateVisitSchema, checkOutSchema } = require('../validators/visit.validator');
 const { createLocationPingSchema } = require('../validators/location.validator');
@@ -111,6 +112,10 @@ router.patch(
   validate(rescheduleSchema),
   controller.reschedule
 );
+
+// --- Dispatch (Care Mobility) ---
+router.patch('/:bookingId/review', authenticate, requireRole('ADMIN'), loadBooking, controller.review);
+router.patch('/:bookingId/fail', authenticate, requireRole('ADMIN'), loadBooking, validate(failSchema), controller.fail);
 
 // --- Clinical visit record (Phase 6) ---
 router.get('/:bookingId/visit', authenticate, loadBooking, requireBookingViewAccess, visitController.get);

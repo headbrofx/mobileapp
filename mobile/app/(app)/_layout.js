@@ -42,7 +42,14 @@ export default function AppLayout() {
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="services" options={{ title: tx('Chagua huduma') }} />
-        <Stack.Screen name="appointments" options={{ title: tx('Ziara zangu') }} />
+        <Stack.Screen name="appointments" options={{ title: tx('Huduma zangu') }} />
+        <Stack.Screen name="care" options={{ title: tx('Tafuta huduma karibu nawe') }} />
+        <Stack.Screen name="transport" options={{ title: tx('Nipeleke kwenye huduma') }} />
+        <Stack.Screen name="track" options={{ title: tx('Fuatilia ombi') }} />
+        <Stack.Screen name="staff-jobs" options={{ title: tx('Kazi zangu') }} />
+        <Stack.Screen name="staff-availability" options={{ title: tx('Upatikanaji wangu') }} />
+        <Stack.Screen name="dispatch" options={{ title: tx('Dispatch Center') }} />
+        <Stack.Screen name="dispatch-item" options={{ title: tx('Ombi') }} />
         <Stack.Screen name="notifications" options={{ title: tx('Taarifa') }} />
         <Stack.Screen name="symptoms" options={{ title: tx('Ripoti dalili') }} />
         <Stack.Screen name="family" options={{ title: tx('Familia yangu') }} />

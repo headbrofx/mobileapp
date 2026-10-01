@@ -47,6 +47,39 @@ async function updateMyProfile(userId, data, req) {
   return staff;
 }
 
+// Availability in full: the on/off switch, the hours they work, a
+// "away until", where they usually start from and the areas they
+// cover. The dispatcher's recommendations and the server's conflict
+// check both read these.
+async function updateMyAvailability(userId, data, req) {
+  const staff = await Staff.findOne({ where: { userId } });
+  if (!staff) throw AppError.notFound('Staff profile not found');
+
+  if ((data.baseLat == null) !== (data.baseLng == null) && (data.baseLat !== undefined || data.baseLng !== undefined)) {
+    throw AppError.badRequest('baseLat and baseLng go together');
+  }
+
+  ['availability', 'workingHours', 'serviceAreas', 'baseLat', 'baseLng'].forEach((field) => {
+    if (data[field] !== undefined) staff[field] = data[field];
+  });
+  if (data.unavailableUntil !== undefined) {
+    staff.unavailableUntil = data.unavailableUntil ? new Date(data.unavailableUntil) : null;
+  }
+  await staff.save();
+
+  await logAudit({
+    userId,
+    action: 'STAFF_AVAILABILITY_UPDATED',
+    req,
+    entityType: 'Staff',
+    entityId: staff.id,
+    // Which fields, not the coordinates themselves.
+    metadata: { fields: Object.keys(data) },
+  });
+
+  return staff;
+}
+
 async function approveStaff(staffId, req) {
   const staff = await Staff.findByPk(staffId);
   if (!staff) throw AppError.notFound('Staff record not found');
@@ -84,4 +117,4 @@ async function rejectStaff(staffId, reason, req) {
   return staff;
 }
 
-module.exports = { listStaff, getMyProfile, updateMyProfile, approveStaff, rejectStaff };
+module.exports = { listStaff, getMyProfile, updateMyProfile, updateMyAvailability, approveStaff, rejectStaff };

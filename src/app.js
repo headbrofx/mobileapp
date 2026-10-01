@@ -41,7 +41,17 @@ app.use(
 app.use(apiLimiter);
 
 // Parsing
-app.use(express.json({ limit: '1mb' }));
+app.use(
+  express.json({
+    limit: '1mb',
+    // Partner webhooks are signed over the exact bytes they sent, and a
+    // re-serialised object is not those bytes. Kept only for the routes
+    // that verify a signature.
+    verify: (req, res, buf) => {
+      if (req.originalUrl && req.originalUrl.startsWith('/api/integrations/')) req.rawBody = buf;
+    },
+  })
+);
 app.use(express.urlencoded({ extended: true }));
 
 // Logging

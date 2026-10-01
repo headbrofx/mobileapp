@@ -20,8 +20,12 @@ let staffId;
 let otherStaffId;
 let nursingServiceId;
 
+// Each call lands four hours after the last, because the same nurse is
+// assigned to several of these and the server refuses a double booking.
+let slot = 0;
 function future(hours = 48) {
-  return new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
+  slot += 1;
+  return new Date(Date.now() + (hours + slot * 4) * 60 * 60 * 1000).toISOString();
 }
 
 async function createAssignedAcceptedBooking() {

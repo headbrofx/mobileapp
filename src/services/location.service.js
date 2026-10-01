@@ -3,9 +3,10 @@
 const { Booking, BookingLocationPing } = require('../models');
 const AppError = require('../utils/appError');
 const { logAudit } = require('./audit.service');
-const { haversineKm, estimateEtaMinutes, proximityLabel, isStale } = require('../utils/geo');
+const { haversineKm, proximityLabel, isStale } = require('../utils/geo');
+const maps = require('../integrations/location');
 
-const DISCLAIMER = 'Estimated straight-line distance/ETA from the last known position — not real-time traffic-aware routing.';
+const DISCLAIMER = 'Straight-line distance from the last known position, not a road distance. No arrival time is given without a routing provider.';
 
 // Only recorded while the booking is actually on the way — once the
 // staff member has arrived there's nothing left to track towards, and
@@ -59,6 +60,7 @@ async function getCurrent(bookingId) {
       latestPing: null,
       distanceKm: null,
       etaMinutes: null,
+      etaSource: null,
       proximity: null,
       stale: null,
       disclaimer: DISCLAIMER,
@@ -71,16 +73,33 @@ async function getCurrent(bookingId) {
 
   if (booking.locationLat != null && booking.locationLng != null) {
     distanceKm = haversineKm(latestPing.lat, latestPing.lng, booking.locationLat, booking.locationLng);
-    etaMinutes = estimateEtaMinutes(distanceKm);
     proximity = proximityLabel(distanceKm);
     distanceKm = Math.round(distanceKm * 100) / 100;
+  }
+
+  // An arrival time only from a real routing answer. This used to be
+  // distance at an assumed 25 km/h, which is a guess dressed as a
+  // number; a client planning around "12 min" deserves better than
+  // that, so without a provider there is no number at all.
+  let etaSource = null;
+  if (distanceKm != null) {
+    const routed = await maps.route(
+      { lat: latestPing.lat, lng: latestPing.lng },
+      { lat: booking.locationLat, lng: booking.locationLng }
+    );
+    if (routed.status === 'OK' && Number.isFinite(routed.durationMinutes)) {
+      etaMinutes = Math.max(1, Math.round(routed.durationMinutes));
+      etaSource = 'ROUTING';
+    }
   }
 
   return {
     hasLocation: true,
     latestPing: { lat: latestPing.lat, lng: latestPing.lng, recordedAt: latestPing.recordedAt },
     distanceKm,
+    distanceKind: 'STRAIGHT_LINE',
     etaMinutes,
+    etaSource,
     proximity,
     stale: isStale(latestPing.recordedAt),
     disclaimer: DISCLAIMER,

@@ -26,8 +26,12 @@ const DEST_LNG = 39.2726;
 const FAR_LAT = -6.8000;
 const FAR_LNG = 39.29;
 
+// Each call lands four hours after the last, because the same nurse is
+// assigned to several of these and the server refuses a double booking.
+let slot = 0;
 function future(hours = 48) {
-  return new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
+  slot += 1;
+  return new Date(Date.now() + (hours + slot * 4) * 60 * 60 * 1000).toISOString();
 }
 
 async function createBookingOnTheWay({ withDestination = true } = {}) {
@@ -192,7 +196,10 @@ describe('Phase 7 — Current location, distance/ETA/proximity, and history', ()
     expect(farStatus.status).toBe(200);
     expect(farStatus.body.data.hasLocation).toBe(true);
     expect(farStatus.body.data.distanceKm).toBeGreaterThan(1);
-    expect(farStatus.body.data.etaMinutes).toBeGreaterThan(0);
+    // No routing provider is connected, so no arrival time: a straight
+    // line at an assumed speed is not one.
+    expect(farStatus.body.data.etaMinutes).toBeNull();
+    expect(farStatus.body.data.distanceKind).toBe('STRAIGHT_LINE');
     expect(farStatus.body.data.proximity).toBe('EN_ROUTE');
     expect(farStatus.body.data.stale).toBe(false);
 

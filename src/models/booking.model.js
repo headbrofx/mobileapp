@@ -1,6 +1,7 @@
 'use strict';
 
 const { Model } = require('sequelize');
+const { generateReference } = require('../utils/reference');
 
 // The home-care marketplace core (full state-machine logic built out in
 // Phase 5). Phase 1 defines the shape and the status enum.
@@ -13,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       Booking.belongsTo(models.Staff, { foreignKey: 'staffId', as: 'staff' });
       Booking.hasOne(models.Visit, { foreignKey: 'bookingId', as: 'visit' });
       Booking.hasMany(models.BookingLocationPing, { foreignKey: 'bookingId', as: 'locationPings' });
+      Booking.belongsTo(models.ServiceZone, { foreignKey: 'serviceZoneId', as: 'zone' });
     }
   }
 
@@ -26,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
       status: {
         type: DataTypes.ENUM(
           'REQUESTED',
+          'UNDER_REVIEW',
           'ASSIGNED',
           'ACCEPTED',
           'ON_THE_WAY',
@@ -34,7 +37,9 @@ module.exports = (sequelize, DataTypes) => {
           'COMPLETED',
           'CANCELLED',
           'REJECTED',
-          'RESCHEDULED'
+          'RESCHEDULED',
+          'FAILED',
+          'EXPIRED'
         ),
         allowNull: false,
         defaultValue: 'REQUESTED',
@@ -45,6 +50,18 @@ module.exports = (sequelize, DataTypes) => {
       scheduledAt: { type: DataTypes.DATE, allowNull: false, field: 'scheduled_at' },
       notes: { type: DataTypes.TEXT, allowNull: true }, // client's description of the need
       cancellationReason: { type: DataTypes.TEXT, allowNull: true, field: 'cancellation_reason' },
+
+      // Care Mobility (see the 20261001 migration for why these live on
+      // bookings rather than in a second table).
+      bookingReference: { type: DataTypes.STRING(16), allowNull: false, unique: true, field: 'booking_reference' },
+      idempotencyKey: { type: DataTypes.STRING(80), allowNull: true, field: 'idempotency_key' },
+      locationDetails: { type: DataTypes.JSONB, allowNull: true, field: 'location_details' },
+      accessibilityNotes: { type: DataTypes.TEXT, allowNull: true, field: 'accessibility_notes' },
+      timeWindow: { type: DataTypes.STRING(16), allowNull: true, field: 'time_window' },
+      createdByUserId: { type: DataTypes.UUID, allowNull: true, field: 'created_by_user_id' },
+      serviceZoneId: { type: DataTypes.UUID, allowNull: true, field: 'service_zone_id' },
+      quotedPriceTzs: { type: DataTypes.INTEGER, allowNull: true, field: 'quoted_price_tzs' },
+      confirmedPriceTzs: { type: DataTypes.INTEGER, allowNull: true, field: 'confirmed_price_tzs' },
     },
     {
       sequelize,
@@ -54,6 +71,12 @@ module.exports = (sequelize, DataTypes) => {
       timestamps: true,
     }
   );
+
+  // Every row gets a reference, including ones made outside the
+  // service (fixtures, scripts). The service retries on the rare clash.
+  Booking.beforeValidate((row) => {
+    if (!row.bookingReference) row.bookingReference = generateReference('BOOKING');
+  });
 
   return Booking;
 };

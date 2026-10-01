@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       Staff.hasMany(models.Booking, { foreignKey: 'staffId', as: 'bookings' });
       Staff.hasMany(models.Visit, { foreignKey: 'staffId', as: 'visits' });
       Staff.hasMany(models.BookingLocationPing, { foreignKey: 'staffId', as: 'locationPings' });
+      Staff.hasMany(models.TransportRequest, { foreignKey: 'assignedStaffId', as: 'transportTrips' });
     }
   }
 
@@ -37,6 +38,13 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 'PENDING',
         field: 'approval_status',
       },
+      // { mon: [{ from: '08:00', to: '17:00' }], tue: [...], ... } in
+      // East Africa time. Absent means "not stated", which the
+      // dispatcher sees as unknown rather than as always-on.
+      workingHours: { type: DataTypes.JSONB, allowNull: true, field: 'working_hours' },
+      unavailableUntil: { type: DataTypes.DATE, allowNull: true, field: 'unavailable_until' },
+      baseLat: { type: DataTypes.FLOAT, allowNull: true, field: 'base_lat' },
+      baseLng: { type: DataTypes.FLOAT, allowNull: true, field: 'base_lng' },
     },
     {
       sequelize,

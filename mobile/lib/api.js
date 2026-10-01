@@ -152,8 +152,8 @@ async function refreshOnce() {
   return true;
 }
 
-async function send(path, { method = 'GET', body, auth = true, retrying = false } = {}) {
-  const headers = { 'Content-Type': 'application/json' };
+async function send(path, { method = 'GET', body, auth = true, retrying = false, headers: extra } = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(extra || {}) };
 
   if (auth) {
     const token = await getItem(ACCESS_KEY);
@@ -171,7 +171,7 @@ async function send(path, { method = 'GET', body, auth = true, retrying = false 
   if (response.status === 401 && auth && !retrying) {
     const refreshed = await refreshSession();
     if (refreshed) {
-      return send(path, { method, body, auth, retrying: true });
+      return send(path, { method, body, auth, retrying: true, headers: extra });
     }
     await clearTokens();
     onSessionLost();
@@ -310,12 +310,80 @@ export const invoices = {
   list: () => api.get('/api/invoices'),
 };
 
+// A key that makes a create safe to send twice. Made once per form,
+// so a double tap or a retry after a timeout returns the request the
+// first attempt made instead of a second one.
+export function newIdempotencyKey() {
+  const rand = () => Math.random().toString(36).slice(2, 10);
+  return `app-${Date.now().toString(36)}-${rand()}${rand()}`;
+}
+
 export const bookings = {
   list: () => api.get('/api/bookings'),
-  create: (payload) => api.post('/api/bookings', payload),
+  create: (payload, idempotencyKey) =>
+    send('/api/bookings', {
+      method: 'POST',
+      body: payload,
+      headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined,
+    }),
   // The backend requires a reason and records who cancelled, so this is
   // never a silent disappearance.
   cancel: (id, reason) => api.patch(`/api/bookings/${id}/cancel`, { reason }),
+
+  // Staff side of a visit.
+  mySchedule: () => api.get('/api/staff/me/schedule'),
+  act: (id, action, body) => api.patch(`/api/bookings/${id}/${action}`, body ?? {}),
+  sharePosition: (id, lat, lng) => api.post(`/api/bookings/${id}/location`, { lat, lng }),
+};
+
+// Care Mobility: discovery, My Care Requests, tracking, saved places.
+export const care = {
+  discover: (coords) =>
+    api.get(`/api/care/discover${coords ? `?lat=${coords.lat}&lng=${coords.lng}` : ''}`),
+  requests: (tab) => api.get(`/api/care/requests?tab=${tab}`),
+  // kind: 'home-visit' | 'transport'
+  track: (kind, id) => api.get(`/api/care/requests/${kind}/${id}`),
+  locations: () => api.get('/api/care/locations'),
+  saveLocation: (payload) => api.post('/api/care/locations', payload),
+  deleteLocation: (id) => api.del(`/api/care/locations/${id}`),
+  setAvailability: (payload) => api.patch('/api/care/staff/availability', payload),
+  myStaffProfile: () => api.get('/api/staff/me'),
+};
+
+export const transport = {
+  create: (payload, idempotencyKey) =>
+    send('/api/transport', {
+      method: 'POST',
+      body: payload,
+      headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined,
+    }),
+  list: () => api.get('/api/transport'),
+  get: (id) => api.get(`/api/transport/${id}`),
+  acceptQuote: (id) => api.patch(`/api/transport/${id}/accept-quote`),
+  declineQuote: (id, reason) => api.patch(`/api/transport/${id}/decline-quote`, reason ? { reason } : {}),
+  cancel: (id, reason) => api.patch(`/api/transport/${id}/cancel`, { reason }),
+  progress: (id, action) => api.patch(`/api/transport/${id}/progress`, { action }),
+};
+
+// The Dispatch Center. Every one of these is ADMIN-only on the server;
+// the app hides the screens from everyone else, but the server is what
+// actually says no.
+export const dispatch = {
+  queue: (view, kind) => api.get(`/api/dispatch/queue?view=${view}${kind ? `&kind=${kind}` : ''}`),
+  booking: (id) => api.get(`/api/dispatch/bookings/${id}`),
+  assignBooking: (id, staffId, overrideReason) =>
+    api.post(`/api/dispatch/bookings/${id}/assign`, overrideReason ? { staffId, overrideReason } : { staffId }),
+  reviewBooking: (id) => api.patch(`/api/bookings/${id}/review`),
+  failBooking: (id, reason) => api.patch(`/api/bookings/${id}/fail`, { reason }),
+  cancelBooking: (id, reason) => api.patch(`/api/bookings/${id}/cancel`, { reason }),
+  trip: (id) => api.get(`/api/dispatch/transport/${id}`),
+  tripAction: (id, action, body) => api.patch(`/api/dispatch/transport/${id}/${action}`, body ?? {}),
+  integrations: () => api.get('/api/dispatch/integrations'),
+  analytics: () => api.get('/api/dispatch/analytics'),
+  settings: () => api.get('/api/dispatch/settings'),
+  saveSettings: (changes) => api.patch('/api/dispatch/settings', changes),
+  zones: () => api.get('/api/dispatch/zones'),
+  saveZone: (id, payload) => (id ? api.patch(`/api/dispatch/zones/${id}`, payload) : api.post('/api/dispatch/zones', payload)),
 };
 
 export const services = {
