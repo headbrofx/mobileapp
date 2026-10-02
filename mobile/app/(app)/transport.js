@@ -5,7 +5,8 @@ import { useRouter } from 'expo-router';
 import { care, familyMembers, newIdempotencyKey, transport } from '../../lib/api';
 import { Card, ErrorBox, Field } from '../../lib/ui';
 import { ActionButton, Chip, InfoLine, careStyles } from '../../lib/care-ui';
-import { DESTINATION_TYPES, atHour, currentPosition, dateTimeSw, nextDays } from '../../lib/care';
+import { DESTINATION_TYPES, atHour, currentPosition, dateTimeSw, nextDays, serviceZones, zoneCircles } from '../../lib/care';
+import MapView from '../../lib/MapView';
 import { useSession } from '../../lib/session';
 import { colors, font, fs, radius, spacing, type } from '../../lib/theme';
 import { tx, useI18n } from '../../lib/i18n';
@@ -33,6 +34,7 @@ export default function Transport() {
   const [members, setMembers] = useState([]);
   const [places, setPlaces] = useState([]);
   const [days] = useState(() => nextDays(7));
+  const [zones, setZones] = useState([]);
 
   const [memberId, setMemberId] = useState(null);
   const [dayIndex, setDayIndex] = useState(0);
@@ -43,6 +45,7 @@ export default function Transport() {
   const [destType, setDestType] = useState('HOSPITAL');
   const [destName, setDestName] = useState('');
   const [destAddress, setDestAddress] = useState('');
+  const [destPin, setDestPin] = useState(null);
   const [mobility, setMobility] = useState('');
   const [passengers, setPassengers] = useState(1);
   const [companion, setCompanion] = useState('');
@@ -55,6 +58,16 @@ export default function Transport() {
   const [error, setError] = useState(null);
   const [emergency, setEmergency] = useState(null);
   const [done, setDone] = useState(null);
+
+  useEffect(() => {
+    serviceZones().then(setZones);
+  }, []);
+
+  // The account's own number, as a starting point the client can
+  // change. The session may arrive after this screen first renders.
+  useEffect(() => {
+    if (user?.phone) setPhone((current) => current || user.phone);
+  }, [user?.phone]);
 
   useEffect(() => {
     (async () => {
@@ -108,6 +121,7 @@ export default function Transport() {
           destinationType: destType,
           destinationName: destName.trim(),
           ...(destAddress.trim() ? { destinationAddress: destAddress.trim() } : {}),
+          ...(destPin ? { destinationLat: destPin.lat, destinationLng: destPin.lng } : {}),
           passengerCount: passengers,
           scheduledAt: scheduledAt.toISOString(),
           ...(mobility.trim() ? { mobilityNeeds: mobility.trim() } : {}),
@@ -208,14 +222,14 @@ export default function Transport() {
             </View>
 
             <Text style={styles.title}>{tx('Siku gani')}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hscroll}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hscrollView} contentContainerStyle={styles.hscroll}>
               {days.map((d, i) => (
                 <Chip key={d.sub} label={`${d.label} · ${d.sub}`} selected={i === dayIndex} onPress={() => setDayIndex(i)} />
               ))}
             </ScrollView>
 
             <Text style={styles.title}>{tx('Saa ya kuchukuliwa')}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hscroll}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hscrollView} contentContainerStyle={styles.hscroll}>
               {HOURS.map((h) => (
                 <Chip key={h} label={`${String(h).padStart(2, '0')}:00`} selected={h === hour} onPress={() => setHour(h)} />
               ))}
@@ -236,7 +250,16 @@ export default function Transport() {
             ) : null}
             <Field label={tx('Mahali pa kuchukuliwa')} placeholder={tx('mfano: Sinza Mori, karibu na kituo cha mafuta')} value={pickup} onChangeText={setPickup} />
             <Field label={tx('Alama ya karibu (hiari)')} value={landmark} onChangeText={setLandmark} />
-            <View style={careStyles.row}>
+            <MapView
+              height={220}
+              markers={pin ? [{ ...pin, label: tx('Kuchukuliwa'), colour: colors.primary, pick: true }] : []}
+              circles={zoneCircles(zones.filter((z) => z.transport), colors.primary)}
+              zoom={pin ? 16 : 11}
+              onPick={setPin}
+              fallbackCentre={zones[0] ? { lat: zones[0].centerLat, lng: zones[0].centerLng } : null}
+            />
+            <View style={{ height: spacing.sm }} />
+            <View style={careStyles.actions}>
               <ActionButton
                 variant="ghost"
                 icon={pin ? 'location' : 'locate'}
@@ -259,6 +282,17 @@ export default function Transport() {
             </View>
             <Field label={tx('Jina la mahali')} placeholder={tx('mfano: Hospitali ya Taifa Muhimbili')} value={destName} onChangeText={setDestName} />
             <Field label={tx('Anwani (hiari)')} value={destAddress} onChangeText={setDestAddress} />
+            <Text style={styles.label}>{tx('Weka pini ya unakoenda (hiari)')}</Text>
+            <MapView
+              height={200}
+              markers={[
+                ...(pin ? [{ ...pin, label: tx('Kuchukuliwa'), colour: colors.muted }] : []),
+                ...(destPin ? [{ ...destPin, label: tx('Kwenda'), colour: colors.primary, pick: true }] : []),
+              ]}
+              zoom={13}
+              onPick={setDestPin}
+              fallbackCentre={zones[0] ? { lat: zones[0].centerLat, lng: zones[0].centerLng } : null}
+            />
           </>
         ) : null}
 
@@ -326,7 +360,10 @@ const styles = StyleSheet.create({
   title: { ...type.section, color: colors.text, marginBottom: spacing.sm, marginTop: spacing.xs },
   label: { ...type.label, color: colors.text, marginBottom: spacing.xs },
   textarea: { minHeight: 76, textAlignVertical: 'top' },
-  hscroll: { gap: spacing.xs, paddingBottom: spacing.sm },
+  // A horizontal ScrollView stretches its children to its own height
+  // unless told otherwise, which turned each chip into a tall pill.
+  hscroll: { gap: spacing.xs, paddingBottom: spacing.sm, alignItems: 'flex-start' },
+  hscrollView: { flexGrow: 0 },
 
   stepBar: {
     flexDirection: 'row',

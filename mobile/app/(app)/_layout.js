@@ -50,6 +50,7 @@ export default function AppLayout() {
         <Stack.Screen name="staff-availability" options={{ title: tx('Upatikanaji wangu') }} />
         <Stack.Screen name="dispatch" options={{ title: tx('Dispatch Center') }} />
         <Stack.Screen name="dispatch-item" options={{ title: tx('Ombi') }} />
+        <Stack.Screen name="dispatch-settings" options={{ title: tx('Takwimu na mipangilio') }} />
         <Stack.Screen name="notifications" options={{ title: tx('Taarifa') }} />
         <Stack.Screen name="symptoms" options={{ title: tx('Ripoti dalili') }} />
         <Stack.Screen name="family" options={{ title: tx('Familia yangu') }} />

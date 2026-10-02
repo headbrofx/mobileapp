@@ -263,6 +263,37 @@ export default function Home() {
       <View style={styles.gutter}>
         <ErrorBox error={error} />
 
+        {/* Care Mobility's two other doors, beside the one above: a
+            ride to care, and what is available where you are. */}
+        <View style={styles.mobilityRow}>
+          <Pressable
+            onPress={() => router.push('/transport')}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.mobility, pressed && styles.pressed]}
+          >
+            <View style={styles.mobilityIcon}>
+              <Ionicons name="car" size={18} color={colors.onPrimary} />
+            </View>
+            <View style={styles.mobilityText}>
+              <Text style={styles.mobilityTitle}>{tx('Omba usafiri')}</Text>
+              <Text style={styles.mobilySub} numberOfLines={1}>{tx('Hadi hospitali au kliniki')}</Text>
+            </View>
+          </Pressable>
+          <Pressable
+            onPress={() => router.push('/care')}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.mobility, pressed && styles.pressed]}
+          >
+            <View style={styles.mobilityIcon}>
+              <Ionicons name="map" size={18} color={colors.onPrimary} />
+            </View>
+            <View style={styles.mobilityText}>
+              <Text style={styles.mobilityTitle}>{tx('Huduma karibu')}</Text>
+              <Text style={styles.mobilySub} numberOfLines={1}>{tx('Ramani ya maeneo yetu')}</Text>
+            </View>
+          </Pressable>
+        </View>
+
         <SectionHeader title={t('home.ourServices')} label={t('common.all')} onPress={() => router.push('/services')} />
 
         <View style={styles.grid}>
@@ -658,4 +689,28 @@ const styles = StyleSheet.create({
   quickText: { flex: 1 },
   quickTitle: { ...type.label, color: colors.text },
   quickHint: { ...type.tiny, fontSize: fs(10), color: colors.muted, marginTop: 1 },
+  mobilityRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
+  mobility: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    padding: spacing.sm,
+    ...shadow.card,
+  },
+  mobilityIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mobilityText: { flex: 1 },
+  mobilityTitle: { ...type.label, color: colors.text },
+  mobilySub: { ...type.tiny, color: colors.muted },
 });

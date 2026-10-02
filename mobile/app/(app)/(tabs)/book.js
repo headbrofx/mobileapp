@@ -23,7 +23,8 @@ import {
 import { Card, ErrorBox, Field, MenuButton, PriceTag } from '../../../lib/ui';
 import { colors, font, fs, radius, scale, shadow, spacing, type } from '../../../lib/theme';
 import { serviceColour, serviceIcon, serviceImage } from '../../../lib/services-meta';
-import { TIME_WINDOWS, atHour, currentPosition, mapLink, nextDays } from '../../../lib/care';
+import { TIME_WINDOWS, atHour, currentPosition, mapLink, nextDays, serviceZones, zoneCircles } from '../../../lib/care';
+import MapView from '../../../lib/MapView';
 import { tx, useI18n } from '../../../lib/i18n';
 
 // Requesting a home visit, one question per step: service, who, when,
@@ -69,6 +70,7 @@ export default function Book() {
   const [members, setMembers] = useState([]);
   const [places, setPlaces] = useState([]);
   const [days] = useState(() => nextDays(7));
+  const [zones, setZones] = useState([]);
 
   const [service, setService] = useState(null);
   const [memberId, setMemberId] = useState(null);
@@ -95,6 +97,10 @@ export default function Book() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [done, setDone] = useState(null);
+
+  useEffect(() => {
+    serviceZones().then(setZones);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -332,7 +338,7 @@ export default function Book() {
                 <Text style={styles.stepTitle}>{tx('Lini')}</Text>
                 <Text style={styles.stepHint}>{tx('Chagua siku na sehemu ya siku. Muuguzi atathibitisha saa kamili.')}</Text>
 
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dayRow}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerStyle={styles.dayRow}>
                   {days.map((d, i) => (
                     <Pressable
                       key={d.sub}
@@ -392,11 +398,23 @@ export default function Book() {
                   onChangeText={setAddress}
                 />
 
+                {/* The map: the service area drawn as circles, the pin
+                    where it is, and a tap anywhere to put it there. */}
+                <MapView
+                  height={230}
+                  markers={pin ? [{ ...pin, label: tx('Hapa'), colour: colors.primary, pick: true }] : []}
+                  circles={zoneCircles(zones, colors.primary)}
+                  zoom={pin ? 16 : 11}
+                  onPick={setPin}
+                  fallbackCentre={zones[0] ? { lat: zones[0].centerLat, lng: zones[0].centerLng } : null}
+                />
+                <View style={{ height: spacing.sm }} />
+
                 {/* A pin is optional and only taken when asked for. It
                     lets the office check the area is covered and gives
-                    the nurse somewhere exact to aim for. No map is drawn
-                    here until a maps provider is connected; the link
-                    opens the phone's own map instead of a pretend one. */}
+                    the nurse somewhere exact to aim for. The map above is
+                    OpenStreetMap; "Angalia ramani" also opens the phone's
+                    own map app for directions. */}
                 <Card style={styles.pinCard}>
                   <View style={styles.pinRow}>
                     <View style={[styles.pinIcon, pin && styles.pinIconOn]}>
@@ -1155,7 +1173,7 @@ const styles = StyleSheet.create({
   referenceValue: { fontSize: fs(22), fontFamily: font.extrabold, color: colors.primaryDark, letterSpacing: 1.5 },
 
   // Day picker: a strip of chips, the next seven days.
-  dayRow: { gap: spacing.xs, paddingBottom: spacing.xs },
+  dayRow: { gap: spacing.xs, paddingBottom: spacing.xs, alignItems: 'flex-start' },
   day: {
     minWidth: 86,
     alignItems: 'center',

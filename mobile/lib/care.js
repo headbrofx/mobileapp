@@ -1,4 +1,5 @@
 import * as Location from 'expo-location';
+import { care } from './api';
 import { colors } from './theme';
 import { tx } from './i18n';
 
@@ -132,4 +133,25 @@ export async function currentPosition({ approximate = false } = {}) {
 // the honest alternative to a fake one.
 export function mapLink(lat, lng) {
   return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+}
+
+// The business's service zones, fetched once per app session. Maps
+// start at the first zone and draw every zone's circle, so a new
+// region is a row on the server, not a change here.
+let zonesPromise = null;
+export function serviceZones() {
+  if (!zonesPromise) {
+    zonesPromise = care
+      .discover()
+      .then((d) => d?.zones ?? [])
+      .catch(() => {
+        zonesPromise = null;
+        return [];
+      });
+  }
+  return zonesPromise;
+}
+
+export function zoneCircles(zones, colour) {
+  return zones.map((z) => ({ lat: z.centerLat, lng: z.centerLng, radiusKm: z.radiusKm, colour }));
 }

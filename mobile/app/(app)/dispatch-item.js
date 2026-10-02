@@ -7,6 +7,7 @@ import { Card, ErrorBox, Field } from '../../lib/ui';
 import { ActionButton, InfoLine, StatusPill, Timeline, careStyles } from '../../lib/care-ui';
 import { dateTimeSw, mapLink, tzs } from '../../lib/care';
 import { colors, font, fs, radius, spacing, type } from '../../lib/theme';
+import MapView from '../../lib/MapView';
 import { tx, useI18n } from '../../lib/i18n';
 
 // One request, from the dispatcher's side.
@@ -127,6 +128,11 @@ function BookingPanel({ data, busy, run, id }) {
         <InfoLine icon="document-text-outline" label={tx('Mahitaji')} value={b.notes} />
         <InfoLine icon="medkit-outline" label={tx('Muuguzi')} value={b.staff?.user?.name} />
         <InfoLine icon="pricetag-outline" label={tx('Bei ya orodha')} value={tzs(b.quotedPriceTzs)} />
+        {b.locationLat != null ? (
+          <View style={styles.map}>
+            <MapView height={200} markers={[{ lat: b.locationLat, lng: b.locationLng, label: b.patient?.name, colour: colors.primary }]} zoom={15} />
+          </View>
+        ) : null}
         {b.locationLat != null ? (
           <ActionButton variant="ghost" icon="map-outline" title={tx('Fungua pini kwenye ramani')} onPress={() => Linking.openURL(mapLink(b.locationLat, b.locationLng))} />
         ) : (
@@ -282,6 +288,18 @@ function TripPanel({ data, busy, run, id }) {
         <InfoLine icon="pricetag-outline" label={tx('Bei')} value={tzs(t.confirmedFareTzs ?? t.quotedFareTzs)} />
         <InfoLine icon="car-outline" label={tx('Dereva')} value={[t.driver?.user?.name ?? t.driverName, t.driverPhone, t.partnerName].filter(Boolean).join(' · ')} />
         <InfoLine icon="car-sport-outline" label={tx('Gari')} value={t.vehicleDetails} />
+        {t.pickupLat != null || t.destinationLat != null ? (
+          <View style={styles.map}>
+            <MapView
+              height={200}
+              markers={[
+                ...(t.pickupLat != null ? [{ lat: t.pickupLat, lng: t.pickupLng, label: tx('Kuchukuliwa'), colour: colors.primary }] : []),
+                ...(t.destinationLat != null ? [{ lat: t.destinationLat, lng: t.destinationLng, label: tx('Kwenda'), colour: colors.success }] : []),
+              ]}
+              zoom={14}
+            />
+          </View>
+        ) : null}
         {t.pickupLat != null ? (
           <ActionButton variant="ghost" icon="map-outline" title={tx('Fungua pini ya kuchukuliwa')} onPress={() => Linking.openURL(mapLink(t.pickupLat, t.pickupLng))} />
         ) : null}
@@ -467,6 +485,7 @@ const styles = StyleSheet.create({
   reasonText: { ...type.small, color: colors.text, flex: 1 },
 
   confirm: { marginTop: spacing.xs },
+  map: { marginVertical: spacing.sm },
   danger: { marginTop: spacing.md, borderColor: colors.dangerBg },
 
   mode: { borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border, paddingHorizontal: spacing.sm + 2, paddingVertical: 7 },

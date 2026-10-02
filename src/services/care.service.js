@@ -53,7 +53,19 @@ async function discover({ lat, lng } = {}) {
     location: approx ? { approximate: true, ...approx } : null,
     coverage,
     zone: zone ? { id: zone.id, name: zone.name, region: zone.region, homeVisits: zone.homeVisits, transport: zone.transport } : null,
-    zones: activeZones.map((z) => ({ id: z.id, name: z.name, region: z.region, homeVisits: z.homeVisits, transport: z.transport })),
+    // Centre and radius are the business's own published coverage, not
+    // anybody's location, so the app can draw them and start its map
+    // there without a city written into it.
+    zones: activeZones.map((z) => ({
+      id: z.id,
+      name: z.name,
+      region: z.region,
+      homeVisits: z.homeVisits,
+      transport: z.transport,
+      centerLat: z.centerLat,
+      centerLng: z.centerLng,
+      radiusKm: z.radiusKm,
+    })),
     homeVisits: {
       available: coverage !== 'OUTSIDE' && (!zone || zone.homeVisits),
       minLeadMinutes,
@@ -177,6 +189,8 @@ async function track(user, kind, id) {
       kind,
       item: bookingItem(booking),
       details: {
+        locationLat: booking.locationLat,
+        locationLng: booking.locationLng,
         locationDetails: booking.locationDetails,
         accessibilityNotes: booking.accessibilityNotes,
         timeWindow: booking.timeWindow,

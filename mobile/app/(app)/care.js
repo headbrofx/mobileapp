@@ -5,7 +5,8 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { care } from '../../lib/api';
 import { Card, ErrorBox } from '../../lib/ui';
 import { ActionButton, careStyles } from '../../lib/care-ui';
-import { currentPosition, tzs } from '../../lib/care';
+import { currentPosition, tzs, zoneCircles } from '../../lib/care';
+import MapView from '../../lib/MapView';
 import { serviceColour, serviceIcon } from '../../lib/services-meta';
 import { colors, font, fs, radius, shadow, spacing, type } from '../../lib/theme';
 import { tx, useI18n } from '../../lib/i18n';
@@ -92,6 +93,20 @@ export default function FindCare() {
         )}
       </Card>
 
+      {data?.zones?.length ? (
+        <View style={styles.map}>
+          {/* The coverage map: the zones the business serves, and the
+              client's own rough position if they shared it. Never a
+              nurse. */}
+          <MapView
+            height={200}
+            circles={zoneCircles(data.zones, colors.primary)}
+            markers={data.location ? [{ lat: data.location.lat, lng: data.location.lng, label: tx('Uko hapa (takriban)'), colour: colors.primary }] : []}
+            zoom={data.location ? 12 : 10}
+          />
+        </View>
+      ) : null}
+
       <View style={styles.bigRow}>
         <BigAction
           icon="home"
@@ -171,6 +186,7 @@ const styles = StyleSheet.create({
   approx: { ...type.tiny, color: colors.muted, marginTop: spacing.sm },
 
   bigRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs },
+  map: { marginTop: spacing.sm, marginBottom: spacing.xs },
   big: {
     flex: 1,
     backgroundColor: colors.surface,

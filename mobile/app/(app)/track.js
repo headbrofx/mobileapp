@@ -7,6 +7,7 @@ import { Card, ErrorBox, Field } from '../../lib/ui';
 import { ActionButton, InfoLine, StatusPill, Timeline, careStyles } from '../../lib/care-ui';
 import { dateTimeSw, mapLink, tzs } from '../../lib/care';
 import { colors, font, fs, radius, spacing, type } from '../../lib/theme';
+import MapView from '../../lib/MapView';
 import { tx, useI18n } from '../../lib/i18n';
 
 // Following one visit or trip.
@@ -91,6 +92,20 @@ export default function Track() {
   const live = data?.live;
   const canCancel = item && CLIENT_CANCELLABLE[kind].includes(item.status);
 
+  // What the map shows: where care is going to, and, while the nurse is
+  // on the way and has shared, where she was last seen. Nothing else.
+  const mapMarkers = [];
+  if (kind === 'HOME_VISIT' && details.locationLat != null) {
+    mapMarkers.push({ lat: details.locationLat, lng: details.locationLng, label: tx('Nyumbani'), colour: colors.primary });
+  }
+  if (kind === 'TRANSPORT') {
+    if (details.pickupLat != null) mapMarkers.push({ lat: details.pickupLat, lng: details.pickupLng, label: tx('Kuchukuliwa'), colour: colors.muted });
+    if (details.destinationLat != null) mapMarkers.push({ lat: details.destinationLat, lng: details.destinationLng, label: tx('Kwenda'), colour: colors.primary });
+  }
+  if (live?.hasLocation) {
+    mapMarkers.push({ lat: live.latestPing.lat, lng: live.latestPing.lng, label: tx('Muuguzi'), colour: colors.success });
+  }
+
   function doCancel() {
     if (reason.trim().length < 3) {
       setError(tx('Andika sababu fupi ya kusitisha.'));
@@ -174,6 +189,12 @@ export default function Track() {
             </Card>
           ) : null}
 
+          {mapMarkers.length ? (
+            <View style={styles.map}>
+              <MapView height={240} markers={mapMarkers} zoom={15} />
+            </View>
+          ) : null}
+
           {live?.hasLocation ? (
             <Card style={styles.live}>
               <View style={careStyles.row}>
@@ -207,7 +228,7 @@ export default function Track() {
 
           <Text style={careStyles.section}>{tx('Maelezo')}</Text>
           <Card>
-            <InfoLine icon="person-outline" label={tx('Mgonjwa')} value={item.patient?.name} />
+            <InfoLine icon="person-outline" label={kind === 'TRANSPORT' ? tx('Msafiri') : tx('Mgonjwa')} value={item.patient?.name} />
             <InfoLine
               icon={kind === 'TRANSPORT' ? 'car-outline' : 'medkit-outline'}
               label={kind === 'TRANSPORT' ? tx('Dereva') : tx('Muuguzi')}
@@ -282,4 +303,5 @@ const styles = StyleSheet.create({
   liveTime: { ...type.tiny, color: colors.muted, marginTop: spacing.xs, marginBottom: spacing.sm },
 
   cancelCard: { marginTop: spacing.sm },
+  map: { marginBottom: spacing.sm },
 });

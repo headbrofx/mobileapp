@@ -1,7 +1,7 @@
 'use strict';
 
 const { Op, fn, col } = require('sequelize');
-const { Booking, TransportRequest, Staff, User, StatusHistory, sequelize } = require('../models');
+const { Booking, TransportRequest, Staff, User, sequelize } = require('../models');
 const bookingService = require('./booking.service');
 const transportService = require('./transport.service');
 const { recommendForBooking } = require('./staffMatch.service');
@@ -173,6 +173,7 @@ async function analytics({ days = 30 } = {}) {
   const [assignRows] = await sequelize.query(
     `SELECT EXTRACT(EPOCH FROM (a.created_at - r.created_at)) / 60 AS minutes
        FROM status_history r
+       JOIN bookings bk ON bk.id = r.entity_id
        JOIN LATERAL (
          SELECT created_at FROM status_history a
           WHERE a.entity_type = r.entity_type AND a.entity_id = r.entity_id AND a.to_status = 'ASSIGNED'
@@ -185,9 +186,13 @@ async function analytics({ days = 30 } = {}) {
   const median = mins.length ? Math.round(mins[Math.floor(mins.length / 2)]) : null;
 
   const overrides = await sequelize.query(
-    `SELECT COUNT(*) FILTER (WHERE (metadata->>'followedRecommendation')::boolean IS FALSE) AS overridden,
+    // Counted against bookings that still exist, so the figures on this
+    // screen describe the same set of requests as the totals above it.
+    `SELECT COUNT(*) FILTER (WHERE (a.metadata->>'followedRecommendation')::boolean IS FALSE) AS overridden,
             COUNT(*) AS total
-       FROM audit_logs WHERE action = 'BOOKING_ASSIGNED' AND created_at >= :since`,
+       FROM audit_logs a
+       JOIN bookings bk ON bk.id = a.entity_id
+      WHERE a.action = 'BOOKING_ASSIGNED' AND a.created_at >= :since`,
     { replacements: { since }, type: sequelize.QueryTypes.SELECT }
   );
 
@@ -210,7 +215,7 @@ async function analytics({ days = 30 } = {}) {
       overrodeRecommendation: Number(overrides[0]?.overridden || 0),
     },
     staffOnDutyNow: await Staff.count({ where: { approvalStatus: 'APPROVED', availability: 'AVAILABLE' } }),
-    historyRows: await StatusHistory.count({ where: { createdAt: { [Op.gte]: since } } }),
+    
   };
 }
 
