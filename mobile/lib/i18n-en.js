@@ -823,4 +823,7 @@ export const EN_BY_SW = {
   "Imekataliwa": "Rejected",
   "Imekubaliwa": "Accepted",
   "Imepangwa": "Assigned",
+  "Majibu yaliyothibitishwa na mtaalamu": "Answers checked by a professional",
+  "Uliza Afya AI": "Ask Afya AI",
+  "Maswali ya mfano": "Example questions",
 };

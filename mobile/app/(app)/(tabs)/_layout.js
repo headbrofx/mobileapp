@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, dark, font, fs } from '../../../lib/theme';
+import { colors, font, fs } from '../../../lib/theme';
 import { useI18n } from '../../../lib/i18n';
 import { showsOrbit, useSession } from '../../../lib/session';
 
@@ -116,16 +116,6 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="chatbubble-ellipses-outline" size={size} color={color} />
           ),
-          // Afya AI is drawn on navy, so the bar under it is too. A
-          // light strip across the foot of a dark screen reads as a
-          // seam, and this is the one screen with its own surface.
-          tabBarStyle: {
-            ...bar(insets.bottom),
-            backgroundColor: dark.bgDeep,
-            borderTopColor: dark.border,
-          },
-          tabBarActiveTintColor: dark.accent,
-          tabBarInactiveTintColor: dark.subtle,
         }}
       />
       <Tabs.Screen

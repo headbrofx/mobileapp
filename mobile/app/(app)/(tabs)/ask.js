@@ -11,29 +11,26 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { afyaAi } from '../../../lib/api';
 import { MenuButton } from '../../../lib/ui';
-import { dark, font, fs, radius, scale, spacing, type } from '../../../lib/theme';
+import { colors, font, fs, radius, scale, shadow, spacing, type } from '../../../lib/theme';
 import { tx, useI18n } from '../../../lib/i18n';
 
-// Afya AI, on the dark screen the owner asked for.
+// Afya AI, in the same theme as every other screen.
 //
-// This is the one place in the app that does not follow the theme
-// picker, and lib/theme.js says why: it is built from the blue and the
-// orange in the business's own logo, so it reads as the same company
-// whichever theme is on. Everything here — the glass cards, the orb,
-// the glow under the composer — is those two colours at different
-// strengths against navy.
+// It used to be the one screen on navy, with glass cards, a glowing orb
+// and its own tab bar colour. The owner found that busy and out of step
+// with the rest of the app, so it now uses the app's own surfaces: the
+// page background, white cards, and the theme's primary for anything
+// that is the user's or is a control.
 //
-// What the dark does not change is the substance. The server answers
+// What the look does not change is the substance. The server answers
 // out of writing somebody signed off, or it says it has none, and
 // NO_ANSWER is shown as plainly as an answer is. An AI that guesses
 // about somebody's health is worse than one that admits it does not
 // know. The emergency reply still breaks out of the bubbles entirely,
-// in a red lifted off the light theme's, because a dark screen
-// swallows the darker one.
+// in the theme's reserved danger red.
 
 const SUGGESTIONS = [
   { icon: 'help-circle-outline', text: 'Bei ya huduma ya uuguzi nyumbani ni ngapi?' },
@@ -83,133 +80,91 @@ export default function Ask() {
   const canSend = !busy && question.trim().length >= 3;
 
   return (
-    <View style={styles.screen}>
-      <Backdrop />
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 96 : 0}
+    >
+      {/* Outside the scroll: a chat header that scrolls away takes the
+          way out of the conversation with it. */}
+      <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
+        <MenuButton />
 
-      <KeyboardAvoidingView
+        <View style={styles.headerMark}>
+          <Ionicons name="sparkles" size={16} color={colors.primary} />
+        </View>
+        <View style={styles.headerTitles}>
+          <Text style={styles.headerTitle}>Afya AI</Text>
+          <Text style={styles.headerSub}>{tx('Majibu yaliyothibitishwa na mtaalamu')}</Text>
+        </View>
+
+        <Pressable
+          onPress={() => setMessages([])}
+          disabled={messages.length === 0}
+          accessibilityRole="button"
+          accessibilityLabel={tx('Anza mazungumzo mapya')}
+          hitSlop={8}
+          style={({ pressed }) => [styles.newChat, pressed && styles.pressed, messages.length === 0 && styles.faded]}
+        >
+          <Ionicons name="create-outline" size={19} color={colors.primary} />
+        </Pressable>
+      </View>
+
+      <ScrollView
+        ref={scroller}
         style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 96 : 0}
+        contentContainerStyle={styles.thread}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        onContentSizeChange={toBottom}
       >
-        {/* Outside the scroll: a chat header that scrolls away takes the
-            way out of the conversation with it. */}
-        <View style={[styles.header, { paddingTop: insets.top + spacing.xs }]}>
-          <View style={styles.iconButton}>
-            <MenuButton tint={dark.text} />
-          </View>
+        {empty ? <Welcome onPick={send} /> : null}
 
-          <View style={styles.headerTitles}>
-            <Text style={styles.headerTitle}>
-              Afya <Text style={styles.headerTitleAccent}>AI</Text>
-            </Text>
-            <Text style={styles.headerSub}>Afya Nyumbani</Text>
-          </View>
+        {messages.map((message) => (
+          <Message key={message.id} message={message} />
+        ))}
+
+        {busy ? <Thinking /> : null}
+      </ScrollView>
+
+      <View style={[styles.composerBar, { paddingBottom: Math.max(insets.bottom, spacing.sm) }]}>
+        <View style={styles.composer}>
+          <TextInput
+            value={question}
+            onChangeText={setQuestion}
+            placeholder={tx('Uliza swali lolote la afya…')}
+            placeholderTextColor={colors.subtle}
+            style={styles.input}
+            multiline
+            maxLength={500}
+            onSubmitEditing={() => send()}
+            blurOnSubmit={false}
+            accessibilityLabel={tx('Swali lako')}
+          />
 
           <Pressable
-            onPress={() => setMessages([])}
-            disabled={messages.length === 0}
+            onPress={() => send()}
+            disabled={!canSend}
             accessibilityRole="button"
-            accessibilityLabel={tx('Anza mazungumzo mapya')}
-            hitSlop={8}
-            style={({ pressed }) => [
-              styles.iconButton,
-              styles.iconButtonAccent,
-              pressed && styles.pressed,
-              messages.length === 0 && styles.faded,
-            ]}
+            accessibilityLabel={tx('Tuma swali')}
+            style={({ pressed }) => [styles.send, !canSend && styles.sendOff, pressed && styles.pressed]}
           >
-            <Ionicons name="create-outline" size={20} color={dark.accent} />
+            {busy ? (
+              <ActivityIndicator color={colors.onPrimary} size="small" />
+            ) : (
+              <Ionicons name="arrow-up" size={20} color={colors.onPrimary} />
+            )}
           </Pressable>
         </View>
 
-        <ScrollView
-          ref={scroller}
-          style={styles.flex}
-          contentContainerStyle={[styles.thread, empty && styles.threadEmpty]}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          onContentSizeChange={toBottom}
-        >
-          {empty ? <Welcome onPick={send} /> : null}
-
-          {messages.map((message) => (
-            <Message key={message.id} message={message} />
-          ))}
-
-          {busy ? <Thinking /> : null}
-        </ScrollView>
-
-        <View style={[styles.composerBar, { paddingBottom: Math.max(insets.bottom, spacing.sm) }]}>
-          <View style={styles.composer}>
-            <View style={styles.composerSpark}>
-              <Ionicons name="sparkles" size={15} color={dark.glow} />
-            </View>
-
-            <TextInput
-              value={question}
-              onChangeText={setQuestion}
-              placeholder={tx('Uliza swali lolote la afya…')}
-              placeholderTextColor={dark.subtle}
-              style={styles.input}
-              multiline
-              maxLength={500}
-              onSubmitEditing={() => send()}
-              blurOnSubmit={false}
-              accessibilityLabel={tx('Swali lako')}
-            />
-
-            <Pressable
-              onPress={() => send()}
-              disabled={!canSend}
-              accessibilityRole="button"
-              accessibilityLabel={tx('Tuma swali')}
-              style={({ pressed }) => [pressed && styles.pressed]}
-            >
-              <View style={[styles.sendHalo, !canSend && styles.sendHaloOff]}>
-                <LinearGradient
-                  colors={canSend ? [dark.glowLift, dark.glow] : ['#243350', '#1B2740']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.send}
-                >
-                  {busy ? (
-                    <ActivityIndicator color="#FFFFFF" size="small" />
-                  ) : (
-                    <Ionicons name="arrow-up" size={20} color="#FFFFFF" />
-                  )}
-                </LinearGradient>
-              </View>
-            </Pressable>
-          </View>
-
-          <View style={styles.disclaimerRow}>
-            <Ionicons name="shield-checkmark-outline" size={12} color={dark.accent} />
-            <Text style={styles.disclaimer}>
-              {tx('Afya AI hujibu kutoka maandishi yaliyothibitishwa tu. Si mbadala wa daktari.')}
-            </Text>
-          </View>
+        <View style={styles.disclaimerRow}>
+          <Ionicons name="shield-checkmark-outline" size={12} color={colors.muted} />
+          <Text style={styles.disclaimer}>
+            {tx('Afya AI hujibu kutoka maandishi yaliyothibitishwa tu. Si mbadala wa daktari.')}
+          </Text>
         </View>
-      </KeyboardAvoidingView>
-    </View>
-  );
-}
-
-// --- The backdrop -----------------------------------------------------
-//
-// The design has a caduceus, an ECG trace and a molecular lattice
-// printed faintly behind everything. Those are drawings this project
-// does not own, so the same job is done with icons the app already
-// ships, at an opacity where they are texture rather than pictures —
-// and at that opacity nothing here competes with a word on the screen.
-
-function Backdrop() {
-  return (
-    <View style={styles.backdrop} pointerEvents="none">
-      <Ionicons name="medkit-outline" size={150} color="#FFFFFF" style={styles.dropLeft} />
-      <Ionicons name="pulse-outline" size={170} color="#FFFFFF" style={styles.dropRight} />
-      <Ionicons name="git-network-outline" size={130} color="#FFFFFF" style={styles.dropTop} />
-      <Ionicons name="apps-outline" size={110} color="#FFFFFF" style={styles.dropBottom} />
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -218,21 +173,19 @@ function Backdrop() {
 function Welcome({ onPick }) {
   return (
     <View>
-      <Orb />
-
       <View style={styles.welcomeCard}>
-        <Text style={styles.welcomeTitle}>
-          Afya <Text style={styles.headerTitleAccent}>AI</Text>
-        </Text>
+        <View style={styles.welcomeIcon}>
+          <Ionicons name="sparkles" size={24} color={colors.onPrimary} />
+        </View>
+        <Text style={styles.welcomeTitle}>{tx('Uliza Afya AI')}</Text>
         <Text style={styles.welcomeBody}>
           {tx(
             'Uliza kuhusu afya yako au huduma zetu. Majibu yanatoka kwenye maandishi yaliyopitiwa na mtaalamu — hakuna kubahatisha.'
           )}
         </Text>
-        {/* The lit edge the design runs under this card. */}
-        <View style={styles.cardGlow} />
       </View>
 
+      <Text style={styles.chipsHead}>{tx('Maswali ya mfano')}</Text>
       <View style={styles.chips}>
         {SUGGESTIONS.map((item) => (
           <Pressable
@@ -242,39 +195,13 @@ function Welcome({ onPick }) {
             style={({ pressed }) => [styles.chip, pressed && styles.chipPressed]}
           >
             <View style={styles.chipIcon}>
-              <Ionicons name={item.icon} size={19} color={dark.accent} />
+              <Ionicons name={item.icon} size={18} color={colors.primary} />
             </View>
             <Text style={styles.chipText}>{tx(item.text)}</Text>
-            <Ionicons name="arrow-forward" size={17} color={dark.accent} />
+            <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
           </Pressable>
         ))}
       </View>
-    </View>
-  );
-}
-
-// The glowing sphere.
-//
-// React Native has no blur and no radial gradient, so the halo is built
-// the way it would have been before either existed: circles inside
-// circles, each a little more opaque than the one around it. Three
-// rings is where it stops reading as steps and starts reading as light.
-function Orb() {
-  return (
-    <View style={styles.orbWrap}>
-      <View style={[styles.ring, styles.ring4]} />
-      <View style={[styles.ring, styles.ring3]} />
-      <View style={[styles.ring, styles.ring2]} />
-      <LinearGradient
-        colors={[dark.glowLift, dark.glowMid, dark.glowDeep]}
-        start={{ x: 0.2, y: 0 }}
-        end={{ x: 0.8, y: 1 }}
-        style={styles.orb}
-      >
-        <Ionicons name="sparkles" size={34} color="#FFFFFF" />
-      </LinearGradient>
-      {/* The lit plinth it sits on. */}
-      <View style={styles.plinth} />
     </View>
   );
 }
@@ -284,7 +211,7 @@ function Thinking() {
     <View style={styles.aiRow}>
       <Avatar />
       <View style={[styles.bubble, styles.aiBubble, styles.thinking]}>
-        <ActivityIndicator size="small" color={dark.glow} />
+        <ActivityIndicator size="small" color={colors.primary} />
         <Text style={styles.thinkingText}>{tx('Inatafuta jibu…')}</Text>
       </View>
     </View>
@@ -294,7 +221,7 @@ function Thinking() {
 function Avatar() {
   return (
     <View style={styles.avatar}>
-      <Ionicons name="sparkles" size={14} color={dark.glow} />
+      <Ionicons name="sparkles" size={13} color={colors.primary} />
     </View>
   );
 }
@@ -303,14 +230,9 @@ function Message({ message }) {
   if (message.role === 'user') {
     return (
       <View style={styles.userRow}>
-        <LinearGradient
-          colors={[dark.glowLift, dark.glow]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[styles.bubble, styles.userBubble]}
-        >
+        <View style={[styles.bubble, styles.userBubble]}>
           <Text style={styles.userText}>{message.text}</Text>
-        </LinearGradient>
+        </View>
       </View>
     );
   }
@@ -329,13 +251,13 @@ function Message({ message }) {
   const { data } = message;
 
   // The one reply that does not get a bubble. It takes the full width, a
-  // red rule and a heading, because somebody reading this quickly on a
+  // red border and a heading, because somebody reading this quickly on a
   // phone needs to know inside a second that it is different.
   if (data.redFlag) {
     return (
       <View style={styles.emergency}>
         <View style={styles.emergencyHead}>
-          <Ionicons name="warning" size={18} color={dark.danger} />
+          <Ionicons name="warning" size={18} color={colors.danger} />
           <Text style={styles.emergencyHeading}>{tx('DHARURA')}</Text>
         </View>
         <Text style={styles.emergencyBody}>{data.answer}</Text>
@@ -365,7 +287,7 @@ function Message({ message }) {
             what it measures is word overlap. */}
         {data.confidence === 'LOW' ? (
           <View style={styles.caution}>
-            <Ionicons name="alert-circle-outline" size={13} color={dark.accent} />
+            <Ionicons name="alert-circle-outline" size={13} color={colors.caution} />
             <Text style={styles.cautionText}>
               {tx('Jibu hili halilingani vizuri na swali lako. Kama halikujibu, muulize muuguzi.')}
             </Text>
@@ -376,19 +298,15 @@ function Message({ message }) {
 
         {data.outcome === 'ANSWERED' && !data.references?.length ? (
           <View style={styles.source}>
-            <Ionicons name="shield-checkmark-outline" size={13} color={dark.accent} />
-            <Text style={styles.sourceText}>
-              {tx('Limetoka kwenye maandishi yaliyosainiwa na mtaalamu')}
-            </Text>
+            <Ionicons name="shield-checkmark-outline" size={13} color={colors.success} />
+            <Text style={styles.sourceText}>{tx('Limetoka kwenye maandishi yaliyosainiwa na mtaalamu')}</Text>
           </View>
         ) : null}
 
         {data.outcome === 'NO_ANSWER' ? (
           <View style={styles.source}>
-            <Ionicons name="help-circle-outline" size={13} color={dark.muted} />
-            <Text style={styles.sourceText}>
-              {tx('Hakuna jibu lililothibitishwa kwa swali hili bado')}
-            </Text>
+            <Ionicons name="help-circle-outline" size={13} color={colors.muted} />
+            <Text style={styles.sourceText}>{tx('Hakuna jibu lililothibitishwa kwa swali hili bado')}</Text>
           </View>
         ) : null}
       </View>
@@ -398,21 +316,14 @@ function Message({ message }) {
 
 // --- The six-part answer ----------------------------------------------
 //
-// Written by whoever reviewed the entry, not assembled here. This
-// component decides the order and the look, and the look matters:
-// vetted clinical text is set apart from the conversational line above
-// it, so a reader can see which part of the bubble somebody qualified
-// actually signed.
-//
-// "When it is urgent" carries the danger colour. It is the one section
-// that is about leaving the app.
+// Written by whoever reviewed the entry, not assembled here. Vetted
+// clinical text is set apart from the conversational line above it, so
+// a reader can see which part of the bubble somebody qualified actually
+// signed. "When it is urgent" carries the danger colour: it is the one
+// section that is about leaving the app.
 
 const SECTION_ORDER = [
-  {
-    key: 'whatMayBeHappening',
-    label: 'Kinachoweza kuwa kinatokea',
-    icon: 'information-circle-outline',
-  },
+  { key: 'whatMayBeHappening', label: 'Kinachoweza kuwa kinatokea', icon: 'information-circle-outline' },
   { key: 'whatToMonitor', label: 'Cha kufuatilia', icon: 'eye-outline' },
   { key: 'selfCare', label: 'Unachoweza kufanya', icon: 'leaf-outline' },
   { key: 'whenToSeekAdvice', label: 'Lini kuona mtaalamu', icon: 'medkit-outline' },
@@ -428,18 +339,10 @@ function Sections({ sections }) {
       {present.map((section) => (
         <View key={section.key} style={[styles.section, section.urgent && styles.sectionUrgent]}>
           <View style={styles.sectionHead}>
-            <Ionicons
-              name={section.icon}
-              size={13}
-              color={section.urgent ? dark.danger : dark.accent}
-            />
-            <Text style={[styles.sectionLabel, section.urgent && styles.sectionLabelUrgent]}>
-              {tx(section.label)}
-            </Text>
+            <Ionicons name={section.icon} size={13} color={section.urgent ? colors.danger : colors.primary} />
+            <Text style={[styles.sectionLabel, section.urgent && styles.sectionLabelUrgent]}>{tx(section.label)}</Text>
           </View>
-          <Text style={[styles.sectionBody, section.urgent && styles.sectionBodyUrgent]}>
-            {sections[section.key]}
-          </Text>
+          <Text style={[styles.sectionBody, section.urgent && styles.sectionBodyUrgent]}>{sections[section.key]}</Text>
         </View>
       ))}
     </View>
@@ -449,8 +352,7 @@ function Sections({ sections }) {
 // --- Where it came from -----------------------------------------------
 //
 // Titles, sources and the date a professional signed them off. A reader
-// who cannot see where an answer came from has no way to weigh it, and
-// "verified" with nothing behind it is a claim rather than a fact.
+// who cannot see where an answer came from has no way to weigh it.
 
 function References({ items }) {
   return (
@@ -461,7 +363,7 @@ function References({ items }) {
           <Ionicons
             name={ref.reviewed ? 'shield-checkmark' : 'shield-outline'}
             size={12}
-            color={ref.reviewed ? dark.accent : dark.subtle}
+            color={ref.reviewed ? colors.success : colors.subtle}
           />
           <View style={styles.refText}>
             <Text style={styles.refTitle}>{ref.title}</Text>
@@ -479,145 +381,94 @@ function References({ items }) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: dark.bg },
+  screen: { flex: 1, backgroundColor: colors.bg },
   flex: { flex: 1 },
   pressed: { opacity: 0.8 },
   faded: { opacity: 0.35 },
 
-  backdrop: { ...StyleSheet.absoluteFillObject, overflow: 'hidden' },
-  dropLeft: { position: 'absolute', top: 120, left: -46, opacity: 0.05 },
-  dropRight: { position: 'absolute', top: 210, right: -54, opacity: 0.05 },
-  dropTop: { position: 'absolute', top: -18, right: -22, opacity: 0.04 },
-  dropBottom: { position: 'absolute', bottom: 120, left: -30, opacity: 0.04 },
-
-  // --- Header ---
+  // --- Header: the same white bar as the booking screen ---
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.xs,
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.sm,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
-  iconButton: {
-    width: 42,
-    height: 42,
-    borderRadius: radius.md,
-    backgroundColor: dark.glass,
+  headerMark: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 4,
+  },
+  headerTitles: { flex: 1 },
+  headerTitle: { fontSize: fs(16), fontFamily: font.bold, color: colors.text },
+  headerSub: { ...type.tiny, fontSize: fs(10), color: colors.muted },
+  newChat: {
+    width: 38,
+    height: 38,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: dark.border,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconButtonAccent: { borderColor: dark.accentLine, backgroundColor: dark.accentSoft },
-  headerTitles: { flex: 1 },
-  headerTitle: { fontSize: scale(21), fontFamily: font.extrabold, color: dark.text },
-  headerTitleAccent: { color: dark.accent },
-  headerSub: { ...type.tiny, color: dark.subtle, marginTop: -2 },
 
   // --- Thread ---
-  thread: { padding: spacing.md, paddingBottom: spacing.lg, gap: spacing.sm },
-  // flexGrow without justifyContent: 'center'. Centring works only
-  // while the content is shorter than the scroll area — once the orb,
-  // the card and four suggestions are taller than the screen, centring
-  // pushes the top of the orb above the scroll origin, where it cannot
-  // be reached by scrolling at all. That is how it was clipped.
-  threadEmpty: { flexGrow: 1, justifyContent: 'flex-start' },
+  thread: { flexGrow: 1, padding: spacing.md, paddingBottom: spacing.lg, gap: spacing.sm },
 
-  // --- Orb ---
-  orbWrap: { alignItems: 'center', justifyContent: 'center', height: 168, marginBottom: -14 },
-  ring: { position: 'absolute', borderRadius: 999, borderWidth: 1 },
-  ring2: {
-    width: 126,
-    height: 126,
-    backgroundColor: dark.glowSoft,
-    borderColor: 'rgba(78,151,255,0.35)',
-  },
-  ring3: {
-    width: 150,
-    height: 150,
-    backgroundColor: dark.glowFaint,
-    borderColor: 'rgba(78,151,255,0.18)',
-  },
-  ring4: {
-    width: 176,
-    height: 176,
-    backgroundColor: 'rgba(46,123,255,0.05)',
-    borderColor: 'rgba(78,151,255,0.10)',
-  },
-  orb: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(160,200,255,0.55)',
-  },
-  plinth: {
-    position: 'absolute',
-    bottom: 16,
-    width: 118,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: 'rgba(120,180,255,0.55)',
-  },
-
-  // --- Welcome card ---
+  // --- Welcome ---
   welcomeCard: {
-    backgroundColor: dark.glass,
-    borderWidth: 1,
-    borderColor: dark.border,
+    backgroundColor: colors.surface,
     borderRadius: radius.xl,
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    padding: spacing.lg,
     alignItems: 'center',
     marginBottom: spacing.md,
-    overflow: 'hidden',
+    ...shadow.card,
   },
-  welcomeTitle: { fontSize: scale(23), fontFamily: font.extrabold, color: dark.text },
-  welcomeBody: {
-    ...type.body,
-    color: dark.muted,
-    textAlign: 'center',
-    marginTop: spacing.xs,
-    lineHeight: scale(21),
+  welcomeIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
   },
-  cardGlow: {
-    position: 'absolute',
-    left: '12%',
-    right: '12%',
-    bottom: 0,
-    height: 2,
-    borderRadius: 2,
-    backgroundColor: dark.accentLine,
-  },
+  welcomeTitle: { ...type.title, color: colors.text },
+  welcomeBody: { ...type.body, color: colors.muted, textAlign: 'center', marginTop: spacing.xs, lineHeight: scale(21) },
 
-  // --- Suggestions ---
-  chips: { gap: spacing.sm },
+  chipsHead: { ...type.section, color: colors.text, marginBottom: spacing.sm },
+  chips: { gap: spacing.xs + 2 },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: dark.glass,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: dark.border,
+    borderColor: colors.hairline,
     borderRadius: radius.lg,
-    paddingVertical: spacing.xs + 2,
+    paddingVertical: spacing.sm,
     paddingHorizontal: spacing.sm,
+    ...shadow.card,
   },
-  chipPressed: { backgroundColor: dark.glassStrong, borderColor: dark.accentLine },
+  chipPressed: { borderColor: colors.primary, backgroundColor: colors.primaryLight },
   chipIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,138,61,0.10)',
-    borderWidth: 1,
-    borderColor: dark.accentLine,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  chipText: { ...type.body, color: dark.text, flex: 1, lineHeight: scale(20) },
+  chipText: { ...type.body, color: colors.text, flex: 1 },
 
   // --- Bubbles ---
   userRow: { alignItems: 'flex-end' },
@@ -626,78 +477,61 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: dark.glowSoft,
-    borderWidth: 1,
-    borderColor: 'rgba(78,151,255,0.35)',
+    backgroundColor: colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 2,
   },
   bubble: { maxWidth: '84%', paddingVertical: spacing.sm + 2, paddingHorizontal: spacing.md },
-  userBubble: { borderRadius: radius.lg, borderBottomRightRadius: radius.sm },
-  userText: { ...type.body, color: '#FFFFFF' },
+  userBubble: { backgroundColor: colors.primary, borderRadius: radius.lg, borderBottomRightRadius: radius.sm / 2 },
+  userText: { ...type.body, color: colors.onPrimary },
   aiBubble: {
-    backgroundColor: dark.glass,
+    backgroundColor: colors.surface,
     borderRadius: radius.lg,
-    borderBottomLeftRadius: radius.sm,
+    borderBottomLeftRadius: radius.sm / 2,
     borderWidth: 1,
-    borderColor: dark.border,
+    borderColor: colors.hairline,
     flexShrink: 1,
+    ...shadow.card,
   },
   aiBubbleWide: { maxWidth: '96%' },
-  aiText: { ...type.body, color: dark.text, lineHeight: scale(22) },
+  aiText: { ...type.body, color: colors.text, lineHeight: scale(22) },
 
   sections: { marginTop: spacing.sm, gap: spacing.xs },
   section: {
-    borderLeftWidth: 2,
-    borderLeftColor: dark.accentLine,
-    paddingLeft: spacing.sm,
-    paddingVertical: 2,
+    backgroundColor: colors.bg,
+    borderRadius: radius.sm,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
   },
-  sectionUrgent: { borderLeftColor: dark.dangerBorder },
+  sectionUrgent: { borderLeftColor: colors.danger, backgroundColor: colors.dangerBg },
   sectionHead: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  sectionLabel: {
-    fontSize: fs(10),
-    fontFamily: font.extrabold,
-    letterSpacing: 0.5,
-    color: dark.accent,
-    textTransform: 'uppercase',
-  },
-  sectionLabelUrgent: { color: dark.danger },
-  sectionBody: { ...type.small, color: dark.text, lineHeight: scale(19), marginTop: 2 },
-  sectionBodyUrgent: { color: dark.danger },
+  sectionLabel: { ...type.label, fontSize: fs(11.5), color: colors.primary },
+  sectionLabelUrgent: { color: colors.danger },
+  sectionBody: { ...type.small, color: colors.text, lineHeight: scale(19), marginTop: 2 },
+  sectionBodyUrgent: { color: colors.danger },
 
   caution: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 5,
     marginTop: spacing.sm,
-    backgroundColor: dark.accentSoft,
+    backgroundColor: colors.cautionBg,
     borderRadius: radius.sm,
     padding: spacing.xs,
   },
-  cautionText: { ...type.tiny, color: dark.text, flex: 1, lineHeight: scale(15) },
+  cautionText: { ...type.tiny, color: colors.caution, flex: 1, lineHeight: scale(15) },
 
-  refs: {
-    marginTop: spacing.sm,
-    paddingTop: spacing.xs,
-    borderTopWidth: 1,
-    borderTopColor: dark.border,
-    gap: spacing.xs,
-  },
-  refsHead: {
-    fontSize: fs(9),
-    fontFamily: font.extrabold,
-    letterSpacing: 0.8,
-    color: dark.subtle,
-    textTransform: 'uppercase',
-  },
+  refs: { marginTop: spacing.sm, paddingTop: spacing.xs, borderTopWidth: 1, borderTopColor: colors.hairline, gap: spacing.xs },
+  refsHead: { ...type.tiny, fontFamily: font.bold, color: colors.muted },
   ref: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
   refText: { flex: 1 },
-  refTitle: { ...type.tiny, fontFamily: font.semibold, color: dark.text },
-  refSource: { ...type.tiny, fontSize: fs(9), color: dark.muted },
-  refMeta: { ...type.tiny, fontSize: fs(9), color: dark.subtle },
-  errorText: { ...type.body, color: dark.danger },
+  refTitle: { ...type.tiny, fontFamily: font.semibold, color: colors.text },
+  refSource: { ...type.tiny, fontSize: fs(9.5), color: colors.muted },
+  refMeta: { ...type.tiny, fontSize: fs(9.5), color: colors.subtle },
+  errorText: { ...type.body, color: colors.danger },
 
   source: {
     flexDirection: 'row',
@@ -706,82 +540,67 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     paddingTop: spacing.xs,
     borderTopWidth: 1,
-    borderTopColor: dark.border,
+    borderTopColor: colors.hairline,
   },
-  sourceText: { ...type.tiny, color: dark.muted, flex: 1 },
+  sourceText: { ...type.tiny, color: colors.muted, flex: 1 },
 
   thinking: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  thinkingText: { ...type.small, color: dark.muted },
+  thinkingText: { ...type.small, color: colors.muted },
 
   // --- Emergency ---
   emergency: {
-    backgroundColor: dark.dangerBg,
-    borderColor: dark.dangerBorder,
+    backgroundColor: colors.dangerBg,
+    borderColor: colors.danger,
     borderWidth: 2,
     borderRadius: radius.md,
     padding: spacing.md,
   },
   emergencyHead: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.xs },
-  emergencyHeading: {
-    fontSize: fs(13),
-    fontFamily: font.extrabold,
-    color: dark.danger,
-    letterSpacing: 1.2,
-  },
-  emergencyBody: { fontSize: fs(17), color: dark.danger, lineHeight: fs(25), fontFamily: font.semibold },
-  emergencyMeta: { ...type.small, color: dark.danger, marginTop: spacing.sm, opacity: 0.85 },
+  emergencyHeading: { fontSize: fs(13), fontFamily: font.extrabold, color: colors.danger, letterSpacing: 1.2 },
+  emergencyBody: { fontSize: fs(16), color: colors.danger, lineHeight: fs(24), fontFamily: font.semibold },
+  emergencyMeta: { ...type.small, color: colors.danger, marginTop: spacing.sm, opacity: 0.85 },
 
   // --- Composer ---
-  composerBar: { paddingHorizontal: spacing.md, paddingTop: spacing.sm },
+  composerBar: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
   composer: {
     flexDirection: 'row',
     // Bottom, not centre: the send button stays level with the last line
     // of a question that has grown to three.
     alignItems: 'flex-end',
     gap: spacing.sm,
-    backgroundColor: dark.glass,
+    backgroundColor: colors.bg,
     borderWidth: 1,
-    borderColor: dark.accentLine,
-    borderRadius: radius.xxl,
-    paddingLeft: spacing.xs,
-    paddingRight: 6,
-    paddingVertical: 6,
-  },
-  composerSpark: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: dark.glowSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 2,
+    borderColor: colors.border,
+    borderRadius: radius.xl,
+    paddingLeft: spacing.md,
+    paddingRight: 5,
+    paddingVertical: 5,
   },
   input: {
     flex: 1,
     ...type.body,
-    color: dark.text,
+    color: colors.text,
     maxHeight: 120,
     minHeight: 40,
     paddingTop: 10,
     paddingBottom: 10,
     ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : null),
   },
-  sendHalo: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: dark.glowSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sendHaloOff: { backgroundColor: 'transparent' },
   send: {
     width: 42,
     height: 42,
     borderRadius: 21,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  sendOff: { opacity: 0.4 },
 
   disclaimerRow: {
     flexDirection: 'row',
@@ -791,5 +610,5 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     paddingHorizontal: spacing.sm,
   },
-  disclaimer: { ...type.tiny, fontSize: fs(10), color: dark.subtle, flexShrink: 1 },
+  disclaimer: { ...type.tiny, fontSize: fs(10), color: colors.muted, flexShrink: 1 },
 });
