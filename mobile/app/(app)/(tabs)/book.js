@@ -12,7 +12,8 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import TransportForm from '../../../lib/TransportForm';
 import {
   bookings,
   care,
@@ -46,6 +47,13 @@ const LAST = STEPS.length - 1;
 // Where the form goes back to when the server refuses something.
 const STEP_FOR_ERROR = { OUT_OF_SERVICE_AREA: 3, TOO_SOON: 2, TOO_FAR_AHEAD: 2 };
 
+// Transport to care sits in the same list as the home-visit services,
+// so asking for a ride is the same procedure as asking for a nurse:
+// pick it here and the transport steps take over. It is not a row in
+// the services table because it is not priced or staffed the same way —
+// a dispatcher quotes each trip.
+const TRANSPORT = { id: '__transport', kind: 'TRANSPORT', name: 'Usafiri' };
+
 // The three things the welcome card promises. Kept to what the business
 // actually does rather than invented selling points.
 const PROMISES = [
@@ -64,6 +72,7 @@ export default function Book() {
   // memo. Reading the context is what gets past that.
   useI18n();
   const router = useRouter();
+  const params = useLocalSearchParams();
 
   const [step, setStep] = useState(0);
   const [catalogue, setCatalogue] = useState([]);
@@ -73,6 +82,10 @@ export default function Book() {
   const [zones, setZones] = useState([]);
 
   const [service, setService] = useState(null);
+  // Bumped each time the transport branch is entered, so it starts
+  // clean rather than showing the last trip's confirmation.
+  const [transportRun, setTransportRun] = useState(0);
+  const isTransport = service?.id === TRANSPORT.id;
   const [memberId, setMemberId] = useState(null);
   const [dayIndex, setDayIndex] = useState(0);
   const [windowValue, setWindowValue] = useState(TIME_WINDOWS[0].value);
@@ -101,6 +114,18 @@ export default function Book() {
   useEffect(() => {
     serviceZones().then(setZones);
   }, []);
+
+  // Every "Omba usafiri" button in the app opens this procedure with
+  // transport already chosen, rather than a separate screen.
+  useEffect(() => {
+    if (params.service === 'transport') {
+      setService(TRANSPORT);
+      setTransportRun((n) => n + 1);
+      setStep(1);
+      router.setParams({ service: undefined });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.service]);
 
   useEffect(() => {
     (async () => {
@@ -229,6 +254,38 @@ export default function Book() {
 
   if (done) return <Done router={router} booking={done} />;
 
+  if (isTransport && step >= 1) {
+    return (
+      <View style={styles.flex}>
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <MenuButton />
+            <View style={styles.headerMiddle}>
+              <View style={styles.headerMark}>
+                <Ionicons name="car" size={16} color={colors.primary} />
+              </View>
+              <View style={styles.headerTitles}>
+                <Text style={styles.title} numberOfLines={1}>
+                  {tx('Omba usafiri')}
+                </Text>
+                <Text style={styles.subtitle} numberOfLines={1}>
+                  {tx('Usafiri hadi hospitali, kliniki au duka la dawa')}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        <TransportForm
+          key={transportRun}
+          onExit={() => {
+            setStep(0);
+            setService(null);
+          }}
+        />
+      </View>
+    );
+  }
+
   return (
     <KeyboardAvoidingView
       style={styles.flex}
@@ -244,24 +301,25 @@ export default function Book() {
             </View>
             <View style={styles.headerTitles}>
               <Text style={styles.title} numberOfLines={1}>
-                {tx('Omba ziara ya nyumbani')}
+                {tx('Omba huduma')}
               </Text>
               <Text style={styles.subtitle} numberOfLines={1}>
-                {tx('Huduma bora ya afya, karibu nawe')}
+                {tx('Ziara ya nyumbani au usafiri wa kwenda kwenye huduma')}
               </Text>
             </View>
           </View>
 
-          {/* Transport sits one tap away from here, because "get me to
-              care" is the other half of the same need. */}
-          <Pressable
-            onPress={() => router.push('/transport')}
-            accessibilityRole="button"
-            style={({ pressed }) => [styles.trust, pressed && styles.pressed]}
-          >
-            <Ionicons name="car-outline" size={12} color={colors.success} />
-            <Text style={styles.trustText}>{tx('Usafiri')}</Text>
-          </Pressable>
+          {/* The trust badge the design puts here. It claims only what
+              the business can stand behind — no rating, because there is
+              no rating in the database to back one up. */}
+          <View style={styles.trust}>
+            <Ionicons name="shield-checkmark" size={11} color={colors.success} />
+            <Text style={styles.trustText}>
+              {tx('Salama')}
+              {'\n'}
+              {tx('Haraka')}
+            </Text>
+          </View>
         </View>
         <Stepper step={step} />
       </View>
@@ -299,6 +357,8 @@ export default function Book() {
                     <Ionicons name="chevron-forward" size={13} color={colors.subtle} />
                   </Pressable>
                 </View>
+
+                <TransportRow selected={isTransport} onPress={() => setService(TRANSPORT)} />
 
                 {sorted.map((item) => (
                   <ServiceRow
@@ -582,7 +642,16 @@ export default function Book() {
         ) : null}
 
         <Pressable
-          onPress={() => (step === LAST ? submit() : setStep(step + 1))}
+          onPress={() => {
+            if (step === 0 && isTransport) {
+              setTransportRun((n) => n + 1);
+              setStep(1);
+            } else if (step === LAST) {
+              submit();
+            } else {
+              setStep(step + 1);
+            }
+          }}
           disabled={!canContinue || busy}
           accessibilityRole="button"
           style={({ pressed }) => [
@@ -692,6 +761,40 @@ function Welcome() {
         ))}
       </View>
     </View>
+  );
+}
+
+// The transport option, drawn like a service row so it reads as one of
+// the things you can ask for. No price: a dispatcher quotes each trip,
+// and the row says so rather than showing a number that is not real.
+function TransportRow({ selected, onPress }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="radio"
+      accessibilityState={{ selected }}
+      style={({ pressed }) => [
+        styles.serviceRow,
+        { backgroundColor: colors.primaryLight, borderColor: colors.border },
+        selected && { borderColor: colors.primary, borderWidth: 2 },
+        pressed && styles.pressed,
+      ]}
+    >
+      <View style={[styles.rowIcon, { backgroundColor: colors.primary }]}>
+        <Ionicons name="car" size={20} color={colors.onPrimary} />
+      </View>
+      <View style={styles.rowText}>
+        <Text style={styles.serviceName} numberOfLines={2}>
+          {tx('Usafiri wa kwenda kwenye huduma')}
+        </Text>
+        <Text style={styles.duration} numberOfLines={2}>
+          {tx('Hospitali, kliniki au duka la dawa · bei inatumwa baada ya kupitiwa')}
+        </Text>
+      </View>
+      <View style={[styles.rowGo, { backgroundColor: colors.primary }]}>
+        <Ionicons name={selected ? 'checkmark' : 'arrow-forward'} size={15} color={colors.onPrimary} />
+      </View>
+    </Pressable>
   );
 }
 

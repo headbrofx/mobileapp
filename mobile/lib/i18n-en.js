@@ -826,4 +826,9 @@ export const EN_BY_SW = {
   "Majibu yaliyothibitishwa na mtaalamu": "Answers checked by a professional",
   "Uliza Afya AI": "Ask Afya AI",
   "Maswali ya mfano": "Example questions",
+  "Omba huduma": "Request care",
+  "Ziara ya nyumbani au usafiri wa kwenda kwenye huduma": "A home visit, or transport to care",
+  "Usafiri wa kwenda kwenye huduma": "Transport to care",
+  "Hospitali, kliniki au duka la dawa · bei inatumwa baada ya kupitiwa": "Hospital, clinic or pharmacy · fare sent after review",
+  "Omba huduma nyingine": "Request something else",
 };
