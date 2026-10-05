@@ -6,12 +6,9 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  useWindowDimensions,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   bookings as bookingsApi,
@@ -24,12 +21,7 @@ import { useSession } from '../../../lib/session';
 import { ErrorBox, MenuButton } from '../../../lib/ui';
 import { Wordmark } from '../../../lib/brand';
 import { accentAt, colors, font, fs, radius, scale, shadow, spacing, textScale, type } from '../../../lib/theme';
-import {
-  serviceColour,
-  serviceIcon,
-  serviceIcon3d,
-  serviceImage,
-} from '../../../lib/services-meta';
+import { serviceColour, serviceIcon, serviceImage, servicePrice } from '../../../lib/services-meta';
 
 // The home screen, element for element from the design.
 //
@@ -75,64 +67,9 @@ export default function Home() {
   const router = useRouter();
   const { user } = useSession();
   const { t, language } = useI18n();
-  const { width, height } = useWindowDimensions();
-  const insets = useSafeAreaInsets();
-  // The service tiles come first, and the picture takes what is left.
-  //
-  // This used to be the other way round — the hero took a fixed share of
-  // the screen and the tiles went wherever they landed. On a 640-tall
-  // Android that put the bottom row twelve pixels under the tab bar:
-  // half the catalogue was invisible unless you knew to scroll. Sizing
-  // the picture from the room left over fixes both complaints at once,
-  // because a tall phone has room to spare and the hero grows into it
-  // while a short one gives the room to the tiles.
-  // Two across, not three. Three fitted six services into two rows but
-  // gave each one a 107-point column, which is narrower than the names
-  // are: "Medication Administration" came out as three stacked
-  // fragments in ten-point type. Two across doubles the width, so the
-  // icon and the name both get room, and the third row is paid for out
-  // of the picture above rather than out of the fold.
-  // Floored, and a pixel given back.
-  //
-  // Two tiles plus the gap came to exactly the available width — 166.5
-  // each on a 375-wide phone — and a fractional width that sums to the
-  // container rounds over it, so the second tile wrapped and the grid
-  // rendered one per row down the left. It looked like a layout choice
-  // and it was a rounding error.
-  const tileWidth = Math.floor((width - spacing.md * 2 - spacing.sm - 2) / 2);
-  const tileHeight = Math.round(Math.min(Math.max(height * 0.155, 100), 170));
-  // Just under half the tile. At 52% the plate crowded the name and the
-  // tile read as an icon with a caption; this leaves the two in
-  // proportion.
-  const plate = Math.round(tileHeight * 0.46);
-
-  // Everything above the grid that is not the picture: the top bar, the
-  // greeting, the tagline, the button hanging off the hero and the
-  // section heading. Measured, not guessed, and scaled with the width
-  // because the type and the spacing are. BREATH is the slack that
-  // covers a greeting long enough to wrap onto a second line.
-  // Scales with the reader's text size as well as the width, because
-  // everything it stands for — the greeting, the tagline, the heading —
-  // is type.
-  const ABOVE_GRID = Math.round(scale(240) * textScale);
-  // Must match the tab bar in (tabs)/_layout.js, inset and all —
-  // useWindowDimensions reports the whole screen, including the strip
-  // the system reserves at the bottom, so leaving the inset out here
-  // hands the grid room that the bar is standing on.
-  const TAB_BAR = 66 + insets.bottom;
-  const BREATH = 16;
-  const HERO_MIN = 110;
-
-  // Two columns, two rows, four services — the owner's call, and the
-  // one that fits every phone without the last row sliding under the
-  // tab bar. "Zote" beside the heading opens the full catalogue, so
+  // Four services on Home; "Zote" opens the whole catalogue, so
   // nothing is hidden, only held back.
-  const rows = 2;
-  const shown = rows * 2;
-
-  const gridHeight = tileHeight * rows + spacing.sm * (rows - 1);
-  const room = height - TAB_BAR - ABOVE_GRID - gridHeight - BREATH;
-  const heroHeight = Math.round(Math.min(Math.max(room, HERO_MIN), 300));
+  const shown = 4;
 
   const [services, setServices] = useState([]);
   const [visits, setVisits] = useState([]);
@@ -226,117 +163,82 @@ export default function Home() {
         <MenuButton />
       </View>
 
+      {/* The one coloured block on the screen: who this is for, and the
+          one thing most people open the app to do. Everything below it
+          is white, so the eye has a single place to land. */}
       <View style={styles.gutter}>
-        <Text style={styles.greeting}>{t('home.greeting')}, {user?.name?.split(' ')[0] ?? tx('Karibu')}!</Text>
-        <Text style={styles.tagline}>{t('home.tagline')}</Text>
-      </View>
-
-      <View style={styles.heroWrap}>
-        <Image
-          source={require('../../../assets/hero.png')}
-          style={[styles.hero, { height: heroHeight }]}
-          resizeMode="cover"
-        />
-
-        {/* The design hangs the button off the foot of the picture,
-            which is what stops the two reading as separate blocks. */}
-        <Pressable
-          onPress={() => router.push('/book')}
-          accessibilityRole="button"
-          style={({ pressed }) => [styles.ctaWrap, pressed && styles.pressed]}
-        >
-          <LinearGradient
-            colors={[colors.primary, colors.primaryDark]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.cta}
+        <View style={styles.hero}>
+          <View style={styles.heroText}>
+            <Text style={styles.heroHello}>{t('home.greeting')},</Text>
+            <Text style={styles.heroName} numberOfLines={1}>
+              {user?.name?.split(' ')[0] ?? tx('Karibu')}
+            </Text>
+            <Text style={styles.heroTag} numberOfLines={2}>
+              {t('home.tagline')}
+            </Text>
+          </View>
+          <Image source={require('../../../assets/hero.png')} style={styles.heroPhoto} resizeMode="cover" />
+          <Pressable
+            onPress={() => router.push('/book')}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.heroButton, pressed && styles.pressed]}
           >
-            <View style={styles.ctaIcon}>
-              <Ionicons name="calendar" size={18} color={colors.onPrimary} />
-            </View>
-            <Text style={styles.ctaText}>{t('home.book')}</Text>
-            <Ionicons name="arrow-forward" size={19} color={colors.onPrimary} />
-          </LinearGradient>
-        </Pressable>
+            <Text style={styles.heroButtonText}>{tx('Omba huduma')}</Text>
+            <Ionicons name="arrow-forward" size={18} color={colors.primary} />
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.gutter}>
         <ErrorBox error={error} />
 
-        {/* Care Mobility's two other doors, beside the one above: a
-            ride to care, and what is available where you are. */}
         <View style={styles.mobilityRow}>
           <Pressable
             onPress={() => router.push('/transport')}
             accessibilityRole="button"
             style={({ pressed }) => [styles.mobility, pressed && styles.pressed]}
           >
-            <View style={styles.mobilityIcon}>
-              <Ionicons name="car" size={18} color={colors.onPrimary} />
-            </View>
-            <View style={styles.mobilityText}>
-              <Text style={styles.mobilityTitle}>{tx('Omba usafiri')}</Text>
-              <Text style={styles.mobilySub} numberOfLines={1}>{tx('Hadi hospitali au kliniki')}</Text>
-            </View>
+            <Ionicons name="car-outline" size={22} color={colors.accent} />
+            <Text style={styles.mobilityTitle}>{tx('Usafiri')}</Text>
+            <Text style={styles.mobilySub} numberOfLines={1}>{tx('Hadi hospitali au kliniki')}</Text>
           </Pressable>
           <Pressable
             onPress={() => router.push('/care')}
             accessibilityRole="button"
             style={({ pressed }) => [styles.mobility, pressed && styles.pressed]}
           >
-            <View style={styles.mobilityIcon}>
-              <Ionicons name="map" size={18} color={colors.onPrimary} />
-            </View>
-            <View style={styles.mobilityText}>
-              <Text style={styles.mobilityTitle}>{tx('Huduma karibu')}</Text>
-              <Text style={styles.mobilySub} numberOfLines={1}>{tx('Ramani ya maeneo yetu')}</Text>
-            </View>
+            <Ionicons name="location-outline" size={22} color={colors.accent} />
+            <Text style={styles.mobilityTitle}>{tx('Karibu nawe')}</Text>
+            <Text style={styles.mobilySub} numberOfLines={1}>{tx('Ramani ya maeneo yetu')}</Text>
           </Pressable>
         </View>
 
         <SectionHeader title={t('home.ourServices')} label={t('common.all')} onPress={() => router.push('/services')} />
 
-        <View style={styles.grid}>
-          {services.slice(0, shown).map((service) => (
-            <Pressable
-              key={service.id}
-              onPress={() => router.push('/book')}
-              accessibilityRole="button"
-              style={({ pressed }) => [{ width: tileWidth }, pressed && styles.pressed]}
-            >
-              <View
-                style={[
-                  styles.tile,
-                  { height: tileHeight, backgroundColor: serviceColour(service.name) },
-                ]}
+        {/* A list, not a grid of coloured blocks. Every row is the same
+            white card with the theme's own tint behind its icon, so the
+            catalogue reads as one thing and the names get the width. */}
+        <View style={styles.list}>
+          {services.slice(0, shown).map((service) => {
+            const price = servicePrice(service);
+            return (
+              <Pressable
+                key={service.id}
+                onPress={() => router.push('/book')}
+                accessibilityRole="button"
+                style={({ pressed }) => [styles.serviceRow, pressed && styles.pressed]}
               >
-                {/* The raised icon sits on a white plate, as the
-                    design has it — the colour of the tile behind it is
-                    what the plate is there to hold it off. A service
-                    without artwork keeps its flat icon on the same
-                    plate, so the row never breaks. */}
-                <View style={[styles.tilePlate, { width: plate, height: plate }]}>
-                  {serviceIcon3d(service.name) ? (
-                    <Image
-                      source={serviceIcon3d(service.name)}
-                      style={{ width: plate - 18, height: plate - 18 }}
-                      resizeMode="contain"
-                      accessible={false}
-                    />
-                  ) : (
-                    <Ionicons
-                      name={serviceIcon(service.name)}
-                      size={plate - 26}
-                      color={serviceColour(service.name)}
-                    />
-                  )}
+                <View style={styles.serviceIcon}>
+                  <Ionicons name={serviceIcon(service.name)} size={18} color={colors.primary} />
                 </View>
-                <Text style={styles.tileText} numberOfLines={2}>
+                <Text style={styles.serviceName} numberOfLines={1}>
                   {service.name}
                 </Text>
-              </View>
-            </Pressable>
-          ))}
+                {price ? <Text style={styles.servicePrice}>{price.free ? price.text : price.text.replace(`${tx('Kuanzia')} `, '')}</Text> : null}
+                <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
+              </Pressable>
+            );
+          })}
         </View>
 
         {featured ? (
@@ -525,32 +427,38 @@ const styles = StyleSheet.create({
   },
   bellCount: { color: '#FFFFFF', fontSize: fs(10), fontFamily: font.bold },
 
-  greeting: { ...type.title, fontFamily: font.extrabold, fontSize: type.display.fontSize - 5, color: colors.text },
-  tagline: { ...type.body, color: colors.muted, marginTop: 2 },
-
-  // The button hangs below the picture, so the wrapper leaves room for
-  // the half that overlaps.
-  heroWrap: { marginTop: spacing.md, marginBottom: spacing.xxl },
-  hero: { width: '100%', borderRadius: radius.xl },
-  ctaWrap: { position: 'absolute', left: spacing.md, right: spacing.md, bottom: -26 },
-  cta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    borderRadius: radius.lg,
-    paddingVertical: spacing.md - 2,
-    paddingHorizontal: spacing.md,
+  hero: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.xl,
+    padding: spacing.md,
+    overflow: 'hidden',
     ...shadow.lifted,
   },
-  ctaIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: radius.sm,
-    backgroundColor: 'rgba(255,255,255,0.22)',
-    alignItems: 'center',
-    justifyContent: 'center',
+  heroText: { paddingRight: 96 },
+  heroHello: { ...type.small, color: colors.onPrimary, opacity: 0.85 },
+  heroName: { fontSize: fs(22), lineHeight: fs(28), fontFamily: font.extrabold, color: colors.onPrimary },
+  heroTag: { ...type.small, color: colors.onPrimary, opacity: 0.85, marginTop: 2 },
+  heroPhoto: {
+    position: 'absolute',
+    top: spacing.md,
+    right: spacing.md,
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    borderWidth: 3,
+    borderColor: 'rgba(255,255,255,0.35)',
   },
-  ctaText: { flex: 1, ...type.bodyStrong, color: colors.onPrimary },
+  heroButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.md,
+    marginTop: spacing.md,
+  },
+  heroButtonText: { ...type.bodyStrong, fontFamily: font.bold, color: colors.primary },
 
   sectionRow: {
     flexDirection: 'row',
@@ -563,30 +471,28 @@ const styles = StyleSheet.create({
   viewAll: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   viewAllText: { ...type.label, color: colors.primary },
 
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  tile: {
-    borderRadius: radius.lg,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.xs,
+  list: { gap: spacing.xs + 2 },
+  serviceRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    ...shadow.card,
-  },
-  tilePlate: {
+    gap: spacing.sm,
+    backgroundColor: colors.surface,
     borderRadius: radius.md,
-    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm + 2,
+  },
+  serviceIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tileText: {
-    ...type.tiny,
-    fontSize: fs(12),
-    lineHeight: fs(15),
-    fontFamily: font.bold,
-    color: '#FFFFFF',
-    textAlign: 'center',
-  },
+  serviceName: { flex: 1, ...type.bodyStrong, color: colors.text },
+  servicePrice: { ...type.label, color: colors.primary },
 
   featured: {
     flexDirection: 'row',
@@ -692,25 +598,13 @@ const styles = StyleSheet.create({
   mobilityRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
   mobility: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.hairline,
-    padding: spacing.sm,
-    ...shadow.card,
+    padding: spacing.sm + 2,
+    gap: 2,
   },
-  mobilityIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mobilityText: { flex: 1 },
-  mobilityTitle: { ...type.label, color: colors.text },
+  mobilityTitle: { ...type.bodyStrong, color: colors.text, marginTop: 4 },
   mobilySub: { ...type.tiny, color: colors.muted },
 });

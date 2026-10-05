@@ -36,8 +36,9 @@ const THEME_KEY = 'afya.theme';
 
 const PALETTES = {
   green: {
-    label: 'Kijani',
-    swatch: '#0E7A5F',
+    label: 'Kijani tulivu',
+    swatch: '#0F6E56',
+    accent: '#0F6E56',
     bg: '#F4F7F6',
     surface: '#FFFFFF',
     surfaceAlt: '#FBFCFC',
@@ -46,9 +47,9 @@ const PALETTES = {
     text: '#101A17',
     muted: '#64766F',
     subtle: '#9AA8A3',
-    primary: '#0E7A5F',
-    primaryDark: '#09563F',
-    primaryLight: '#E6F2EE',
+    primary: '#0F6E56',
+    primaryDark: '#085041',
+    primaryLight: '#E1F5EE',
     onPrimary: '#FFFFFF',
     danger: '#B3261E',
     dangerBg: '#FDEDEC',
@@ -56,25 +57,30 @@ const PALETTES = {
     shadowFar: '#062018',
   },
   orange: {
-    label: 'Chungwa',
+    label: 'Machungwa',
     // Terracotta rather than the fire orange this started as. The
     // owner asked for the harshness taken out, and harshness here was
     // saturation: #C44200 is fully saturated, which on a phone in
     // daylight is a colour that shouts. This is the same hue at 62%,
     // solved to 5.20:1 on white so nothing became harder to read —
     // the rule above still holds.
-    swatch: '#AA5528',
-    bg: '#F8F6F5',
+    //
+    // Then the owner found the terracotta itself brown and heavy. The
+    // brown was low saturation, so this is a clean, saturated orange
+    // instead, still solved to clear 5:1 on white (#C2410C is 5.18:1).
+    swatch: '#C2410C',
+    accent: '#C2410C',
+    bg: '#FAF8F6',
     surface: '#FFFFFF',
     surfaceAlt: '#FCFBFA',
-    border: '#EEE8E5',
-    hairline: '#F5F2F0',
-    text: '#1A120D',
-    muted: '#76685F',
-    subtle: '#A89B92',
-    primary: '#AA5528',
-    primaryDark: '#763C1C',
-    primaryLight: '#F7EFEB',
+    border: '#EFE9E4',
+    hairline: '#F4EFEB',
+    text: '#2B2B2B',
+    muted: '#77706A',
+    subtle: '#A8A29C',
+    primary: '#C2410C',
+    primaryDark: '#9A3412',
+    primaryLight: '#FFF1E8',
     onPrimary: '#FFFFFF',
     // Darker than the other two on purpose — see rule 2 above.
     danger: '#8A1008',
@@ -82,20 +88,24 @@ const PALETTES = {
     shadowNear: '#2B1A10',
     shadowFar: '#1C0F07',
   },
+  // The brief's own colours: #0D4EA6 blue, #F58220 orange, on
+  // #F5F4F1 with #2B2B2B text. The orange is only ever an icon accent —
+  // at 2.6:1 on white it is too light to carry text.
   blue: {
-    label: 'Buluu',
-    swatch: '#0D6EAD',
-    bg: '#F3F6F9',
+    label: 'Bluu (rangi za brand)',
+    swatch: '#0D4EA6',
+    accent: '#F58220',
+    bg: '#F5F4F1',
     surface: '#FFFFFF',
-    surfaceAlt: '#FAFCFD',
-    border: '#E3EAF0',
-    hairline: '#EFF4F8',
-    text: '#0F1A22',
-    muted: '#61727E',
-    subtle: '#96A5B0',
-    primary: '#0D6EAD',
-    primaryDark: '#0A5586',
-    primaryLight: '#E4F1FA',
+    surfaceAlt: '#FAFAF8',
+    border: '#E4E2DC',
+    hairline: '#EEECE7',
+    text: '#2B2B2B',
+    muted: '#6B6964',
+    subtle: '#9A988F',
+    primary: '#0D4EA6',
+    primaryDark: '#0A3D82',
+    primaryLight: '#E6EEF8',
     onPrimary: '#FFFFFF',
     danger: '#B3261E',
     dangerBg: '#FDEDEC',
@@ -180,6 +190,9 @@ export const colors = {
   primaryDark: palette.primaryDark,
   primaryLight: palette.primaryLight,
   onPrimary: palette.onPrimary,
+  // A second colour for small icons only — the brand orange in the blue
+  // theme, the primary itself in the others.
+  accent: palette.accent ?? palette.primary,
 
   // The logo's own colours, kept for accents and for the wordmark. These
   // do not follow the theme — the business has one logo.
