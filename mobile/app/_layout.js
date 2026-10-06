@@ -10,7 +10,6 @@ import {
   Poppins_500Medium,
   Poppins_600SemiBold,
   Poppins_700Bold,
-  Poppins_800ExtraBold,
 } from '@expo-google-fonts/poppins';
 import { I18nProvider } from '../lib/i18n';
 import { SessionProvider } from '../lib/session';
@@ -29,11 +28,14 @@ SplashScreen.preventAutoHideAsync().catch(() => {
 
 export default function RootLayout() {
   const [ready, error] = useFonts({
+    // One step lighter than each role's name; see font in lib/theme.js.
+    // Regular and medium stay as they are: regular has nowhere lighter
+    // to go that still reads on a phone, and medium is already light.
     [font.regular]: Poppins_400Regular,
     [font.medium]: Poppins_500Medium,
-    [font.semibold]: Poppins_600SemiBold,
-    [font.bold]: Poppins_700Bold,
-    [font.extrabold]: Poppins_800ExtraBold,
+    [font.semibold]: Poppins_500Medium,
+    [font.bold]: Poppins_600SemiBold,
+    [font.extrabold]: Poppins_700Bold,
   });
 
   useEffect(() => {

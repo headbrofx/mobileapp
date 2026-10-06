@@ -336,14 +336,19 @@ export const dark = {
 // single error. Anything that wants bold names the bold file.
 
 // Poppins. The owner found Plus Jakarta Sans unappealing; Poppins is
-// the face most apps here use, rounder and a touch heavier, and it holds
-// up at small sizes on a cheap screen.
+// the face most apps here use, and it holds up at small sizes on a cheap
+// screen.
+//
+// The names are roles, not weights, and each role is loaded one step
+// lighter than its name (see app/_layout.js). Poppins is a heavy face:
+// at the weights Jakarta used, every heading and button came out dense
+// and crowded. "bold" is Poppins SemiBold, "extrabold" is Poppins Bold.
 export const font = {
-  regular: 'Poppins_400Regular',
-  medium: 'Poppins_500Medium',
-  semibold: 'Poppins_600SemiBold',
-  bold: 'Poppins_700Bold',
-  extrabold: 'Poppins_800ExtraBold',
+  regular: 'AppFont-Regular',
+  medium: 'AppFont-Medium',
+  semibold: 'AppFont-SemiBold',
+  bold: 'AppFont-Bold',
+  extrabold: 'AppFont-ExtraBold',
 };
 
 // --- Scale -----------------------------------------------------------
@@ -407,14 +412,16 @@ const ts = textScaleSize;
 export const fs = textScaleSize;
 
 export const type = {
-  display: { fontFamily: font.extrabold, fontSize: ts(28), lineHeight: ts(34) },
-  title: { fontFamily: font.bold, fontSize: ts(21), lineHeight: ts(27) },
-  section: { fontFamily: font.bold, fontSize: ts(16), lineHeight: ts(21) },
-  body: { fontFamily: font.regular, fontSize: ts(14), lineHeight: ts(20) },
-  bodyStrong: { fontFamily: font.semibold, fontSize: ts(14), lineHeight: ts(20) },
-  label: { fontFamily: font.semibold, fontSize: ts(13), lineHeight: ts(17) },
-  small: { fontFamily: font.regular, fontSize: ts(12), lineHeight: ts(16) },
-  tiny: { fontFamily: font.medium, fontSize: ts(11), lineHeight: ts(14) },
+  // Line heights at about 1.45 of the size. Poppins has tall ascenders,
+  // and the tighter values tuned for Jakarta made lines crowd each other.
+  display: { fontFamily: font.extrabold, fontSize: ts(28), lineHeight: ts(38) },
+  title: { fontFamily: font.bold, fontSize: ts(21), lineHeight: ts(30) },
+  section: { fontFamily: font.bold, fontSize: ts(16), lineHeight: ts(23) },
+  body: { fontFamily: font.regular, fontSize: ts(14), lineHeight: ts(21) },
+  bodyStrong: { fontFamily: font.semibold, fontSize: ts(14), lineHeight: ts(21) },
+  label: { fontFamily: font.semibold, fontSize: ts(13), lineHeight: ts(19) },
+  small: { fontFamily: font.regular, fontSize: ts(12), lineHeight: ts(18) },
+  tiny: { fontFamily: font.medium, fontSize: ts(11), lineHeight: ts(16) },
 };
 
 export const spacing = {
