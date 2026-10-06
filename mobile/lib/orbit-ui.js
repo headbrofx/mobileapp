@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { accentAt, colors, font, fs, radius, scale, shadow, spacing, type } from './theme';
+import { tx } from './i18n';
 
 // Orbit's own surface.
 //
@@ -67,8 +68,10 @@ export const orbit = {
 // ring all the way round would say Orbit knows where the cycle ends,
 // and it does not — it has an average of what happened before.
 
-export function CycleRing({ day, length, phase, size = 240, label, sublabel }) {
-  const stroke = 14;
+// `onColour` draws it for a coloured card: a translucent white track and
+// a white arc, so it sits on the theme's primary like the Home card.
+export function CycleRing({ day, length, phase, size = 240, label, sublabel, onColour = false }) {
+  const stroke = size < 160 ? 10 : 14;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
 
@@ -76,7 +79,8 @@ export function CycleRing({ day, length, phase, size = 240, label, sublabel }) {
   // length, and a ring that divides by zero renders as nothing at all.
   const total = Number.isFinite(length) && length > 0 ? length : 28;
   const progress = Number.isFinite(day) && day > 0 ? Math.min(day / total, 1) : 0;
-  const colour = orbit.phase[phase] ?? orbit.plum;
+  const colour = onColour ? '#FFFFFF' : orbit.phase[phase] ?? orbit.plum;
+  const track = onColour ? 'rgba(255,255,255,0.25)' : orbit.plumLine;
 
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
@@ -84,7 +88,7 @@ export function CycleRing({ day, length, phase, size = 240, label, sublabel }) {
         <Defs>
           <SvgGradient id="orbitArc" x1="0" y1="0" x2="1" y2="1">
             <Stop offset="0" stopColor={colour} stopOpacity="1" />
-            <Stop offset="1" stopColor={orbit.plum} stopOpacity="0.85" />
+            <Stop offset="1" stopColor={onColour ? '#FFFFFF' : orbit.plum} stopOpacity="0.85" />
           </SvgGradient>
         </Defs>
 
@@ -93,7 +97,7 @@ export function CycleRing({ day, length, phase, size = 240, label, sublabel }) {
           cx={size / 2}
           cy={size / 2}
           r={r}
-          stroke={orbit.plumLine}
+          stroke={track}
           strokeWidth={stroke}
           fill="none"
         />
@@ -112,8 +116,10 @@ export function CycleRing({ day, length, phase, size = 240, label, sublabel }) {
       </Svg>
 
       <View style={styles.ringCentre}>
-        <Text style={styles.ringLabel}>{label}</Text>
-        {sublabel ? <Text style={styles.ringSub}>{sublabel}</Text> : null}
+        <Text style={[styles.ringLabel, onColour && styles.onColour, size < 160 && styles.ringLabelSmall]}>
+          {label}
+        </Text>
+        {sublabel ? <Text style={[styles.ringSub, onColour && styles.onColourSoft]}>{sublabel}</Text> : null}
       </View>
     </View>
   );
@@ -160,11 +166,14 @@ const STATUS_TONE = {
   MONITORING: { bg: orbit.plumSoft, fg: orbit.inkSoft },
 };
 
+// In words a reader uses, not the API's own codes.
+const STATUS_LABEL = { STABLE: 'Tulivu', CHANGING: 'Inabadilika', MONITORING: 'Tunafuatilia' };
+
 export function StatusPill({ status }) {
   const tone = STATUS_TONE[status] ?? STATUS_TONE.MONITORING;
   return (
     <View style={[styles.pill, { backgroundColor: tone.bg }]}>
-      <Text style={[styles.pillText, { color: tone.fg }]}>{status}</Text>
+      <Text style={[styles.pillText, { color: tone.fg }]}>{tx(STATUS_LABEL[status] ?? status)}</Text>
     </View>
   );
 }
@@ -176,12 +185,16 @@ export function StatusPill({ status }) {
 
 export function NotYet({ icon = 'sparkles-outline', title, body, children }) {
   return (
-    <OrbitCard tone="soft" style={styles.notYet}>
-      <View style={styles.notYetIcon}>
-        <Ionicons name={icon} size={20} color={orbit.plum} />
+    <OrbitCard>
+      <View style={styles.notYetRow}>
+        <View style={styles.notYetIcon}>
+          <Ionicons name={icon} size={19} color={orbit.plum} />
+        </View>
+        <View style={styles.notYetText}>
+          <Text style={styles.notYetTitle}>{title}</Text>
+          <Text style={styles.notYetBody}>{body}</Text>
+        </View>
       </View>
-      <Text style={styles.notYetTitle}>{title}</Text>
-      <Text style={styles.notYetBody}>{body}</Text>
       {children}
     </OrbitCard>
   );
@@ -240,6 +253,9 @@ const styles = StyleSheet.create({
     color: orbit.ink,
     textAlign: 'center',
   },
+  ringLabelSmall: { fontSize: fs(26), lineHeight: fs(30) },
+  onColour: { color: '#FFFFFF' },
+  onColourSoft: { color: 'rgba(255,255,255,0.85)' },
   ringSub: {
     ...type.small,
     color: orbit.inkSoft,
@@ -250,14 +266,17 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: orbit.surface,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: orbit.plumLine,
     padding: spacing.md,
     ...shadow.card,
   },
-  cardSoft: { backgroundColor: orbit.plumSoft, borderColor: 'transparent' },
-  cardRose: { backgroundColor: orbit.roseSoft, borderColor: 'transparent' },
+  // Every Orbit card is the same white card now. The tinted variants
+  // turned the screen into a stack of pale blocks with nothing standing
+  // out; the one coloured card is the cycle card at the top.
+  cardSoft: {},
+  cardRose: {},
 
   sectionRow: {
     flexDirection: 'row',
@@ -273,31 +292,20 @@ const styles = StyleSheet.create({
   },
 
   pill: { borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 3 },
-  pillText: { fontSize: fs(9), fontFamily: font.bold, letterSpacing: 0.6 },
+  pillText: { fontSize: fs(10.5), fontFamily: font.bold },
 
-  notYet: { alignItems: 'center' },
+  notYetRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
   notYetIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: '#FFFFFF',
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: orbit.plumSoft,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.xs,
   },
-  notYetTitle: {
-    fontSize: fs(15),
-    fontFamily: font.bold,
-    color: orbit.ink,
-    textAlign: 'center',
-  },
-  notYetBody: {
-    ...type.small,
-    color: orbit.inkSoft,
-    textAlign: 'center',
-    marginTop: 4,
-    lineHeight: scale(18),
-  },
+  notYetText: { flex: 1 },
+  notYetTitle: { fontSize: fs(15), fontFamily: font.bold, color: orbit.ink },
+  notYetBody: { ...type.small, color: orbit.inkSoft, marginTop: 2, lineHeight: scale(18) },
 
   scaleRow: { flexDirection: 'row', gap: spacing.xs },
   scaleCell: { flex: 1 },

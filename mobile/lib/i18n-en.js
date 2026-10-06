@@ -831,4 +831,12 @@ export const EN_BY_SW = {
   "Usafiri wa kwenda kwenye huduma": "Transport to care",
   "Hospitali, kliniki au duka la dawa · bei inatumwa baada ya kupitiwa": "Hospital, clinic or pharmacy · fare sent after review",
   "Omba huduma nyingine": "Request something else",
+  "Tulivu": "Stable",
+  "Inabadilika": "Changing",
+  "Tunafuatilia": "Monitoring",
+  "\"Tunafuatilia\" inamaanisha bado hakuna siku za kutosha kusema, si kwamba kuna tatizo.": "\"Monitoring\" means there are not enough days yet to say, not that something is wrong.",
+  "Mzunguko wako": "Your cycle",
+  "Anza Orbit yako": "Start your Orbit",
+  "Andika tarehe ya hedhi yako ya mwisho ili Orbit ianze kujifunza mzunguko wako.": "Enter the date of your last period so Orbit can start learning your cycle.",
+  "Uliza swali lako la afya": "Ask your health question",
 };

@@ -95,7 +95,7 @@ export default function Ask() {
         </View>
         <View style={styles.headerTitles}>
           <Text style={styles.headerTitle}>Afya AI</Text>
-          <Text style={styles.headerSub}>{tx('Majibu yaliyothibitishwa na mtaalamu')}</Text>
+          <Text style={styles.headerSub}>Afya Nyumbani</Text>
         </View>
 
         <Pressable
@@ -173,16 +173,27 @@ export default function Ask() {
 function Welcome({ onPick }) {
   return (
     <View>
+      {/* The same coloured card that opens Home and Orbit, so the three
+          tabs read as one app. */}
       <View style={styles.welcomeCard}>
-        <View style={styles.welcomeIcon}>
-          <Ionicons name="sparkles" size={24} color={colors.onPrimary} />
+        <View style={styles.welcomeTop}>
+          <View style={styles.welcomeText}>
+            <Text style={styles.welcomeKicker}>Afya AI</Text>
+            <Text style={styles.welcomeTitle}>{tx('Uliza swali lako la afya')}</Text>
+          </View>
+          <View style={styles.welcomeIcon}>
+            <Ionicons name="sparkles" size={24} color={colors.onPrimary} />
+          </View>
         </View>
-        <Text style={styles.welcomeTitle}>{tx('Uliza Afya AI')}</Text>
         <Text style={styles.welcomeBody}>
           {tx(
             'Uliza kuhusu afya yako au huduma zetu. Majibu yanatoka kwenye maandishi yaliyopitiwa na mtaalamu — hakuna kubahatisha.'
           )}
         </Text>
+        <View style={styles.welcomeBadge}>
+          <Ionicons name="shield-checkmark" size={13} color={colors.onPrimary} />
+          <Text style={styles.welcomeBadgeText}>{tx('Majibu yaliyothibitishwa na mtaalamu')}</Text>
+        </View>
       </View>
 
       <Text style={styles.chipsHead}>{tx('Maswali ya mfano')}</Text>
@@ -424,26 +435,37 @@ const styles = StyleSheet.create({
 
   // --- Welcome ---
   welcomeCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.xl,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    padding: spacing.lg,
-    alignItems: 'center',
-    marginBottom: spacing.md,
-    ...shadow.card,
-  },
-  welcomeIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 18,
     backgroundColor: colors.primary,
+    borderRadius: radius.xl,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    ...shadow.lifted,
+  },
+  welcomeTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  welcomeText: { flex: 1 },
+  welcomeKicker: { ...type.small, color: colors.onPrimary, opacity: 0.85 },
+  welcomeTitle: { fontSize: fs(21), lineHeight: fs(27), fontFamily: font.extrabold, color: colors.onPrimary },
+  welcomeIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(255,255,255,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.sm,
   },
-  welcomeTitle: { ...type.title, color: colors.text },
-  welcomeBody: { ...type.body, color: colors.muted, textAlign: 'center', marginTop: spacing.xs, lineHeight: scale(21) },
+  welcomeBody: { ...type.small, color: colors.onPrimary, opacity: 0.9, marginTop: spacing.sm, lineHeight: scale(19) },
+  welcomeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 5,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    borderRadius: radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginTop: spacing.sm,
+  },
+  welcomeBadgeText: { ...type.tiny, fontFamily: font.semibold, color: colors.onPrimary },
 
   chipsHead: { ...type.section, color: colors.text, marginBottom: spacing.sm },
   chips: { gap: spacing.xs + 2 },
@@ -454,16 +476,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.hairline,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    ...shadow.card,
+    paddingHorizontal: spacing.sm + 2,
   },
   chipPressed: { borderColor: colors.primary, backgroundColor: colors.primaryLight },
   chipIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 34,
+    height: 34,
+    borderRadius: 10,
     backgroundColor: colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',

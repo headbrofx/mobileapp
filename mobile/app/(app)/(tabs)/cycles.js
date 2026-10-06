@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -21,7 +20,7 @@ import {
   StatusPill,
   orbit,
 } from '../../../lib/orbit-ui';
-import { colors, font, fs, radius, scale, spacing, type } from '../../../lib/theme';
+import { colors, font, fs, radius, scale, shadow, spacing, type } from '../../../lib/theme';
 
 // Orbit — the women's health module's home.
 //
@@ -325,14 +324,9 @@ export default function OrbitHome() {
           accessibilityRole="button"
           style={({ pressed }) => [pressed && styles.pressed]}
         >
-          <LinearGradient
-            colors={[orbit.plum, orbit.plumDeep]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.talk}
-          >
+          <OrbitCard style={styles.talk}>
             <View style={styles.talkIcon}>
-              <Ionicons name="medkit-outline" size={19} color="#FFFFFF" />
+              <Ionicons name="medkit-outline" size={19} color={orbit.plum} />
             </View>
             <View style={styles.rowText}>
               <Text style={styles.talkTitle}>{tx('Zungumza na mtaalamu')}</Text>
@@ -340,8 +334,8 @@ export default function OrbitHome() {
                 {tx('Orbit si mbadala wa mtaalamu wa afya. Unaweza kuomba muuguzi wakati wowote.')}
               </Text>
             </View>
-            <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
-          </LinearGradient>
+            <Ionicons name="chevron-forward" size={17} color={orbit.inkFaint} />
+          </OrbitCard>
         </Pressable>
 
         <Text style={styles.footer}>
@@ -358,47 +352,51 @@ function CycleCard({ insights, day, length, phase, onPress }) {
   const cyclesLogged = insights?.cyclesLogged ?? 0;
   const prediction = insights?.prediction;
 
+  // The one coloured card on the screen, the same shape as the greeting
+  // card on Home: the answer in large type on the left, the ring small
+  // beside it. The ring used to fill the whole screen, empty, before a
+  // single date was entered.
   if (cyclesLogged === 0) {
     return (
-      <OrbitCard tone="soft" style={styles.cycleCard}>
-        <CycleRing day={0} length={28} label="—" sublabel={tx('Bado hakuna mzunguko')} />
-        <Text style={styles.cycleEmpty}>
-          {tx(
-            'Orbit yako ndio kwanza inaanza. Andika tarehe ya hedhi yako ya mwisho ili ianze kujifunza mzunguko wako.'
-          )}
-        </Text>
-        <Pressable onPress={onPress} accessibilityRole="button" style={styles.notYetCta}>
-          <Text style={styles.notYetCtaText}>{tx('Andika hedhi')}</Text>
-        </Pressable>
-      </OrbitCard>
+      <Pressable onPress={onPress} accessibilityRole="button" style={({ pressed }) => [pressed && styles.pressed]}>
+        <View style={styles.hero}>
+          <View style={styles.heroTop}>
+            <View style={styles.rowText}>
+              <Text style={styles.heroKicker}>{tx('Mzunguko wako')}</Text>
+              <Text style={styles.heroTitle}>{tx('Anza Orbit yako')}</Text>
+              <Text style={styles.heroBody}>
+                {tx('Andika tarehe ya hedhi yako ya mwisho ili Orbit ianze kujifunza mzunguko wako.')}
+              </Text>
+            </View>
+            <CycleRing size={92} day={0} length={28} label="—" onColour />
+          </View>
+          <View style={styles.heroButton}>
+            <Text style={styles.heroButtonText}>{tx('Andika hedhi')}</Text>
+            <Ionicons name="arrow-forward" size={18} color={orbit.plum} />
+          </View>
+        </View>
+      </Pressable>
     );
   }
 
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      style={({ pressed }) => [pressed && styles.pressed]}
-    >
-      <OrbitCard style={styles.cycleCard}>
-        <CycleRing
-          day={day}
-          length={length}
-          phase={phase}
-          label={day ? String(day) : '—'}
-          sublabel={day ? tx('Siku ya mzunguko') : tx('Bado hakuna mzunguko')}
-        />
-
-        {phase ? (
-          <View style={[styles.phasePill, { backgroundColor: `${orbit.phase[phase]}18` }]}>
-            <View style={[styles.phaseDot, { backgroundColor: orbit.phase[phase] }]} />
-            <Text style={[styles.phaseText, { color: orbit.phase[phase] }]}>
-              {tx(PHASE_LABEL[phase])}
-            </Text>
+    <Pressable onPress={onPress} accessibilityRole="button" style={({ pressed }) => [pressed && styles.pressed]}>
+      <View style={styles.hero}>
+        <View style={styles.heroTop}>
+          <View style={styles.rowText}>
+            <Text style={styles.heroKicker}>{tx('Siku ya mzunguko')}</Text>
+            <Text style={styles.heroDay}>{day ? String(day) : '—'}</Text>
+            {phase ? (
+              <View style={styles.heroPill}>
+                <View style={styles.heroPillDot} />
+                <Text style={styles.heroPillText}>{tx(PHASE_LABEL[phase])}</Text>
+              </View>
+            ) : null}
           </View>
-        ) : null}
+          <CycleRing size={104} day={day} length={length} phase={phase} label="" onColour />
+        </View>
 
-        <View style={styles.cycleStats}>
+        <View style={styles.heroStats}>
           <Stat
             label={tx('Inakadiriwa')}
             value={
@@ -412,26 +410,18 @@ function CycleCard({ insights, day, length, phase, onPress }) {
             }
           />
           <Stat label={tx('Wastani')} value={length ? `${length}` : '—'} />
-          <Stat
-            label={tx('Uthabiti')}
-            value={tx(REGULARITY_LABEL[insights?.regularity] ?? '—')}
-          />
+          <Stat label={tx('Uthabiti')} value={tx(REGULARITY_LABEL[insights?.regularity] ?? '—')} />
         </View>
 
         {/* Every prediction carries where it came from. "Based on your
             previous cycles" is not a disclaimer bolted on — it is the
             only true description of what this number is. */}
-        {prediction ? (
-          <Text style={styles.estimate}>
-            {tx('Kutokana na mizunguko yako')} {prediction.basedOnIntervals}{' '}
-            {tx('iliyopita. Ni makadirio, si uhakika.')}
-          </Text>
-        ) : (
-          <Text style={styles.estimate}>
-            {tx('Orbit inahitaji angalau mizunguko miwili kabla ya kukadiria ujao.')}
-          </Text>
-        )}
-      </OrbitCard>
+        <Text style={styles.heroNote}>
+          {prediction
+            ? `${tx('Kutokana na mizunguko yako')} ${prediction.basedOnIntervals} ${tx('iliyopita. Ni makadirio, si uhakika.')}`
+            : tx('Orbit inahitaji angalau mizunguko miwili kabla ya kukadiria ujao.')}
+        </Text>
+      </View>
     </Pressable>
   );
 }
@@ -528,7 +518,7 @@ function CheckInCard({ streak, onPress }) {
           <Ionicons
             name={done ? 'checkmark' : 'add'}
             size={20}
-            color={done ? colors.success : orbit.rose}
+            color={done ? colors.success : orbit.plum}
           />
         </View>
         <View style={styles.rowText}>
@@ -585,7 +575,7 @@ function SnapshotCard({ patterns, onPress }) {
         {/* Says what MONITORING means, once, rather than leaving three
             of them on screen looking like a warning. */}
         <Text style={styles.snapshotNote}>
-          {tx('MONITORING inamaanisha bado hakuna siku za kutosha kusema, si kwamba kuna tatizo.')}
+          {tx('"Tunafuatilia" inamaanisha bado hakuna siku za kutosha kusema, si kwamba kuna tatizo.')}
         </Text>
       </OrbitCard>
     </View>
@@ -693,57 +683,60 @@ const styles = StyleSheet.create({
   },
   privacyText: { fontSize: fs(10), fontFamily: font.semibold, color: orbit.plum },
 
-  cycleCard: { alignItems: 'center' },
-  cycleEmpty: {
-    ...type.small,
-    color: orbit.inkSoft,
-    textAlign: 'center',
-    marginTop: spacing.sm,
-    lineHeight: scale(19),
+  hero: {
+    backgroundColor: orbit.plum,
+    borderRadius: radius.xl,
+    padding: spacing.md,
+    ...shadow.lifted,
   },
-  phasePill: {
+  heroTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  heroKicker: { ...type.small, color: 'rgba(255,255,255,0.85)' },
+  heroTitle: { fontSize: fs(22), lineHeight: fs(28), fontFamily: font.extrabold, color: '#FFFFFF' },
+  heroBody: { ...type.small, color: 'rgba(255,255,255,0.85)', marginTop: 2, lineHeight: scale(18) },
+  heroDay: { fontSize: fs(44), lineHeight: fs(50), fontFamily: font.extrabold, color: '#FFFFFF' },
+  heroPill: {
     flexDirection: 'row',
     alignItems: 'center',
+    alignSelf: 'flex-start',
     gap: 6,
+    backgroundColor: 'rgba(255,255,255,0.18)',
     borderRadius: radius.pill,
-    paddingHorizontal: 11,
-    paddingVertical: 5,
-    marginTop: spacing.sm,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
-  phaseDot: { width: 7, height: 7, borderRadius: 4 },
-  phaseText: { fontSize: fs(11), fontFamily: font.bold },
-
-  cycleStats: {
+  heroPillDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#FFFFFF' },
+  heroPillText: { fontSize: fs(11), fontFamily: font.bold, color: '#FFFFFF' },
+  heroStats: { flexDirection: 'row', gap: spacing.xs, marginTop: spacing.md },
+  heroNote: { ...type.tiny, color: 'rgba(255,255,255,0.8)', marginTop: spacing.sm, lineHeight: scale(15) },
+  heroButton: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FFFFFF',
+    borderRadius: radius.md,
+    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.md,
     marginTop: spacing.md,
-    alignSelf: 'stretch',
-    borderTopWidth: 1,
-    borderTopColor: orbit.plumLine,
-    paddingTop: spacing.sm,
   },
-  stat: { flex: 1, alignItems: 'center', paddingHorizontal: 2 },
-  statValue: { fontSize: fs(16), fontFamily: font.bold, color: orbit.ink },
-  statLabel: {
-    ...type.tiny,
-    fontSize: fs(9),
-    color: orbit.inkFaint,
-    textAlign: 'center',
-    marginTop: 2,
+  heroButtonText: { ...type.bodyStrong, fontFamily: font.bold, color: orbit.plum },
+  stat: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderRadius: radius.md,
+    paddingVertical: spacing.xs + 2,
+    paddingHorizontal: 6,
   },
-  estimate: {
-    ...type.tiny,
-    color: orbit.inkFaint,
-    textAlign: 'center',
-    marginTop: spacing.sm,
-    lineHeight: scale(15),
-  },
+  statValue: { fontSize: fs(16), fontFamily: font.bold, color: '#FFFFFF' },
+  statLabel: { ...type.tiny, fontSize: fs(10), color: 'rgba(255,255,255,0.8)', marginTop: 1 },
 
   insightBody: { ...type.body, color: orbit.ink, lineHeight: scale(21) },
   insightMeta: { ...type.tiny, color: orbit.inkSoft, marginTop: spacing.xs },
   insightNote: { ...type.tiny, color: orbit.inkFaint, marginTop: 2, fontStyle: 'italic' },
 
   notYetCta: {
+    alignSelf: 'flex-start',
     marginTop: spacing.sm,
+    marginLeft: 38 + spacing.sm,
     backgroundColor: orbit.plum,
     borderRadius: radius.pill,
     paddingHorizontal: spacing.md,
@@ -756,7 +749,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: orbit.plumSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -808,23 +801,17 @@ const styles = StyleSheet.create({
   },
   learnTitle: { flex: 1, ...type.bodyStrong, color: orbit.ink },
 
-  talk: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    borderRadius: radius.xl,
-    padding: spacing.md,
-  },
+  talk: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm },
   talkIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.18)',
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: orbit.plumSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  talkTitle: { fontSize: fs(15), fontFamily: font.bold, color: '#FFFFFF' },
-  talkBody: { ...type.tiny, color: 'rgba(255,255,255,0.85)', marginTop: 1, lineHeight: scale(15) },
+  talkTitle: { ...type.bodyStrong, color: orbit.ink },
+  talkBody: { ...type.tiny, color: orbit.inkSoft, marginTop: 1, lineHeight: scale(15) },
 
   footer: {
     ...type.tiny,
