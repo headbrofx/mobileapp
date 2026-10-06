@@ -35,6 +35,7 @@ const META = {
   'Health Education': { icon: 'school', step: 5 },
   'Follow-up Visit': { icon: 'repeat', step: 2 },
   'Medication Administration': { icon: 'medical', step: 1 },
+  'Health Consultation': { icon: 'chatbubbles', step: 0 },
 };
 
 // A service the catalogue gains before this map knows about it still

@@ -167,7 +167,7 @@ function Sidebar() {
                     { backgroundColor: active ? item.tint : `${item.tint}1F` },
                   ]}
                 >
-                  <Ionicons name={item.icon} size={19} color={active ? '#FFFFFF' : item.tint} />
+                  <Ionicons name={item.icon} size={16} color={active ? '#FFFFFF' : item.tint} />
                 </View>
 
                 <Text style={[styles.itemText, active && styles.itemTextActive]} numberOfLines={1}>
@@ -180,11 +180,6 @@ function Sidebar() {
                   </View>
                 ) : null}
 
-                <Ionicons
-                  name="chevron-forward"
-                  size={16}
-                  color={active ? colors.primary : colors.subtle}
-                />
               </Pressable>
             );
           })}
@@ -261,7 +256,7 @@ const styles = StyleSheet.create({
   },
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)' },
   panel: {
-    width: 286,
+    width: 272,
     backgroundColor: colors.surface,
     paddingTop: spacing.xl + spacing.md,
     paddingBottom: spacing.md,
@@ -278,41 +273,43 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { fontFamily: font.bold, fontSize: fs(15), color: colors.primary },
+  avatarText: { fontFamily: font.bold, fontSize: fs(13), color: colors.primary },
   headerText: { flex: 1 },
-  name: { fontSize: fs(16), fontFamily: font.bold, color: colors.text },
-  phone: { fontSize: fs(13), color: colors.muted, marginTop: 1 },
+  name: { fontSize: fs(14), fontFamily: font.semibold, color: colors.text },
+  phone: { fontSize: fs(12), color: colors.muted },
 
   item: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: 7,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 5,
     marginHorizontal: spacing.xs + 2,
-    borderRadius: radius.md,
+    borderRadius: radius.sm,
   },
   // The row you are on is a filled pill, not a tint on the icon alone.
   // Inset from the panel edge so it reads as a selected row rather
   // than as a band across the whole drawer.
   itemActive: { backgroundColor: colors.primaryLight },
   itemPressed: { backgroundColor: colors.hairline },
+  // Small and quiet. The tile was 38px, which made a list of fifteen
+  // destinations a wall of coloured squares taller than the screen.
   itemIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: radius.sm + 2,
+    width: 28,
+    height: 28,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  itemText: { flex: 1, fontSize: fs(15), fontFamily: font.semibold, color: colors.text },
-  itemTextActive: { color: colors.primaryDark, fontFamily: font.bold },
+  itemText: { flex: 1, fontSize: fs(13.5), fontFamily: font.medium, color: colors.text },
+  itemTextActive: { color: colors.primaryDark, fontFamily: font.semibold },
   itemBadge: {
     backgroundColor: colors.primary,
     borderRadius: 999,
@@ -330,7 +327,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
-  languageLabel: { flex: 1, fontSize: fs(14), color: colors.muted },
+  languageLabel: { flex: 1, fontSize: fs(13), color: colors.muted },
   languageChoices: { flexDirection: 'row', gap: 6 },
   languageChip: {
     paddingHorizontal: 10,
@@ -352,6 +349,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
-  signOutText: { fontSize: fs(15), fontFamily: font.semibold, color: colors.danger },
+  signOutText: { fontSize: fs(14), fontFamily: font.medium, color: colors.danger },
 });
 

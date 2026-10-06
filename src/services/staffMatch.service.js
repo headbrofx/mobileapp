@@ -13,6 +13,7 @@ const CATEGORY_TO_SPECIALTY = {
   Care: 'CAREGIVER',
   Rehabilitation: 'PHYSIOTHERAPIST',
   'Maternal Health': 'NURSE',
+  Consultation: 'NURSE',
 };
 
 // The dispatcher's shortlist for a booking: a recommendation, never an
