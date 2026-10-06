@@ -52,7 +52,7 @@ export default function Profile() {
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <LinearGradient
-        colors={[colors.primary, colors.primaryDark]}
+        colors={[colors.primary, colors.primary]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.hero, { paddingTop: insets.top + spacing.sm }]}

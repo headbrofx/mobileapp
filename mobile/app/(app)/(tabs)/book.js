@@ -775,13 +775,13 @@ function TransportRow({ selected, onPress }) {
       accessibilityState={{ selected }}
       style={({ pressed }) => [
         styles.serviceRow,
-        { backgroundColor: colors.primaryLight, borderColor: colors.border },
-        selected && { borderColor: colors.primary, borderWidth: 2 },
+        { backgroundColor: colors.surface, borderColor: colors.hairline },
+        selected && { borderColor: colors.primary, borderWidth: 2, backgroundColor: colors.primaryLight },
         pressed && styles.pressed,
       ]}
     >
-      <View style={[styles.rowIcon, { backgroundColor: colors.primary }]}>
-        <Ionicons name="car" size={20} color={colors.onPrimary} />
+      <View style={[styles.rowIcon, { backgroundColor: colors.primaryLight }]}>
+        <Ionicons name="car" size={20} color={colors.primary} />
       </View>
       <View style={styles.rowText}>
         <Text style={styles.serviceName} numberOfLines={2}>
@@ -809,13 +809,13 @@ function ServiceRow({ service, selected, onPress }) {
       accessibilityState={{ selected }}
       style={({ pressed }) => [
         styles.serviceRow,
-        { backgroundColor: `${colour}0F`, borderColor: `${colour}2E` },
-        selected && { borderColor: colour, borderWidth: 2 },
+        { backgroundColor: colors.surface, borderColor: colors.hairline },
+        selected && { borderColor: colour, borderWidth: 2, backgroundColor: colors.primaryLight },
         pressed && styles.pressed,
       ]}
     >
-      <View style={[styles.rowIcon, { backgroundColor: colour }]}>
-        <Ionicons name={serviceIcon(service.name)} size={20} color="#FFFFFF" />
+      <View style={[styles.rowIcon, { backgroundColor: colors.primaryLight }]}>
+        <Ionicons name={serviceIcon(service.name)} size={20} color={colour} />
       </View>
 
       <View style={styles.rowText}>

@@ -205,7 +205,7 @@ export default function Cycles() {
         style={({ pressed }) => [pressed && styles.pressed, !memberId && styles.disabled]}
       >
         <LinearGradient
-          colors={[colors.primary, colors.primaryDark]}
+          colors={[colors.primary, colors.primary]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.logButton}
@@ -285,7 +285,7 @@ function CountdownCard({ insights }) {
 
   return (
     <LinearGradient
-      colors={[colors.primary, colors.primaryDark]}
+      colors={[colors.primary, colors.primary]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.countdown}
@@ -622,7 +622,7 @@ function LogSheet({ open, busy, onClose, onSave }) {
               style={({ pressed }) => [pressed && styles.pressed, (busy || !start) && styles.disabled]}
             >
               <LinearGradient
-                colors={[colors.primary, colors.primaryDark]}
+                colors={[colors.primary, colors.primary]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.sheetSave}

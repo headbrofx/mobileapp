@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { usePathname, useRouter } from 'expo-router';
 import { LANGUAGES, tx, useI18n } from './i18n';
 import { showsOrbit, useSession } from './session';
-import { accentAt, colors, font, fs, radius, spacing } from './theme';
+import { colors, font, fs, radius, spacing } from './theme';
 
 // The sidebar menu.
 //
@@ -38,28 +38,28 @@ const SidebarContext = createContext(null);
 // by role, not by position, so related destinations stay related.
 
 const ITEMS = [
-  { icon: 'home', key: 'nav.home', href: '/home', tint: accentAt(0) },
+  { icon: 'home', key: 'nav.home', href: '/home', tint: colors.primary },
   // Orbit sits third, under the two things somebody opens the app to
   // do. It is the reason a lot of people will keep the app installed
   // rather than delete it after one visit, and it was buried ninth.
-  { icon: 'calendar-number', key: 'nav.orbit', href: '/cycles', badge: 'nav.new', tint: accentAt(2) },
-  { icon: 'heart-circle', key: 'nav.services', href: '/services', tint: accentAt(1) },
-  { icon: 'search', key: 'nav.findCare', href: '/care', tint: accentAt(1) },
-  { icon: 'calendar', key: 'nav.bookVisit', href: '/book', tint: accentAt(2) },
-  { icon: 'car', key: 'nav.transport', href: '/transport', tint: accentAt(3) },
+  { icon: 'calendar-number', key: 'nav.orbit', href: '/cycles', badge: 'nav.new', tint: colors.primary },
+  { icon: 'heart-circle', key: 'nav.services', href: '/services', tint: colors.primary },
+  { icon: 'search', key: 'nav.findCare', href: '/care', tint: colors.primary },
+  { icon: 'calendar', key: 'nav.bookVisit', href: '/book', tint: colors.primary },
+  { icon: 'car', key: 'nav.transport', href: '/transport', tint: colors.primary },
   // Role-gated: shown only to the role named, and refused by the server
   // to everyone else whatever the menu shows.
-  { icon: 'briefcase', key: 'nav.staffJobs', href: '/staff-jobs', tint: accentAt(0), role: 'STAFF' },
-  { icon: 'git-network', key: 'nav.dispatch', href: '/dispatch', tint: accentAt(0), role: 'ADMIN' },
-  { icon: 'list', key: 'nav.myVisits', href: '/appointments', tint: accentAt(0) },
-  { icon: 'chatbubble-ellipses', key: 'nav.ai', href: '/ask', tint: accentAt(2) },
-  { icon: 'notifications', key: 'nav.notifications', href: '/notifications', tint: accentAt(3) },
-  { icon: 'pulse', key: 'nav.symptoms', href: '/symptoms', tint: accentAt(1) },
-  { icon: 'people', key: 'nav.family', href: '/family', tint: accentAt(2) },
-  { icon: 'medical', key: 'nav.medications', href: '/medications', tint: accentAt(0) },
-  { icon: 'receipt', key: 'nav.invoices', href: '/invoices', tint: accentAt(2) },
-  { icon: 'person', key: 'nav.profile', href: '/profile', tint: accentAt(4) },
-  { icon: 'settings', key: 'nav.settings', href: '/settings', tint: accentAt(5) },
+  { icon: 'briefcase', key: 'nav.staffJobs', href: '/staff-jobs', tint: colors.primary, role: 'STAFF' },
+  { icon: 'git-network', key: 'nav.dispatch', href: '/dispatch', tint: colors.primary, role: 'ADMIN' },
+  { icon: 'list', key: 'nav.myVisits', href: '/appointments', tint: colors.primary },
+  { icon: 'chatbubble-ellipses', key: 'nav.ai', href: '/ask', tint: colors.primary },
+  { icon: 'notifications', key: 'nav.notifications', href: '/notifications', tint: colors.primary },
+  { icon: 'pulse', key: 'nav.symptoms', href: '/symptoms', tint: colors.primary },
+  { icon: 'people', key: 'nav.family', href: '/family', tint: colors.primary },
+  { icon: 'medical', key: 'nav.medications', href: '/medications', tint: colors.primary },
+  { icon: 'receipt', key: 'nav.invoices', href: '/invoices', tint: colors.primary },
+  { icon: 'person', key: 'nav.profile', href: '/profile', tint: colors.primary },
+  { icon: 'settings', key: 'nav.settings', href: '/settings', tint: colors.primary },
 ];
 
 export function SidebarProvider({ children }) {

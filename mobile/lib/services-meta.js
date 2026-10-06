@@ -1,4 +1,4 @@
-import { accentAt, accents, colors } from './theme';
+import { colors } from './theme';
 import { tx } from './i18n';
 
 // One icon and one colour per service, for the whole app.
@@ -43,11 +43,6 @@ const META = {
 // Same family, so a service the map has never heard of still looks
 // like it belongs here.
 
-function hash(text = '') {
-  let total = 0;
-  for (let i = 0; i < text.length; i += 1) total = (total + text.charCodeAt(i)) % 997;
-  return total;
-}
 
 // Photographs, where there is one.
 //
@@ -106,10 +101,13 @@ export function serviceImage(name) {
   return IMAGES[name] ?? null;
 }
 
+// Every service takes the theme's primary now. A different shade per
+// service made each list a row of competing colours; the icon is what
+// tells services apart, and one colour is what makes the app read as
+// one app.
 export function serviceMeta(name) {
   const known = META[name];
-  if (known) return { icon: known.icon, colour: accentAt(known.step) };
-  return { icon: 'ellipse', colour: accentAt(hash(name) % accents.length) };
+  return { icon: known ? known.icon : 'ellipse', colour: colors.primary };
 }
 
 export const serviceIcon = (name) => serviceMeta(name).icon;

@@ -143,7 +143,7 @@ export function GradientButton({ title, onPress, loading, disabled, icon = 'arro
       style={({ pressed }) => [pressed && !isDisabled && styles.pressed, isDisabled && styles.disabled]}
     >
       <LinearGradient
-        colors={[colors.primary, colors.primaryDark]}
+        colors={[colors.primary, colors.primary]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.gradientButton}
