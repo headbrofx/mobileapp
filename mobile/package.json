@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
-    "@expo-google-fonts/plus-jakarta-sans": "^0.4.2",
+    "@expo-google-fonts/poppins": "^0.4.1",
     "@expo/vector-icons": "^15.0.2",
     "expo": "~57.0.23",
     "expo-auth-session": "~57.0.12",

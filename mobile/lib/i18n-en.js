@@ -839,4 +839,5 @@ export const EN_BY_SW = {
   "Anza Orbit yako": "Start your Orbit",
   "Andika tarehe ya hedhi yako ya mwisho ili Orbit ianze kujifunza mzunguko wako.": "Enter the date of your last period so Orbit can start learning your cycle.",
   "Uliza swali lako la afya": "Ask your health question",
+  "Karibu nawe": "Near you",
 };

@@ -6,12 +6,12 @@ import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
-  PlusJakartaSans_400Regular,
-  PlusJakartaSans_500Medium,
-  PlusJakartaSans_600SemiBold,
-  PlusJakartaSans_700Bold,
-  PlusJakartaSans_800ExtraBold,
-} from '@expo-google-fonts/plus-jakarta-sans';
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+  Poppins_800ExtraBold,
+} from '@expo-google-fonts/poppins';
 import { I18nProvider } from '../lib/i18n';
 import { SessionProvider } from '../lib/session';
 import { colors, font, type } from '../lib/theme';
@@ -19,7 +19,7 @@ import { colors, font, type } from '../lib/theme';
 // The splash stays up until the typeface is in memory.
 //
 // Without this the app draws once in the system font and again in
-// Jakarta, and every line on screen jumps as it reflows. Holding the
+// Poppins, and every line on screen jumps as it reflows. Holding the
 // splash for that extra moment is the difference between an app that
 // opens and one that flickers.
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -29,11 +29,11 @@ SplashScreen.preventAutoHideAsync().catch(() => {
 
 export default function RootLayout() {
   const [ready, error] = useFonts({
-    [font.regular]: PlusJakartaSans_400Regular,
-    [font.medium]: PlusJakartaSans_500Medium,
-    [font.semibold]: PlusJakartaSans_600SemiBold,
-    [font.bold]: PlusJakartaSans_700Bold,
-    [font.extrabold]: PlusJakartaSans_800ExtraBold,
+    [font.regular]: Poppins_400Regular,
+    [font.medium]: Poppins_500Medium,
+    [font.semibold]: Poppins_600SemiBold,
+    [font.bold]: Poppins_700Bold,
+    [font.extrabold]: Poppins_800ExtraBold,
   });
 
   useEffect(() => {

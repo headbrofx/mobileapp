@@ -335,12 +335,15 @@ export const dark = {
 // regular one, and every heading on the screen goes flat without a
 // single error. Anything that wants bold names the bold file.
 
+// Poppins. The owner found Plus Jakarta Sans unappealing; Poppins is
+// the face most apps here use, rounder and a touch heavier, and it holds
+// up at small sizes on a cheap screen.
 export const font = {
-  regular: 'Jakarta_400Regular',
-  medium: 'Jakarta_500Medium',
-  semibold: 'Jakarta_600SemiBold',
-  bold: 'Jakarta_700Bold',
-  extrabold: 'Jakarta_800ExtraBold',
+  regular: 'Poppins_400Regular',
+  medium: 'Poppins_500Medium',
+  semibold: 'Poppins_600SemiBold',
+  bold: 'Poppins_700Bold',
+  extrabold: 'Poppins_800ExtraBold',
 };
 
 // --- Scale -----------------------------------------------------------
