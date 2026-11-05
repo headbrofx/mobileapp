@@ -840,4 +840,10 @@ export const EN_BY_SW = {
   "Andika tarehe ya hedhi yako ya mwisho ili Orbit ianze kujifunza mzunguko wako.": "Enter the date of your last period so Orbit can start learning your cycle.",
   "Uliza swali lako la afya": "Ask your health question",
   "Karibu nawe": "Near you",
+  "Afya yangu": "My health",
+  "Akaunti": "Account",
+  "Fonti ya maandishi": "Typeface",
+  "Huduma bora ya afya nyumbani": "Quality health care at home",
+  "Nunito (laini)": "Nunito (soft)",
+  "DM Sans (safi)": "DM Sans (clean)",
 };

@@ -229,6 +229,25 @@ export async function saveTheme(name) {
   return writePref(THEME_KEY, name);
 }
 
+// The typeface, chosen in Settings like the colour. The owner could not
+// pick between faces from a picture, so the choice is made on the phone,
+// in the app itself. Nunito is the default: softer and rounder than
+// Poppins, which he found heavy.
+const FONT_KEY = 'afya.font';
+const FONT_FAMILIES = {
+  nunito: { label: 'Nunito (laini)' },
+  poppins: { label: 'Poppins' },
+  dmsans: { label: 'DM Sans (safi)' },
+};
+export const DEFAULT_FONT = 'nunito';
+export const fontChoice = readPref(FONT_KEY, FONT_FAMILIES, DEFAULT_FONT);
+export const FONT_OPTIONS = Object.entries(FONT_FAMILIES).map(([name, entry]) => ({ name, label: entry.label }));
+
+export async function saveFont(name) {
+  if (!FONT_FAMILIES[name]) return false;
+  return writePref(FONT_KEY, name);
+}
+
 export async function saveTextSize(name) {
   if (!TEXT_SIZES[name]) return false;
   return writePref(TEXT_KEY, name);
@@ -335,14 +354,9 @@ export const dark = {
 // regular one, and every heading on the screen goes flat without a
 // single error. Anything that wants bold names the bold file.
 
-// Poppins. The owner found Plus Jakarta Sans unappealing; Poppins is
-// the face most apps here use, and it holds up at small sizes on a cheap
-// screen.
-//
-// The names are roles, not weights, and each role is loaded one step
-// lighter than its name (see app/_layout.js). Poppins is a heavy face:
-// at the weights Jakarta used, every heading and button came out dense
-// and crowded. "bold" is Poppins SemiBold, "extrabold" is Poppins Bold.
+// The names are roles, not weights. app/_layout.js loads whichever face
+// is chosen (see fontChoice below) under these names, at weights tuned
+// per face: Poppins is heavy, so its roles are loaded a step lighter.
 export const font = {
   regular: 'AppFont-Regular',
   medium: 'AppFont-Medium',

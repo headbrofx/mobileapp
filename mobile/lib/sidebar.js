@@ -2,8 +2,8 @@ import { createContext, useContext, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { usePathname, useRouter } from 'expo-router';
-import { LANGUAGES, tx, useI18n } from './i18n';
-import { showsOrbit, useSession } from './session';
+import { tx, useI18n } from './i18n';
+import { useSession } from './session';
 import { colors, font, fs, radius, spacing } from './theme';
 
 // The sidebar menu.
@@ -37,29 +37,42 @@ const SidebarContext = createContext(null);
 // The grouping is unchanged and still deliberate: the ramp is indexed
 // by role, not by position, so related destinations stay related.
 
-const ITEMS = [
-  { icon: 'home', key: 'nav.home', href: '/home', tint: colors.primary },
-  // Orbit sits third, under the two things somebody opens the app to
-  // do. It is the reason a lot of people will keep the app installed
-  // rather than delete it after one visit, and it was buried ninth.
-  { icon: 'calendar-number', key: 'nav.orbit', href: '/cycles', badge: 'nav.new', tint: colors.primary },
-  { icon: 'heart-circle', key: 'nav.services', href: '/services', tint: colors.primary },
-  { icon: 'search', key: 'nav.findCare', href: '/care', tint: colors.primary },
-  { icon: 'calendar', key: 'nav.bookVisit', href: '/book', tint: colors.primary },
-  { icon: 'car', key: 'nav.transport', href: '/transport', tint: colors.primary },
-  // Role-gated: shown only to the role named, and refused by the server
-  // to everyone else whatever the menu shows.
-  { icon: 'briefcase', key: 'nav.staffJobs', href: '/staff-jobs', tint: colors.primary, role: 'STAFF' },
-  { icon: 'git-network', key: 'nav.dispatch', href: '/dispatch', tint: colors.primary, role: 'ADMIN' },
-  { icon: 'list', key: 'nav.myVisits', href: '/appointments', tint: colors.primary },
-  { icon: 'chatbubble-ellipses', key: 'nav.ai', href: '/ask', tint: colors.primary },
-  { icon: 'notifications', key: 'nav.notifications', href: '/notifications', tint: colors.primary },
-  { icon: 'pulse', key: 'nav.symptoms', href: '/symptoms', tint: colors.primary },
-  { icon: 'people', key: 'nav.family', href: '/family', tint: colors.primary },
-  { icon: 'medical', key: 'nav.medications', href: '/medications', tint: colors.primary },
-  { icon: 'receipt', key: 'nav.invoices', href: '/invoices', tint: colors.primary },
-  { icon: 'person', key: 'nav.profile', href: '/profile', tint: colors.primary },
-  { icon: 'settings', key: 'nav.settings', href: '/settings', tint: colors.primary },
+// Grouped, and only what the tab bar does not already show.
+//
+// Home, Orbit, Omba, Afya AI and Profile are one tap away at the foot of
+// every screen; listing them here too made the menu fifteen rows long,
+// running to the bottom of the phone. What is left falls into three
+// groups, each under a heading, so the menu reads in seconds.
+const SECTIONS = [
+  {
+    title: 'Huduma',
+    items: [
+      { icon: 'list', key: 'nav.myVisits', href: '/appointments' },
+      { icon: 'search', key: 'nav.findCare', href: '/care' },
+      { icon: 'heart-circle', key: 'nav.services', href: '/services' },
+      { icon: 'car', key: 'nav.transport', href: '/transport' },
+      // Role-gated: shown only to the role named, and refused by the
+      // server to everyone else whatever the menu shows.
+      { icon: 'briefcase', key: 'nav.staffJobs', href: '/staff-jobs', role: 'STAFF' },
+      { icon: 'git-network', key: 'nav.dispatch', href: '/dispatch', role: 'ADMIN' },
+    ],
+  },
+  {
+    title: 'Afya yangu',
+    items: [
+      { icon: 'pulse', key: 'nav.symptoms', href: '/symptoms' },
+      { icon: 'medical', key: 'nav.medications', href: '/medications' },
+      { icon: 'people', key: 'nav.family', href: '/family' },
+    ],
+  },
+  {
+    title: 'Akaunti',
+    items: [
+      { icon: 'notifications', key: 'nav.notifications', href: '/notifications' },
+      { icon: 'receipt', key: 'nav.invoices', href: '/invoices' },
+      { icon: 'settings', key: 'nav.settings', href: '/settings' },
+    ],
+  },
 ];
 
 export function SidebarProvider({ children }) {
@@ -100,16 +113,14 @@ function initials(name) {
 function Sidebar() {
   const { closeSidebar } = useSidebar();
   const router = useRouter();
-  const { user, self, signOut } = useSession();
-  const { t, language, setLanguage } = useI18n();
+  const { user, signOut } = useSession();
+  const { t } = useI18n();
   const pathname = usePathname();
 
-  // The menu drops Orbit for the same reason the tab bar does. Leaving
-  // it here would make hiding the tab pointless — the menu is one tap
-  // from every screen in the app.
-  const items = ITEMS.filter(
-    (item) => (item.key !== 'nav.orbit' || showsOrbit(self)) && (!item.role || item.role === user?.role)
-  );
+  const sections = SECTIONS.map((section) => ({
+    ...section,
+    items: section.items.filter((item) => !item.role || item.role === user?.role),
+  })).filter((section) => section.items.length > 0);
 
   function go(href) {
     closeSidebar();
@@ -142,89 +153,49 @@ function Sidebar() {
           </Pressable>
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {items.map((item) => {
-            const active = pathname === item.href;
-            return (
-              <Pressable
-                key={item.href}
-                onPress={() => go(item.href)}
-                accessibilityRole="button"
-                accessibilityState={{ selected: active }}
-                style={({ pressed }) => [
-                  styles.item,
-                  active && styles.itemActive,
-                  pressed && styles.itemPressed,
-                ]}
-              >
-                {/* Filled tile where you are, pale tile where you are
-                    not. The hue is the same either way, so the row
-                    reads as the same destination in two states rather
-                    than as two different things. */}
-                <View
-                  style={[
-                    styles.itemIcon,
-                    { backgroundColor: active ? item.tint : `${item.tint}1F` },
-                  ]}
-                >
-                  <Ionicons name={item.icon} size={16} color={active ? '#FFFFFF' : item.tint} />
-                </View>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.list}>
+          {sections.map((section) => (
+            <View key={section.title} style={styles.section}>
+              <Text style={styles.sectionTitle}>{tx(section.title)}</Text>
+              {section.items.map((item) => {
+                const active = pathname === item.href;
+                return (
+                  <Pressable
+                    key={item.href}
+                    onPress={() => go(item.href)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                    style={({ pressed }) => [styles.item, active && styles.itemActive, pressed && styles.itemPressed]}
+                  >
+                    <Ionicons
+                      name={active ? item.icon : `${item.icon}-outline`}
+                      size={18}
+                      color={active ? colors.primary : colors.muted}
+                    />
+                    <Text style={[styles.itemText, active && styles.itemTextActive]} numberOfLines={1}>
+                      {t(item.key)}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ))}
 
-                <Text style={[styles.itemText, active && styles.itemTextActive]} numberOfLines={1}>
-                  {t(item.key)}
-                </Text>
-
-                {item.badge ? (
-                  <View style={styles.itemBadge}>
-                    <Text style={styles.itemBadgeText}>{t(item.badge)}</Text>
-                  </View>
-                ) : null}
-
-              </Pressable>
-            );
-          })}
+          {/* Straight after the list, not pinned to the foot of the
+              screen: the menu ends where its content ends. */}
+          <Pressable
+            onPress={() => {
+              closeSidebar();
+              signOut();
+            }}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.signOut, pressed && styles.itemPressed]}
+          >
+            <Ionicons name="log-out-outline" size={18} color={colors.danger} />
+            <Text style={styles.signOutText}>{t('common.signOut')}</Text>
+          </Pressable>
         </ScrollView>
 
-        <View style={styles.languageRow}>
-          <Ionicons name="language-outline" size={18} color={colors.muted} />
-          <Text style={styles.languageLabel}>{t('settings.language')}</Text>
-          <View style={styles.languageChoices}>
-            {LANGUAGES.map((option) => (
-              <Pressable
-                key={option.code}
-                onPress={() => setLanguage(option.code)}
-                accessibilityRole="button"
-                accessibilityState={{ selected: language === option.code }}
-                style={({ pressed }) => [
-                  styles.languageChip,
-                  language === option.code && styles.languageChipOn,
-                  pressed && styles.itemPressed,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.languageChipText,
-                    language === option.code && styles.languageChipTextOn,
-                  ]}
-                >
-                  {option.code.toUpperCase()}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        </View>
-
-        <Pressable
-          onPress={() => {
-            closeSidebar();
-            signOut();
-          }}
-          accessibilityRole="button"
-          style={({ pressed }) => [styles.signOut, pressed && styles.itemPressed]}
-        >
-          <Ionicons name="log-out-outline" size={20} color={colors.danger} />
-          <Text style={styles.signOutText}>{t('common.signOut')}</Text>
-        </Pressable>
       </View>
 
       {/* Tapping beside the panel closes it, the way a drawer does. */}
@@ -285,70 +256,41 @@ const styles = StyleSheet.create({
   name: { fontSize: fs(14), fontFamily: font.semibold, color: colors.text },
   phone: { fontSize: fs(12), color: colors.muted },
 
+  list: { paddingBottom: spacing.md },
+  section: { marginTop: spacing.sm },
+  sectionTitle: {
+    fontSize: fs(11),
+    fontFamily: font.semibold,
+    color: colors.subtle,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    paddingHorizontal: spacing.md,
+    marginBottom: 2,
+  },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
     paddingHorizontal: spacing.sm,
-    paddingVertical: 5,
+    paddingVertical: 9,
     marginHorizontal: spacing.xs + 2,
     borderRadius: radius.sm,
   },
-  // The row you are on is a filled pill, not a tint on the icon alone.
-  // Inset from the panel edge so it reads as a selected row rather
-  // than as a band across the whole drawer.
   itemActive: { backgroundColor: colors.primaryLight },
   itemPressed: { backgroundColor: colors.hairline },
-  // Small and quiet. The tile was 38px, which made a list of fifteen
-  // destinations a wall of coloured squares taller than the screen.
-  itemIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  itemText: { flex: 1, fontSize: fs(13.5), fontFamily: font.medium, color: colors.text },
-  itemTextActive: { color: colors.primaryDark, fontFamily: font.semibold },
-  itemBadge: {
-    backgroundColor: colors.primary,
-    borderRadius: 999,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-  },
-  itemBadgeText: { color: colors.onPrimary, fontSize: fs(9), fontFamily: font.bold, letterSpacing: 0.4 },
-
-  languageRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  languageLabel: { flex: 1, fontSize: fs(13), color: colors.muted },
-  languageChoices: { flexDirection: 'row', gap: 6 },
-  languageChip: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  languageChipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
-  languageChipText: { fontSize: fs(11), fontFamily: font.bold, color: colors.muted },
-  languageChipTextOn: { color: colors.onPrimary },
+  itemText: { flex: 1, fontSize: fs(14), fontFamily: font.regular, color: colors.text },
+  itemTextActive: { color: colors.primary, fontFamily: font.semibold },
 
   signOut: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
+    marginTop: spacing.md,
+    marginHorizontal: spacing.xs + 2,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
+    borderTopColor: colors.hairline,
   },
-  signOutText: { fontSize: fs(14), fontFamily: font.medium, color: colors.danger },
+  signOutText: { fontSize: fs(14), fontFamily: font.regular, color: colors.danger },
 });
-

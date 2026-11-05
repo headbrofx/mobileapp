@@ -3,7 +3,7 @@ import { Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from
 import { Ionicons } from '@expo/vector-icons';
 import { BASE_URL } from '../../lib/api';
 import { LANGUAGES, tx, useI18n } from '../../lib/i18n';
-import { TEXT_SIZE_OPTIONS, THEMES, colors, font, fs, radius, saveTextSize, saveTheme, shadow, spacing, textSizeName, themeName, type } from '../../lib/theme';
+import { FONT_OPTIONS, TEXT_SIZE_OPTIONS, THEMES, colors, font, fontChoice, fs, radius, saveFont, saveTextSize, saveTheme, shadow, spacing, textSizeName, themeName, type } from '../../lib/theme';
 
 // Settings: the language and the colour.
 //
@@ -31,6 +31,12 @@ export default function Settings() {
     if (name === themeName) return;
     const applied = await saveTheme(name);
     // On web the line above reloads the page and nothing after it runs.
+    if (!applied) setPending(name);
+  }
+
+  async function chooseFont(name) {
+    if (name === fontChoice) return;
+    const applied = await saveFont(name);
     if (!applied) setPending(name);
   }
 
@@ -92,6 +98,51 @@ export default function Settings() {
           ? tx('Ukichagua rangi, ukurasa unajipakia upya mara moja.')
           : tx('Rangi mpya inaonekana ukifungua app upya.')}
       </Text>
+
+      <Text style={styles.groupTitle}>{tx('Fonti ya maandishi')}</Text>
+      <View style={styles.group}>
+        {FONT_OPTIONS.map((option, index) => {
+          const active = option.name === fontChoice;
+          const waiting = pending === option.name;
+          return (
+            <Pressable
+              key={option.name}
+              onPress={() => chooseFont(option.name)}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: active }}
+              style={({ pressed }) => [
+                styles.row,
+                index < FONT_OPTIONS.length - 1 && styles.rowDivider,
+                pressed && styles.rowPressed,
+              ]}
+            >
+              {/* Each face drawn in itself, so the choice is seen, not
+                  described. */}
+              <View style={styles.rowIcon}>
+                <Text style={[styles.sample, { fontFamily: `Preview-${option.name}`, fontSize: 18 }]}>Aa</Text>
+              </View>
+              <View style={styles.rowText}>
+                <Text style={[styles.rowLabel, { fontFamily: `Preview-${option.name}` }]}>
+                  {tx('Huduma bora ya afya nyumbani')}
+                </Text>
+                <Text style={styles.rowHint}>
+                  {tx(option.label)} ·{' '}
+                  {active
+                    ? tx('Inatumika sasa')
+                    : waiting
+                      ? tx('Imehifadhiwa — fungua app upya ionekane')
+                      : tx('Gusa kuichagua')}
+                </Text>
+              </View>
+              <Ionicons
+                name={active ? 'radio-button-on' : 'radio-button-off'}
+                size={18}
+                color={active ? colors.primary : colors.subtle}
+              />
+            </Pressable>
+          );
+        })}
+      </View>
 
       <Text style={styles.groupTitle}>{tx('Ukubwa wa maandishi')}</Text>
       <View style={styles.group}>
