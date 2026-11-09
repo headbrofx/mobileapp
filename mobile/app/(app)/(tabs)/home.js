@@ -150,7 +150,7 @@ export default function Home() {
           accessibilityRole="button"
           accessibilityLabel={unread > 0 ? `${tx('Taarifa')} ${unread}` : tx('Taarifa')}
           hitSlop={8}
-          style={({ pressed }) => [pressed && styles.pressed]}
+          style={({ pressed }) => [styles.iconTarget, pressed && styles.pressed]}
         >
           <Ionicons name="notifications-outline" size={23} color={colors.text} />
           {unread > 0 ? (
@@ -200,7 +200,7 @@ export default function Home() {
           >
             <Ionicons name="car-outline" size={22} color={colors.accent} />
             <Text style={styles.mobilityTitle}>{tx('Usafiri')}</Text>
-            <Text style={styles.mobilySub} numberOfLines={1}>{tx('Hadi hospitali au kliniki')}</Text>
+            <Text style={styles.mobilySub} numberOfLines={2}>{tx('Hadi hospitali au kliniki')}</Text>
           </Pressable>
           <Pressable
             onPress={() => router.push('/care')}
@@ -209,7 +209,7 @@ export default function Home() {
           >
             <Ionicons name="location-outline" size={22} color={colors.accent} />
             <Text style={styles.mobilityTitle}>{tx('Karibu nawe')}</Text>
-            <Text style={styles.mobilySub} numberOfLines={1}>{tx('Ramani ya maeneo yetu')}</Text>
+            <Text style={styles.mobilySub} numberOfLines={2}>{tx('Ramani ya maeneo yetu')}</Text>
           </Pressable>
         </View>
 
@@ -402,6 +402,7 @@ const styles = StyleSheet.create({
   content: { flexGrow: 1, paddingTop: spacing.md, paddingBottom: spacing.xl },
   gutter: { paddingHorizontal: spacing.md },
   pressed: { opacity: 0.75 },
+  iconTarget: { padding: 10, margin: -8 },
   muted: { ...type.small, color: colors.muted, marginTop: 2 },
 
   topBar: {
@@ -468,7 +469,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   section: { ...type.section, color: colors.text },
-  viewAll: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  viewAll: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingVertical: 12, paddingLeft: 12 },
   viewAllText: { ...type.label, color: colors.primary },
 
   list: { gap: spacing.xs + 2 },

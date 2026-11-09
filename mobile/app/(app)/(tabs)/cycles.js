@@ -678,8 +678,8 @@ const styles = StyleSheet.create({
     gap: 4,
     backgroundColor: orbit.plumSoft,
     borderRadius: radius.pill,
-    paddingHorizontal: 9,
-    paddingVertical: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
   },
   privacyText: { fontSize: fs(10), fontFamily: font.semibold, color: orbit.plum },
 
@@ -740,7 +740,7 @@ const styles = StyleSheet.create({
     backgroundColor: orbit.plum,
     borderRadius: radius.pill,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs + 2,
+    paddingVertical: 12,
   },
   notYetCtaText: { color: '#FFFFFF', fontFamily: font.bold, fontSize: fs(13) },
 
@@ -776,7 +776,7 @@ const styles = StyleSheet.create({
     lineHeight: scale(15),
   },
 
-  link: { fontSize: fs(12), fontFamily: font.bold, color: orbit.plum },
+  link: { fontSize: fs(13), fontFamily: font.bold, color: orbit.plum, paddingVertical: 12, paddingLeft: 12 },
 
   learnList: { gap: spacing.xs },
   learnRow: {

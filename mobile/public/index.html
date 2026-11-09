@@ -24,7 +24,7 @@
     4. A theme colour, so the browser chrome matches instead of sitting
        white above a cream page.
 
-  The typeface here is the system one on purpose: Jakarta has not
+  The typeface here is the system one on purpose: the app's font has not
   loaded at this point, and waiting for it would put the blank screen
   back.
 
@@ -34,14 +34,21 @@
 <html lang="sw">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <!-- viewport-fit=cover lets the app run edge to edge on phones with a
+         notch; the safe-area insets below keep content out from under it.
+         Zoom is left on: pinching is how some people read. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Afya Nyumbani</title>
 
     <meta name="description" content="Huduma bora ya afya, ukiwa nyumbani kwako." />
-    <meta name="theme-color" content="#C44200" />
+    <!-- Replaced at runtime with the chosen theme's colour (app/_layout.js);
+         this is only the colour of the first paint. -->
+    <meta name="theme-color" content="#C2410C" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Afya Nyumbani" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="format-detection" content="telephone=no" />
 
     <link rel="manifest" href="/manifest.json" />
     <link rel="icon" type="image/png" sizes="196x196" href="/favicon-196.png" />
@@ -58,6 +65,21 @@
       body {
         overflow: hidden;
         margin: 0;
+        /* Behave like an app on a phone, not a web page: no grey flash
+           on every tap, no page bounce or pull-to-refresh behind the
+           screens, and no browser enlarging text on its own. */
+        -webkit-tap-highlight-color: transparent;
+        overscroll-behavior: none;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+        -webkit-font-smoothing: antialiased;
+      }
+      /* iOS zooms the whole page into any field whose text is smaller
+         than 16px, and does not zoom back out. 16px stops it. */
+      input,
+      textarea,
+      select {
+        font-size: 16px !important;
       }
       #root {
         display: flex;
@@ -89,7 +111,7 @@
         width: 92px;
         height: 3px;
         border-radius: 2px;
-        background: rgba(196, 66, 0, 0.18);
+        background: rgba(194, 65, 12, 0.18);
         overflow: hidden;
       }
       #afya-splash .bar i {
@@ -97,7 +119,7 @@
         width: 40%;
         height: 100%;
         border-radius: 2px;
-        background: #c44200;
+        background: #c2410c;
         animation: afya-slide 1.1s ease-in-out infinite;
       }
       @keyframes afya-slide {

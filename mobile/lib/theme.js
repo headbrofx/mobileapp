@@ -416,7 +416,11 @@ export const scale = (size) => Math.round(size * scaleFactor);
 // Type only. Spacing keeps plain scale(), because the reader asked for
 // bigger words, not a looser page — and the grids are sized from the
 // screen, so widening every gap would push rows under the fold.
-const textScaleSize = (size) => Math.round(size * scaleFactor * textScale);
+// Never below 12px. Captions, badges and tab labels had been set at
+// 9-11px, which on a phone held at arm's length is too small to read;
+// one floor here lifts every one of them at once.
+const MIN_TEXT = 12;
+const textScaleSize = (size) => Math.max(MIN_TEXT, Math.round(size * scaleFactor * textScale));
 const ts = textScaleSize;
 
 // The same thing, exported, for the places that write a size straight

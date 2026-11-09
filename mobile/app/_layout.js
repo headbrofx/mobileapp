@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
@@ -85,6 +86,15 @@ export default function RootLayout() {
     // splash: the app falls back to the system face and still works.
     if (ready || error) SplashScreen.hideAsync().catch(() => {});
   }, [ready, error]);
+
+  // On web, the browser bar above the app takes the chosen theme's
+  // colour, so a phone shows one continuous app rather than a white or
+  // mismatched strip above it.
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const meta = globalThis.document?.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', colors.primary);
+  }, []);
 
   if (!ready && !error) return null;
 

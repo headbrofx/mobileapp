@@ -64,7 +64,7 @@ export default function Profile() {
             accessibilityRole="button"
             accessibilityLabel={tx('Taarifa')}
             hitSlop={8}
-            style={({ pressed }) => [pressed && styles.pressed]}
+            style={({ pressed }) => [styles.iconTarget, pressed && styles.pressed]}
           >
             <Ionicons name="notifications-outline" size={22} color={colors.onPrimary} />
           </Pressable>
@@ -229,6 +229,7 @@ const styles = StyleSheet.create({
   rowStacked: { flexDirection: 'column', alignItems: 'stretch', gap: spacing.sm },
   rowHead: { flexDirection: 'row', alignItems: 'center' },
   pressed: { opacity: 0.75 },
+  iconTarget: { padding: 10, margin: -8 },
 
   hero: {
     paddingHorizontal: spacing.md,
@@ -331,8 +332,8 @@ const styles = StyleSheet.create({
 
   chips: { flexDirection: 'row', gap: 6 },
   chip: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors.border,

@@ -245,7 +245,9 @@ const styles = StyleSheet.create({
   },
   errorText: { ...type.small, color: colors.danger },
 
-  menuButton: { padding: 4, borderRadius: radius.sm },
+  // 24px icon + 10px each side = a 44px target; the negative margin
+  // keeps the icon exactly where it was.
+  menuButton: { padding: 10, margin: -6, borderRadius: radius.sm },
   menuPressed: { opacity: 0.6 },
   screenHeader: {
     flexDirection: 'row',
@@ -260,7 +262,7 @@ const styles = StyleSheet.create({
   genderChips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   genderChip: {
     paddingHorizontal: spacing.md,
-    paddingVertical: 9,
+    paddingVertical: 12,
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors.border,

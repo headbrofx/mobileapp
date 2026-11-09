@@ -421,8 +421,8 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: fs(16), fontFamily: font.bold, color: colors.text },
   headerSub: { ...type.tiny, fontSize: fs(10), color: colors.muted },
   newChat: {
-    width: 38,
-    height: 38,
+    width: 44,
+    height: 44,
     borderRadius: radius.sm,
     borderWidth: 1,
     borderColor: colors.border,

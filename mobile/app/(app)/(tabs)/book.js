@@ -1041,8 +1041,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
     borderRadius: radius.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 11,
   },
   filterText: { fontSize: fs(11), fontFamily: font.semibold, color: colors.muted },
 
