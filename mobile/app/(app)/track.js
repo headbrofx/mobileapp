@@ -8,6 +8,7 @@ import { ActionButton, InfoLine, StatusPill, Timeline, careStyles } from '../../
 import { dateTimeSw, mapLink, tzs } from '../../lib/care';
 import { colors, font, fs, radius, spacing, type } from '../../lib/theme';
 import MapView from '../../lib/MapView';
+import { VisitReportView } from '../../lib/visit-report';
 import { tx, useI18n } from '../../lib/i18n';
 
 // Following one visit or trip.
@@ -256,6 +257,9 @@ export default function Track() {
             )}
             <InfoLine icon="information-circle-outline" label={tx('Sababu')} value={details.cancellationReason} />
           </Card>
+
+          {/* The nurse's report, once it is written. */}
+          {data.report ? <VisitReportView report={data.report} /> : null}
 
           <Text style={careStyles.section}>{tx('Hatua')}</Text>
           <Card>

@@ -2,6 +2,7 @@
 
 const { AuditLog, User } = require('../models');
 const { success } = require('../utils/apiResponse');
+const visitService = require('../services/visit.service');
 
 async function listAuditLogs(req, res, next) {
   try {
@@ -98,6 +99,15 @@ async function listBookings(req, res, next) {
   }
 }
 
+async function listVisitReports(req, res, next) {
+  try {
+    const reports = await visitService.listReports(req.query);
+    return success(res, { message: 'Visit reports', data: { reports } });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   listAuditLogs,
   dashboard,
@@ -106,4 +116,5 @@ module.exports = {
   setUserRole,
   listStaff,
   listBookings,
+  listVisitReports,
 };

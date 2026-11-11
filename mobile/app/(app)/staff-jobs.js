@@ -21,8 +21,12 @@ const VISIT_NEXT = {
   ],
   ACCEPTED: [{ action: 'on-the-way', label: 'Nimeanza safari', icon: 'navigate' }],
   ON_THE_WAY: [{ action: 'arrive', label: 'Nimefika', icon: 'home' }],
-  ARRIVED: [{ action: 'start', label: 'Anza huduma', icon: 'medkit' }],
-  IN_PROGRESS: [{ action: 'complete', label: 'Maliza huduma', icon: 'checkmark-done' }],
+  // Starting care opens the visit report; finishing it is done from the
+  // report itself, which will not close without an assessment. These
+  // used to call the bare start/complete transitions, which finished a
+  // visit with no record of what was done.
+  ARRIVED: [{ action: 'check-in', label: 'Anza huduma', icon: 'medkit' }],
+  IN_PROGRESS: [{ action: 'report', label: 'Andika ripoti na maliza', icon: 'document-text' }],
 };
 
 const TRIP_NEXT = {
@@ -145,7 +149,20 @@ export default function StaffJobs() {
                   icon={step.icon}
                   title={tx(step.label)}
                   busy={busy === `${step.action}-${v.id}`}
-                  onPress={() => run(`${step.action}-${v.id}`, () => bookings.act(v.id, step.action))}
+                  onPress={() => {
+                    if (step.action === 'report') {
+                      router.push({ pathname: '/visit-report', params: { id: v.id } });
+                      return;
+                    }
+                    if (step.action === 'check-in') {
+                      run(`${step.action}-${v.id}`, async () => {
+                        await bookings.visitCheckIn(v.id);
+                        router.push({ pathname: '/visit-report', params: { id: v.id } });
+                      });
+                      return;
+                    }
+                    run(`${step.action}-${v.id}`, () => bookings.act(v.id, step.action));
+                  }}
                 />
               )
             )}

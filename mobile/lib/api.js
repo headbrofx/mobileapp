@@ -334,6 +334,12 @@ export const bookings = {
   mySchedule: () => api.get('/api/staff/me/schedule'),
   act: (id, action, body) => api.patch(`/api/bookings/${id}/${action}`, body ?? {}),
   sharePosition: (id, lat, lng) => api.post(`/api/bookings/${id}/location`, { lat, lng }),
+
+  // The nurse's visit report: open it on arrival, fill it in, close it.
+  visit: (id) => api.get(`/api/bookings/${id}/visit`),
+  visitCheckIn: (id) => api.post(`/api/bookings/${id}/visit/check-in`),
+  visitSave: (id, payload) => api.patch(`/api/bookings/${id}/visit`, payload),
+  visitCheckOut: (id, payload) => api.post(`/api/bookings/${id}/visit/check-out`, payload ?? {}),
 };
 
 // Care Mobility: discovery, My Care Requests, tracking, saved places.
@@ -380,6 +386,7 @@ export const dispatch = {
   tripAction: (id, action, body) => api.patch(`/api/dispatch/transport/${id}/${action}`, body ?? {}),
   integrations: () => api.get('/api/dispatch/integrations'),
   analytics: () => api.get('/api/dispatch/analytics'),
+  visitReports: (q) => api.get(`/api/admin/visits${q ? `?q=${encodeURIComponent(q)}` : ''}`),
   settings: () => api.get('/api/dispatch/settings'),
   saveSettings: (changes) => api.patch('/api/dispatch/settings', changes),
   zones: () => api.get('/api/dispatch/zones'),

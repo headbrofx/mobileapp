@@ -13,6 +13,7 @@ const location = require('../integrations/location');
 const payments = require('../integrations/payments');
 const { DETAIL_INCLUDE } = require('../middleware/bookingAccess');
 const { CATEGORY_TO_SPECIALTY } = require('./staffMatch.service');
+const visitService = require('./visit.service');
 
 // --- Find Care Near You ----------------------------------------------------
 //
@@ -199,6 +200,15 @@ async function track(user, kind, id) {
       },
       timeline: await history.timeline('BOOKING', booking.id, { forClient: user.role !== 'ADMIN' }),
       live,
+      // The nurse's report, once she has checked in. A client sees it as
+      // soon as it is final; while she is still writing it, only the
+      // office and the nurse do.
+      report: await (async () => {
+        const report = await visitService.reportForBooking(booking.id);
+        if (!report) return null;
+        if (user.role === 'CLIENT' && report.status !== 'FINAL') return null;
+        return report;
+      })(),
     };
   }
 

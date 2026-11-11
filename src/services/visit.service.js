@@ -1,11 +1,24 @@
 'use strict';
 
-const { Visit, Booking, HealthMeasurement, Staff } = require('../models');
+const { Op } = require('sequelize');
+const { Visit, Booking, HealthMeasurement, Staff, User, FamilyMember, Service } = require('../models');
 const AppError = require('../utils/appError');
 const { logAudit } = require('./audit.service');
 const { assertTransition } = require('./bookingStateMachine.service');
 
-const DETAIL_INCLUDE = [{ model: Staff, as: 'staff' }];
+// The nurse as far as anyone reading a visit needs to know: who, and
+// what they are. This used to include the whole staff row, which since
+// Care Mobility carries where they start work from (baseLat/baseLng) and
+// their licence number. A client reading their own visit has no business
+// with either.
+const DETAIL_INCLUDE = [
+  {
+    model: Staff,
+    as: 'staff',
+    attributes: ['id', 'specialty'],
+    include: [{ model: User, as: 'user', attributes: ['id', 'name'] }],
+  },
+];
 
 function measurementSummary(v) {
   if (v.type === 'BLOOD_PRESSURE') return `${v.systolic}/${v.diastolic} mmHg`;
@@ -157,4 +170,95 @@ async function checkOut(bookingId, data, actorUser, req) {
   return getByBooking(booking.id);
 }
 
-module.exports = { getByBooking, checkIn, update, checkOut };
+// The whole report for one visit, in one shape: what a client reads,
+// what an admin prints. Null when the nurse has not checked in yet.
+function toReport(visit, booking) {
+  return {
+    visitId: visit.id,
+    bookingId: booking.id,
+    reference: booking.bookingReference,
+    service: booking.service ? booking.service.name : null,
+    patient: booking.patient
+      ? {
+          id: booking.patient.id,
+          name: booking.patient.name,
+          dateOfBirth: booking.patient.dateOfBirth,
+          gender: booking.patient.gender,
+        }
+      : null,
+    nurse: visit.staff
+      ? { name: visit.staff.user ? visit.staff.user.name : null, specialty: visit.staff.specialty }
+      : null,
+    place: booking.locationAddress,
+    scheduledAt: booking.scheduledAt,
+    checkInAt: visit.checkInAt,
+    checkOutAt: visit.checkOutAt,
+    status: visit.checkOutAt ? 'FINAL' : 'DRAFT',
+    assessment: visit.assessment,
+    treatmentNotes: visit.treatmentNotes,
+    recommendations: visit.recommendations,
+    followUpDate: visit.followUpDate,
+    vitals: Array.isArray(visit.vitalsSnapshot) ? visit.vitalsSnapshot : [],
+    attachments: visit.attachments || [],
+    updatedAt: visit.updatedAt,
+  };
+}
+
+const REPORT_BOOKING_INCLUDE = [
+  { model: FamilyMember, as: 'patient', attributes: ['id', 'name', 'dateOfBirth', 'gender'] },
+  { model: Service, as: 'service', attributes: ['id', 'name'] },
+];
+
+async function reportForBooking(bookingId) {
+  const visit = await Visit.findOne({ where: { bookingId }, include: DETAIL_INCLUDE });
+  if (!visit) return null;
+  const booking = await Booking.findByPk(bookingId, { include: REPORT_BOOKING_INCLUDE });
+  return toReport(visit, booking);
+}
+
+// Every visit report, newest first, for the office. Searchable by the
+// patient's name or the booking reference, and by date.
+async function listReports({ q = null, from = null, to = null, limit = 50 } = {}) {
+  const where = {};
+  if (from || to) {
+    where.checkInAt = {};
+    if (from) where.checkInAt[Op.gte] = new Date(from);
+    if (to) where.checkInAt[Op.lte] = new Date(`${to}T23:59:59.999Z`);
+  }
+
+  const bookingWhere = {};
+  const patientWhere = {};
+  const term = q ? String(q).trim() : '';
+  if (term) {
+    // A reference looks like AN-XXXXXX; anything else is a name.
+    if (/^AN-/i.test(term)) bookingWhere.bookingReference = term.toUpperCase();
+    else patientWhere.name = { [Op.iLike]: `%${term.replace(/[%_]/g, '')}%` };
+  }
+
+  const visits = await Visit.findAll({
+    where,
+    include: [
+      ...DETAIL_INCLUDE,
+      {
+        model: Booking,
+        as: 'booking',
+        where: Object.keys(bookingWhere).length ? bookingWhere : undefined,
+        required: true,
+        include: [
+          {
+            ...REPORT_BOOKING_INCLUDE[0],
+            where: Object.keys(patientWhere).length ? patientWhere : undefined,
+            required: Object.keys(patientWhere).length > 0,
+          },
+          REPORT_BOOKING_INCLUDE[1],
+        ],
+      },
+    ],
+    order: [['checkInAt', 'DESC']],
+    limit: Math.min(parseInt(limit, 10) || 50, 200),
+  });
+
+  return visits.map((v) => toReport(v, v.booking));
+}
+
+module.exports = { getByBooking, checkIn, update, checkOut, reportForBooking, listReports };

@@ -55,6 +55,7 @@ const SECTIONS = [
       // server to everyone else whatever the menu shows.
       { icon: 'briefcase', key: 'nav.staffJobs', href: '/staff-jobs', role: 'STAFF' },
       { icon: 'git-network', key: 'nav.dispatch', href: '/dispatch', role: 'ADMIN' },
+      { icon: 'document-text', key: 'nav.visitReports', href: '/visit-reports', role: 'ADMIN' },
     ],
   },
   {

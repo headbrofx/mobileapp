@@ -388,6 +388,12 @@ module.exports = {
   },
   'GET /api/admin/staff': { tag: 'Admin', summary: 'Staff roster with approval state', roles: ['ADMIN'] },
   'GET /api/admin/bookings': { tag: 'Admin', summary: 'All bookings, filterable', roles: ['ADMIN'] },
+  'GET /api/admin/visits': {
+    tag: 'Admin',
+    summary: 'Visit reports',
+    description: 'Every nurse visit report, newest first. ?q= a patient name or AN- reference; ?from=&to= YYYY-MM-DD.',
+    roles: ['ADMIN'],
+  },
 
   // --- Care Mobility ---
   'PATCH /api/bookings/:bookingId/review': {

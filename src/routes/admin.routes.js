@@ -27,4 +27,7 @@ router.get('/analytics', analyticsController.overview);
 router.get('/staff', controller.listStaff);
 router.get('/bookings', controller.listBookings);
 
+// Every visit report, searchable by patient name or booking reference.
+router.get('/visits', controller.listVisitReports);
+
 module.exports = router;
